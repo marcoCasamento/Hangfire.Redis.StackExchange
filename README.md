@@ -1,4 +1,4 @@
-# Hangfire.Redis.StackExchange
+# Hangfire.Redis.StackExchange [![Build Status](https://travis-ci.org/marcoCasamento/Hangfire.Redis.StackExchange.svg?branch=master)](https://travis-ci.org/marcoCasamento/Hangfire.Redis.StackExchange)
 HangFire Redis storage based on original (and now unsupported) Hangfire.Redis but using lovely StackExchange.Redis client
 
 This project is based upon https://github.com/HangfireIO/Hangfire.Redis/, it's born out of a need, that project get abandoned due to [switch to pro (paid) version](http://odinserj.net/2014/11/15/hangfire-pro/).  
