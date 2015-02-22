@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.StackExchange", "Hangfire.Redis.StackExchange\Hangfire.Redis.StackExchange.csproj", "{406F6D99-BEA8-4511-AC13-FA679E1A5F75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{35AB9242-838F-4410-9ED9-3DD9EE2C96BD}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.Tests", "Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj", "{34AF191F-FBD0-4DC1-A54C-E59745D98879}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8BFCDE3E-8BC4-4101-8BB1-CA285F4C2113}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{406F6D99-BEA8-4511-AC13-FA679E1A5F75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{406F6D99-BEA8-4511-AC13-FA679E1A5F75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{406F6D99-BEA8-4511-AC13-FA679E1A5F75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{406F6D99-BEA8-4511-AC13-FA679E1A5F75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34AF191F-FBD0-4DC1-A54C-E59745D98879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34AF191F-FBD0-4DC1-A54C-E59745D98879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34AF191F-FBD0-4DC1-A54C-E59745D98879}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34AF191F-FBD0-4DC1-A54C-E59745D98879}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

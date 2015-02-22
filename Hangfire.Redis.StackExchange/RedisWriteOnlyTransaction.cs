@@ -120,8 +120,7 @@ namespace Hangfire.Redis
         {
 			 _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
 
-			//TODO: Check that ListRightPushAsync semantically means "enqueue"
-             _transaction.ListRightPushAsync(
+             _transaction.ListLeftPushAsync(
                 String.Format(RedisStorage.Prefix + "queue:{0}", queue), jobId);
         }
 
