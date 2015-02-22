@@ -4,5 +4,5 @@ install:
   - nuget restore Hangfire.Redis.StackExchange.sln
   - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
 script:
-  - xbuild /p:Configuration=Release solution-name.sln
+  - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
   - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll
