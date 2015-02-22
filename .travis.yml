@@ -1,0 +1,2 @@
+language: csharp
+solution: Hangfire.Redis.StackExchange.sln
