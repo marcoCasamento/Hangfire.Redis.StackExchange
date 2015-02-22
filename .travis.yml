@@ -1,4 +1,4 @@
-language: ruby
+language: csharp
 solution: Hangfire.Redis.StackExchange.sln
 install:
   - nuget restore Hangfire.Redis.StackExchange.sln
