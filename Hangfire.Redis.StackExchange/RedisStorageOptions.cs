@@ -17,8 +17,11 @@
 using StackExchange.Redis;
 using System;
 
+
+
 namespace Hangfire.Redis
 {
+	//TODO: This class is pretty useless now, remove ASAP
     public class RedisStorageOptions 
     {
         public RedisStorageOptions() 

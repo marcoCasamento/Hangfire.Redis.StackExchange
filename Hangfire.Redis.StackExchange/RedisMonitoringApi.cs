@@ -398,7 +398,7 @@ namespace Hangfire.Redis
         {
             return UseConnection(redis =>
             {
-                var job = redis.HashGetAll(String.Format("hangfire:job:{0}", jobId)).ToDictionary();
+                var job = redis.HashGetAll(String.Format("hangfire:job:{0}", jobId)).ToStringDictionary();
                 if (job.Count == 0) return null;
 
                 var hiddenProperties = new[] { "Type", "Method", "ParameterTypes", "Arguments", "State", "CreatedAt" };

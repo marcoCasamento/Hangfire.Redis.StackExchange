@@ -62,26 +62,26 @@ namespace Hangfire.Redis
             }
         }
 
-        public async void ExpireJob(string jobId, TimeSpan expireIn)
+        public void ExpireJob(string jobId, TimeSpan expireIn)
         {
-            await _transaction.KeyExpireAsync(
+             _transaction.KeyExpireAsync(
                 String.Format(RedisStorage.Prefix + "job:{0}", jobId),
                 expireIn);
 
-			await _transaction.KeyExpireAsync(
+			 _transaction.KeyExpireAsync(
                 String.Format(RedisStorage.Prefix + "job:{0}:history", jobId),
                 expireIn);
 
-			await _transaction.KeyExpireAsync(
+			 _transaction.KeyExpireAsync(
                 String.Format(RedisStorage.Prefix + "job:{0}:state", jobId),
                 expireIn);
         }
 
-        public async void PersistJob(string jobId)
+        public void PersistJob(string jobId)
         {
-            await _transaction.KeyPersistAsync(String.Format(RedisStorage.Prefix + "job:{0}", jobId));
-            await _transaction.KeyPersistAsync(String.Format(RedisStorage.Prefix + "job:{0}:history", jobId));
-            await _transaction.KeyPersistAsync(String.Format(RedisStorage.Prefix + "job:{0}:state", jobId));
+             _transaction.KeyPersistAsync(String.Format(RedisStorage.Prefix + "job:{0}", jobId));
+             _transaction.KeyPersistAsync(String.Format(RedisStorage.Prefix + "job:{0}:history", jobId));
+             _transaction.KeyPersistAsync(String.Format(RedisStorage.Prefix + "job:{0}:state", jobId));
         }
 
         public void SetJobState(string jobId, IState state)
@@ -116,18 +116,18 @@ namespace Hangfire.Redis
                 JobHelper.ToJson(storedData));
         }
 
-        public async void AddToQueue(string queue, string jobId)
+        public void AddToQueue(string queue, string jobId)
         {
-			await _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
+			 _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
 
 			//TODO: Check that ListRightPushAsync semantically means "enqueue"
-            await _transaction.ListRightPushAsync(
+             _transaction.ListRightPushAsync(
                 String.Format(RedisStorage.Prefix + "queue:{0}", queue), jobId);
         }
 
-        public async void IncrementCounter(string key)
+        public void IncrementCounter(string key)
         {
-            await _transaction.StringIncrementAsync(RedisStorage.Prefix + key);
+             _transaction.StringIncrementAsync(RedisStorage.Prefix + key);
         }
 
         public void IncrementCounter(string key, TimeSpan expireIn)
@@ -136,15 +136,15 @@ namespace Hangfire.Redis
 			_transaction.KeyExpireAsync(RedisStorage.Prefix + key, expireIn);
         }
 
-        public async void DecrementCounter(string key)
+        public void DecrementCounter(string key)
         {
-            await _transaction.StringDecrementAsync(RedisStorage.Prefix + key);
+            _transaction.StringDecrementAsync(RedisStorage.Prefix + key);
         }
 
-        public async void DecrementCounter(string key, TimeSpan expireIn)
+        public void DecrementCounter(string key, TimeSpan expireIn)
         {
-            await _transaction.StringDecrementAsync(RedisStorage.Prefix + key);
-            await _transaction.KeyExpireAsync(RedisStorage.Prefix + key, expireIn);
+            _transaction.StringDecrementAsync(RedisStorage.Prefix + key);
+            _transaction.KeyExpireAsync(RedisStorage.Prefix + key, expireIn);
         }
 
         public void AddToSet(string key, string value)
@@ -152,39 +152,38 @@ namespace Hangfire.Redis
             _transaction.SortedSetAddAsync(RedisStorage.Prefix + key, value, 0);
         }
 
-        public async void AddToSet(string key, string value, double score)
+        public void AddToSet(string key, string value, double score)
         {
-            await _transaction.SortedSetAddAsync(RedisStorage.Prefix + key, value, score);
+             _transaction.SortedSetAddAsync(RedisStorage.Prefix + key, value, score);
         }
 
-        public async void RemoveFromSet(string key, string value)
+        public void RemoveFromSet(string key, string value)
         {
-            await _transaction.SortedSetRemoveAsync(RedisStorage.Prefix + key, value);
+             _transaction.SortedSetRemoveAsync(RedisStorage.Prefix + key, value);
         }
 
-        public async void InsertToList(string key, string value)
+        public void InsertToList(string key, string value)
         {
-			//TODO check that ListRightPushAsync semantically equals x.EnqueueItemOnList
-            await _transaction.ListRightPushAsync(RedisStorage.Prefix + key, value);
+             _transaction.ListLeftPushAsync(RedisStorage.Prefix + key, value);
         }
 
-        public async void RemoveFromList(string key, string value)
+        public void RemoveFromList(string key, string value)
         {
-            await _transaction.ListRemoveAsync(RedisStorage.Prefix + key, value);
+             _transaction.ListRemoveAsync(RedisStorage.Prefix + key, value);
         }
 
-        public async void TrimList(string key, int keepStartingFrom, int keepEndingAt)
+        public void TrimList(string key, int keepStartingFrom, int keepEndingAt)
         {
-            await _transaction.ListTrimAsync(RedisStorage.Prefix + key, keepStartingFrom, keepEndingAt);
+             _transaction.ListTrimAsync(RedisStorage.Prefix + key, keepStartingFrom, keepEndingAt);
         }
 
-        public async void SetRangeInHash(
+        public void SetRangeInHash(
             string key, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
         {
             if (key == null) throw new ArgumentNullException("key");
             if (keyValuePairs == null) throw new ArgumentNullException("keyValuePairs");
 
-			await _transaction.HashSetAsync(RedisStorage.GetRedisKey(key), keyValuePairs.ToHashEntries());
+			 _transaction.HashSetAsync(RedisStorage.GetRedisKey(key), keyValuePairs.ToHashEntries());
         }
 
         public void RemoveHash(string key)

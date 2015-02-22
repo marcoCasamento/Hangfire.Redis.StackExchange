@@ -44,7 +44,7 @@ namespace Hangfire.Redis
         }
 
 		public RedisStorage(string hostAndPort, int db)
-			: this(hostAndPort, db, new ConfigurationOptions())
+			: this(hostAndPort, db, new ConfigurationOptions() { EndPoints = { {hostAndPort}} })
 		{
 		}
         public RedisStorage(string hostAndPort, int db, ConfigurationOptions options)
@@ -58,24 +58,10 @@ namespace Hangfire.Redis
 			
 			_connectionMultiplexer = ConnectionMultiplexer.Connect(options);
 			_invisibilityTimeout = invisibilityTimeout;
-			//HostAndPort = hostAndPort;
-			//Db = db;
-			//Options = options;
+			HostAndPort = hostAndPort;
+			Db = db;
+			Options = options;
 			
-			//_connectionMultiplexer = ConnectionMultiplexer.Connect(
-			//	new ConfigurationOptions()
-			//	{
-			//		Ho
-			//	}
-			//		);
-			//	new []{ HostAndPort },
-			//	new string[0],
-			//	new RedisClientManagerConfig
-			//	{
-			//		DefaultDb = Db,
-			//		MaxWritePoolSize = Options.ConnectionPoolSize
-			//	}
-			//	});
         }
 
         public string HostAndPort { get; private set; }

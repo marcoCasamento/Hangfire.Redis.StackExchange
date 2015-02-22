@@ -22,13 +22,13 @@ namespace Hangfire.Redis
 			return hashEntry;
 		}
 		
-		public static Dictionary<string, string> ToDictionary(this HashEntry[] entries)
-		{
-			var dictionary = new Dictionary<string, string>(entries.Length);
-			foreach (var entry in entries)
-				dictionary[entry.Name] = entry.Value;
-			return dictionary;
-		}
+		//public static Dictionary<string, string> ToStringDictionary(this HashEntry[] entries)
+		//{
+		//	var dictionary = new Dictionary<string, string>(entries.Length);
+		//	foreach (var entry in entries)
+		//		dictionary[entry.Name] = entry.Value;
+		//	return dictionary;
+		//}
 		
 		public static bool ContainsKey(this HashEntry[] hashEntries, RedisValue key)
 		{

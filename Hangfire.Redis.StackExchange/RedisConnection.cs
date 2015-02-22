@@ -206,7 +206,7 @@ namespace Hangfire.Redis
 
             if (entries.Length == 0) return null;
 
-            var stateData = entries.ToDictionary();
+            var stateData = entries.ToStringDictionary();
 			
             stateData.Remove("State");
             stateData.Remove("Reason");
@@ -265,7 +265,7 @@ namespace Hangfire.Redis
         {
             if (key == null) throw new ArgumentNullException("key");
 
-			var result = Redis.HashGetAll(RedisStorage.GetRedisKey(key)).ToDictionary();
+			var result = Redis.HashGetAll(RedisStorage.GetRedisKey(key)).ToStringDictionary();
 				
             return result.Count != 0 ? result : null;
         }
