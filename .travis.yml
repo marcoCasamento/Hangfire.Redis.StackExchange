@@ -6,3 +6,5 @@ install:
 script:
   - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
   - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll
+services:
+  - redis-server
