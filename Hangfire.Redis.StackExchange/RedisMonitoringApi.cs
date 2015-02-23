@@ -294,19 +294,26 @@ namespace Hangfire.Redis
                     long length = 0;
                     long fetched = 0;
 
+					List<System.Threading.Tasks.Task> tasks = new List<System.Threading.Tasks.Task>();
 					var pipeline = redis.CreateBatch();
 
-					pipeline.ListRangeAsync(
+					tasks.Add (
+						pipeline.ListRangeAsync(
                             String.Format("hangfire:queue:{0}", queue), -5, -1)
-							.ContinueWith(x => firstJobIds = x.Result.Select(v=> (string)v).ToList());
-
+							.ContinueWith(x => firstJobIds = x.Result.Select(v=> (string)v).ToList())
+							);
+					tasks.Add (
                     pipeline.ListLengthAsync(String.Format("hangfire:queue:{0}", queue))
-						.ContinueWith(x => length = x.Result);
+						.ContinueWith(x => length = x.Result)
+						);
 
+					tasks.Add (
                     pipeline.ListLengthAsync(String.Format("hangfire:queue:{0}:dequeued", queue))
-						.ContinueWith(x => fetched = x.Result);
+						.ContinueWith(x => fetched = x.Result)
+						);
 
 					pipeline.Execute();
+					System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
 
                     var jobs = GetJobsWithProperties(
                         redis,
