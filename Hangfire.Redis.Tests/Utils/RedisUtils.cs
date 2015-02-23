@@ -1,5 +1,6 @@
 ﻿using StackExchange.Redis;
 using System;
+using System.Threading;
 
 namespace Hangfire.Redis.Tests
 {
@@ -19,8 +20,24 @@ namespace Hangfire.Redis.Tests
 			options.EndPoints.Add(GetHostAndPort());
 			options.AllowAdmin = true;
 			if (connection == null)
+				for (int i = 0; i < 5; i++)
+				{
+					try
+					{
+						connection = ConnectionMultiplexer.Connect(options);
+						if (connection.IsConnected)
+							break;
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine(ex.Message);
+						Thread.Sleep(10);
+					}
+				}
+
+			if (connection == null)
 				connection = ConnectionMultiplexer.Connect(options);
-			
+
 			return connection.GetDatabase(DefaultDb);
         }
 
