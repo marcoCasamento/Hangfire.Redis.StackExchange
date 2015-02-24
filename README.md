@@ -1,4 +1,9 @@
-# Hangfire.Redis.StackExchange [![Build Status](https://travis-ci.org/marcoCasamento/Hangfire.Redis.StackExchange.svg?branch=master)](https://travis-ci.org/marcoCasamento/Hangfire.Redis.StackExchange) [![Build Status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva/branch/master?svg=true)](https://ci.appveyor.com/project/marcoCasamento/hangfire-redis-stackexchange)
+# Hangfire.Redis.StackExchange
+
+| Windows / .NET | Linux / Mono
+| --- | ---
+|  [![Build Status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva/branch/master?svg=true)](https://ci.appveyor.com/project/marcoCasamento/hangfire-redis-stackexchange) | [![Build Status](https://travis-ci.org/marcoCasamento/Hangfire.Redis.StackExchange.svg?branch=master)](https://travis-ci.org/marcoCasamento/Hangfire.Redis.StackExchange)
+
 HangFire Redis storage based on original (and now unsupported) Hangfire.Redis but using lovely StackExchange.Redis client
 
 This project is based upon https://github.com/HangfireIO/Hangfire.Redis/, it's born out of a need, that project get abandoned due to [switch to pro (paid) version](http://odinserj.net/2014/11/15/hangfire-pro/).  
