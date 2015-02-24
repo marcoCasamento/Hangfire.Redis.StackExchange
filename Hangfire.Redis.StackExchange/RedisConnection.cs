@@ -23,6 +23,7 @@ using Hangfire.Common;
 using Hangfire.Server;
 using Hangfire.Storage;
 using StackExchange.Redis;
+using System.Threading.Tasks;
 
 namespace Hangfire.Redis
 {
@@ -335,23 +336,26 @@ namespace Hangfire.Redis
             var utcNow = DateTime.UtcNow;
 
 			var pipeline = Redis.CreateBatch();
-            
+
+			Task[] srvNamesTasks = new Task[serverNames.Length];
+			int i = 0;
             foreach (var serverName in serverNames)
             {
                 var name = serverName;
-
-				var t = pipeline.HashGetAsync(
-						String.Format(RedisStorage.Prefix + "server:{0}", name),
-						new RedisValue[]{"StartedAt", "Heartbeat"})
-					.ContinueWith(x=>  heartbeats.Add(name, 
-							new Tuple<DateTime, DateTime?>(
-							JobHelper.DeserializeDateTime(x.Result[0]),
-							JobHelper.DeserializeNullableDateTime(x.Result[1])))
-						);
+				srvNamesTasks[i] = 
+					pipeline.HashGetAsync(
+							String.Format(RedisStorage.Prefix + "server:{0}", name),
+							new RedisValue[]{"StartedAt", "Heartbeat"})
+						.ContinueWith(x=>  heartbeats.Add(name, 
+								new Tuple<DateTime, DateTime?>(
+								JobHelper.DeserializeDateTime(x.Result[0]),
+								JobHelper.DeserializeNullableDateTime(x.Result[1])))
+							);
+				i++;
             }
 
             pipeline.Execute();
-            
+			pipeline.WaitAll(srvNamesTasks);
 
             var removedServerCount = 0;
             foreach (var heartbeat in heartbeats)

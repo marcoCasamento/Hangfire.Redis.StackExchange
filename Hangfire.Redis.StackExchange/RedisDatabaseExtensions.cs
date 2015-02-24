@@ -46,27 +46,40 @@ namespace Hangfire.Redis
 				}
 				Thread.Sleep(10);
 			}
-			throw new Exception(String.Format("Unable to take the lock key={0} value={1} after 5 tentatives", key, value));
+			throw new Exception(String.Format("Unable to take the lock key={0} value={1} after 5 tentatives, key already exists ?", key, value));
 			
 		}
 
-		public static RedisValue ListRightGetFromAndRightPushTo(this IDatabase redis, RedisKey listKeyFrom, RedisKey listKeyTo, TimeSpan timeOut)
+		public static string ListRightGetFromAndRightPushTo(this IDatabase redis, RedisKey listKeyFrom, RedisKey listKeyTo, TimeSpan timeOut)
 		{
 			RedisValue lockValueFrom = String.Format("{0}:From:{1}", listKeyFrom, Guid.NewGuid());
 			RedisValue lockValueTo = String.Format("{0}:To:{1}", listKeyTo, Guid.NewGuid());
+			System.Diagnostics.Debug.WriteLine("**ListRightGetFrom {0} AndRightPushTo {1}", listKeyFrom, listKeyTo);
+			AutoResetEvent are = new AutoResetEvent(false);
+			var sub = redis.Multiplexer.GetSubscriber();
+			sub.Subscribe(listKeyTo.ToString(), (c, v) =>
+				{
+					redis.ListRightPush(listKeyTo, v);
+					are.Set();
+				});
 			
-			using (redis.AcquireLock(listKeyFrom, lockValueFrom, timeOut))
-			using (redis.AcquireLock(listKeyTo, lockValueTo, timeOut))
+			var poppedValue = redis.ListRightPop(listKeyTo);
+			if (poppedValue.HasValue)
 			{
-				return redis.ListRightGetFromAndRightPushTo(listKeyFrom, listKeyTo);
+				sub.Publish(listKeyTo.ToString(), poppedValue);
+				are.WaitOne(timeOut);
+				return poppedValue;
 			}
-
+			return null;
+			
 		}
 
 		public static RedisValue ListRightGetFromAndRightPushTo(this IDatabase redis, RedisKey listKeyFrom, RedisKey listKeyTo)
 		{
+			System.Diagnostics.Debug.WriteLine("ListRightGetFrom {0} AndRightPushTo {1}", listKeyFrom, listKeyTo);
 			var listValue = redis.ListRightPop(listKeyFrom);
-			redis.ListRightPush(listKeyTo, listValue);
+			if (listValue.HasValue)
+				redis.ListRightPush(listKeyTo, listValue);
 			return listValue;
 		}
 
