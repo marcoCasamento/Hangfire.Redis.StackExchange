@@ -6,7 +6,7 @@ before_build:
 - nuget restore Hangfire.Redis.StackExchange.sln
 - packages\Redis-32.2.6.12.1\tools\redis-server.exe --service-install
 - packages\Redis-32.2.6.12.1\tools\redis-server.exe --service-start
-- @ECHO Redis Started
+- '@ECHO Redis Started'
 build:
   publish_nuget: true
   publish_nuget_symbols: true
