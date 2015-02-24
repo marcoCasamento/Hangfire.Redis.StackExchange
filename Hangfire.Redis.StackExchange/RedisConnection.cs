@@ -51,10 +51,10 @@ namespace Hangfire.Redis
 
         public IFetchedJob FetchNextJob(string[] queues, CancellationToken cancellationToken)
         {
-            string jobId;
+            string jobId = null;
             string queueName;
             var queueIndex = 0;
-
+			System.Diagnostics.Debug.WriteLine("queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -65,14 +65,23 @@ namespace Hangfire.Redis
                 var queueKey = RedisStorage.Prefix + String.Format("queue:{0}", queueName);
                 var fetchedKey = RedisStorage.Prefix + String.Format("queue:{0}:dequeued", queueName);
 
-                if (queueIndex == 0)
-                {
-					jobId = Redis.ListRightGetFromAndRightPushTo(queueKey, fetchedKey, TimeSpan.FromSeconds(1));
-                }
-                else
-                {
-					jobId = Redis.ListRightGetFromAndRightPushTo(queueKey, fetchedKey);
-                }
+				//jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
+
+				//if (jobId == null)
+				//{
+				//	AutoResetEvent are = new AutoResetEvent(false);
+				//	Redis.Multiplexer.GetSubscriber().Subscribe(RedisStorage.Prefix + "queues",
+				//		(channel, val) =>
+				//		{
+				//			jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
+				//			are.Set();
+				//		}
+				//		);
+				//	are.WaitOne();
+				//}
+
+				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
+				Thread.Sleep(1000);
 
             } while (jobId == null);
 

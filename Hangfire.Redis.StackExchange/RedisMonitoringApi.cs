@@ -533,28 +533,25 @@ namespace Hangfire.Redis
             properties = properties ?? new string[0];
 
             var pipeline = redis.CreateBatch();
-			var tasks = new Task[jobIds.Length * 2];
-			int i = 0;
+			var tasks = new List<Task>();
             foreach (var jobId in jobIds)
             {
                 var id = jobId;
-				tasks[i] = pipeline.HashGetAsync(
+				tasks.Add(pipeline.HashGetAsync(
 						String.Format("hangfire:job:{0}", id),
                         properties.Union(new[] { "Type", "Method", "ParameterTypes", "Arguments" })
 						.Select(x=> (RedisValue)x).ToArray())
-				.ContinueWith(x => { if (!jobs.ContainsKey(id)) jobs.Add(id, x.Result.Select(v=> (string)v).ToList()); });
-				i++;
+				.ContinueWith(x => { if (!jobs.ContainsKey(id)) jobs.Add(id, x.Result.Select(v=> (string)v).ToList()); }));
                 if (stateProperties != null)
                 {
-					tasks[i] = pipeline.HashGetAsync(
+					tasks.Add(pipeline.HashGetAsync(
 						String.Format("hangfire:job:{0}:state", id), stateProperties.Select(x=> (RedisValue) x).ToArray())
-							.ContinueWith(x => { if (!states.ContainsKey(id)) states.Add(id, x.Result.ToStringArray().ToList()); });
-					i++;
+							.ContinueWith(x => { if (!states.ContainsKey(id)) states.Add(id, x.Result.ToStringArray().ToList()); }));
                 }
             }
 
             pipeline.Execute();
-			pipeline.WaitAll(tasks);
+			pipeline.WaitAll(tasks.ToArray());
 
             return new JobList<T>(jobIds
                 .Select(x => new
@@ -623,7 +620,7 @@ namespace Hangfire.Redis
 						.ContinueWith(x => stats.Enqueued += x.Result);
 					i++;
                 }
-
+				
 				pipeline.Execute();
 				pipeline.WaitAll(tasks);
 

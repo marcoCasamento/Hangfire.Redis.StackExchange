@@ -37,51 +37,19 @@ namespace Hangfire.Redis
 
 		public static RedisLock AcquireLock(this IDatabase redis, RedisKey key, RedisValue value, TimeSpan timeout)
 		{
-			for (int i = 0; i < 5; i++)
+			DateTime enterTime = DateTime.UtcNow;
+			while (DateTime.UtcNow.Subtract(enterTime)<timeout)
 			{
+				//TODO: Should update the timeout on lock
 				if (redis.LockTake(key, value, timeout))
 				{
-
 					return new RedisLock(redis, key, value);
 				}
-				Thread.Sleep(10);
 			}
-			throw new Exception(String.Format("Unable to take the lock key={0} value={1} after 5 tentatives, key already exists ?", key, value));
+			throw new Exception(String.Format("Unable to take the lock key={0} value={1} in {2}, key already exists ?", key, value, timeout));
 			
 		}
 
-		public static string ListRightGetFromAndRightPushTo(this IDatabase redis, RedisKey listKeyFrom, RedisKey listKeyTo, TimeSpan timeOut)
-		{
-			RedisValue lockValueFrom = String.Format("{0}:From:{1}", listKeyFrom, Guid.NewGuid());
-			RedisValue lockValueTo = String.Format("{0}:To:{1}", listKeyTo, Guid.NewGuid());
-			System.Diagnostics.Debug.WriteLine("**ListRightGetFrom {0} AndRightPushTo {1}", listKeyFrom, listKeyTo);
-			AutoResetEvent are = new AutoResetEvent(false);
-			var sub = redis.Multiplexer.GetSubscriber();
-			sub.Subscribe(listKeyTo.ToString(), (c, v) =>
-				{
-					redis.ListRightPush(listKeyTo, v);
-					are.Set();
-				});
-			
-			var poppedValue = redis.ListRightPop(listKeyTo);
-			if (poppedValue.HasValue)
-			{
-				sub.Publish(listKeyTo.ToString(), poppedValue);
-				are.WaitOne(timeOut);
-				return poppedValue;
-			}
-			return null;
-			
-		}
-
-		public static RedisValue ListRightGetFromAndRightPushTo(this IDatabase redis, RedisKey listKeyFrom, RedisKey listKeyTo)
-		{
-			System.Diagnostics.Debug.WriteLine("ListRightGetFrom {0} AndRightPushTo {1}", listKeyFrom, listKeyTo);
-			var listValue = redis.ListRightPop(listKeyFrom);
-			if (listValue.HasValue)
-				redis.ListRightPush(listKeyTo, listValue);
-			return listValue;
-		}
 
 		public static Dictionary<string, string> GetValuesMap(this IDatabase redis, string[] keys)
 		{
