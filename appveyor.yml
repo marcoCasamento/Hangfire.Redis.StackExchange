@@ -1,9 +1,38 @@
 version: 1.0.{build}
+init:
+- ps: >-
+    Invoke-WebRequest "https://github.com/MSOpenTech/redis/releases/download/win-2.8.17.4/redis-2.8.17.zip" -OutFile .\redis-2.8.17.zip;
+
+    $destFolder = "redis-2.8.17";
+
+    $shell = new-object -com shell.application;
+
+
+    $zip = $shell.NameSpace("$pwd\redis-2.8.17.zip");
+
+    if (Test-Path $pwd\$destFolder )
+
+    {
+        del $pwd\$destFolder -Force -Recurse
+    }
+
+    md ".\redis-2.8.17";
+
+    foreach($item in $zip.items())
+
+    {
+        $shell.Namespace("$pwd\redis-2.8.17").copyhere($item);
+    }
+
+    cd $destFolder
+
+    .\redis-server.exe --service-install
+
+    .\redis-server.exe --service-start
+
+    cd ..
 before_build:
 - nuget restore Hangfire.Redis.StackExchange.sln
-- packages\Redis-32.2.6.12.1\tools\redis-server.exe --service-install
-- packages\Redis-32.2.6.12.1\tools\redis-server.exe --service-start
-- '@ECHO Redis Started'
 build:
   publish_nuget: true
   publish_nuget_symbols: true
