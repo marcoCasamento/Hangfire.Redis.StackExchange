@@ -1,5 +1,5 @@
 version: 1.0.{build}
-init:
+before_build:
 - ps: >-
     Invoke-WebRequest "https://github.com/MSOpenTech/redis/releases/download/win-2.8.17.4/redis-2.8.17.zip" -OutFile .\redis-2.8.17.zip;
 
@@ -31,7 +31,6 @@ init:
     .\redis-server.exe --service-start
 
     cd ..
-before_build:
 - nuget restore Hangfire.Redis.StackExchange.sln
 build:
   publish_nuget: true
