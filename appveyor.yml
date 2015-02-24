@@ -1,7 +1,4 @@
 version: 1.0.{build}
-init:
-- choco install redis
-- redis-server.exe
 before_build:
 - nuget restore Hangfire.Redis.StackExchange.sln
 - packages\Redis-32.2.6.12.1\tools\redis-server.exe --service-install
