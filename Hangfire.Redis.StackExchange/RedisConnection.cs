@@ -54,7 +54,7 @@ namespace Hangfire.Redis
             string jobId = null;
             string queueName;
             var queueIndex = 0;
-			System.Diagnostics.Debug.WriteLine("queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
+			//System.Diagnostics.Debug.WriteLine("queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -81,7 +81,8 @@ namespace Hangfire.Redis
 				//}
 
 				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
-				Thread.Sleep(1000);
+				if (jobId == null)
+					Thread.Sleep(1000);
 
             } while (jobId == null);
 
