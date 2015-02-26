@@ -38,37 +38,33 @@ namespace Hangfire.Redis
         {
         }
 
-        public RedisStorage(string hostAndPort)
-            : this(hostAndPort, (int)0)
+        public RedisStorage(string connectionString)
+			: this(connectionString, (int)0)
         {
         }
 
-		public RedisStorage(string hostAndPort, int db)
-			: this(hostAndPort, db, new ConfigurationOptions() { EndPoints = { {hostAndPort}} })
+		
+		public RedisStorage(string connectionString, int db)
+			: this(connectionString, db, TimeSpan.FromMinutes(30))
+        {
+        }
+
+		public RedisStorage(string connectionString, int db, TimeSpan invisibilityTimeout)
 		{
-		}
-        public RedisStorage(string hostAndPort, int db, ConfigurationOptions options)
-            : this(hostAndPort, db, options, TimeSpan.FromMinutes(30))
-        {
-        }
-        public RedisStorage(string hostAndPort, int db, ConfigurationOptions options, TimeSpan invisibilityTimeout)
-        {
-            if (hostAndPort == null) throw new ArgumentNullException("hostAndPort");
-            if (options == null) throw new ArgumentNullException("options");
-			
-			_connectionMultiplexer = ConnectionMultiplexer.Connect(options);
+			if (connectionString == null) throw new ArgumentNullException("connectionString");
+			if (invisibilityTimeout == null) throw new ArgumentNullException("invisibilityTimeout");
+
+			_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
 			_invisibilityTimeout = invisibilityTimeout;
-			HostAndPort = hostAndPort;
+			ConnectionString = _connectionMultiplexer.GetEndPoints(true)[0].ToString();
 			Db = db;
-			Options = options;
-			
-        }
 
-        public string HostAndPort { get; private set; }
+		}
+
+
+        public string ConnectionString { get; private set; }
         public int Db { get; private set; }
-        public ConfigurationOptions Options { get; private set; }
-
-		public ConnectionMultiplexer RConnectionMultiplexer { get { return _connectionMultiplexer; } }
+ 		public ConnectionMultiplexer RConnectionMultiplexer { get { return _connectionMultiplexer; } }
 
         public override IMonitoringApi GetMonitoringApi()
         {
@@ -96,16 +92,13 @@ namespace Hangfire.Redis
         public override void WriteOptionsToLog(ILog logger)
         {
             logger.Info("Using the following options for Redis job storage:");
-			StringBuilder sb = new StringBuilder();
-			
-			foreach (var p in Options.GetType().GetProperties())
-				sb.AppendFormat("{0} : {1}", p.Name, p.GetValue(Options));
-			
+	
+			logger.InfoFormat("ConnectionString: {0}\nDN: {1}", ConnectionString, Db);
         }
 
         public override string ToString()
         {
-            return String.Format("redis://{0}/{1}", HostAndPort, Db);
+			return String.Format("redis://{0}/{1}", ConnectionString, Db);
         }
 
         internal static string GetRedisKey([NotNull] string key)

@@ -15,6 +15,7 @@
 // License along with Hangfire. If not, see <http://www.gnu.org/licenses/>.
 
 using StackExchange.Redis;
+using System;
 namespace Hangfire.Redis
 {
     public static class RedisBootstrapperConfigurationExtensions
@@ -81,11 +82,11 @@ namespace Hangfire.Redis
         /// <param name="options">Advanced storage options</param>
         public static RedisStorage UseRedisStorage(
             this IBootstrapperConfiguration configuration,
-            string hostAndPort,
+            string connectionString,
             int db,
-            ConfigurationOptions options)
+            TimeSpan invisibilityTimeout)
         {
-            var storage = new RedisStorage(hostAndPort, db, options);
+			var storage = new RedisStorage(connectionString, db, invisibilityTimeout);
             configuration.UseStorage(storage);
 
             return storage;
