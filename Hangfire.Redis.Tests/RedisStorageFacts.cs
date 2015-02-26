@@ -10,7 +10,7 @@ namespace Hangfire.Redis.Tests
         {
             var storage = new RedisStorage();
 
-            Assert.Equal("localhost:6379", storage.HostAndPort);
+            Assert.True(storage.ConnectionString.Contains("localhost:6379"));
             Assert.Equal(0, storage.Db);
         }
 
