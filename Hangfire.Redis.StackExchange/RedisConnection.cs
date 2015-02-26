@@ -1,5 +1,5 @@
 // This file is part of Hangfire.
-// Copyright © 2013-2014 Sergey Odinokov.
+// Copyright Â© 2013-2014 Sergey Odinokov.
 // 
 // Hangfire is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as 
@@ -345,27 +345,16 @@ namespace Hangfire.Redis
 
             var utcNow = DateTime.UtcNow;
 
-			var pipeline = Redis.CreateBatch();
 
-			Task[] srvNamesTasks = new Task[serverNames.Length];
-			int i = 0;
             foreach (var serverName in serverNames)
             {
                 var name = serverName;
-				srvNamesTasks[i] = 
-					pipeline.HashGetAsync(
-							String.Format(RedisStorage.Prefix + "server:{0}", name),
-							new RedisValue[]{"StartedAt", "Heartbeat"})
-						.ContinueWith(x=>  heartbeats.Add(name, 
-								new Tuple<DateTime, DateTime?>(
-								JobHelper.DeserializeDateTime(x.Result[0]),
-								JobHelper.DeserializeNullableDateTime(x.Result[1])))
-							);
-				i++;
+                var srv = Redis.HashGet(String.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "StartedAt", "Heartbeat" });
+                heartbeats.Add(name,
+                                new Tuple<DateTime, DateTime?>(
+                                JobHelper.DeserializeDateTime(srv[0]),
+                                JobHelper.DeserializeNullableDateTime(srv[1])));
             }
-
-            pipeline.Execute();
-			pipeline.WaitAll(srvNamesTasks);
 
             var removedServerCount = 0;
             foreach (var heartbeat in heartbeats)
