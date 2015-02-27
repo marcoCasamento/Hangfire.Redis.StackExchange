@@ -21,7 +21,6 @@ namespace Hangfire.Redis
 {
     internal class RedisFetchedJob : IFetchedJob
     {
-		//private readonly IRedisClient _redis;
 		private readonly IDatabase _redis;
         private bool _disposed;
         private bool _removedFromQueue;

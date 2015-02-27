@@ -54,7 +54,7 @@ namespace Hangfire.Redis
             string jobId = null;
             string queueName;
             var queueIndex = 0;
-			//System.Diagnostics.Debug.WriteLine("queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
+			System.Diagnostics.Debug.WriteLine("queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -79,13 +79,16 @@ namespace Hangfire.Redis
 				//		);
 				//	are.WaitOne();
 				//}
-
+				System.Diagnostics.Debug.WriteLine("Trying to fetch on queue {0}, ManagedThreadId {1}", queueName, Thread.CurrentThread.ManagedThreadId);
 				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
 				if (jobId == null)
+				{
 					Thread.Sleep(1000);
+					System.Diagnostics.Debug.WriteLine("No job to fetch on queue {0} ManagedThreadId {1}", queueName, Thread.CurrentThread.ManagedThreadId);
+				}
 
             } while (jobId == null);
-
+			System.Diagnostics.Debug.WriteLine("Succesfully fetched job {0} from queue {1} ManagedThreadId {2}", jobId, queueName, Thread.CurrentThread.ManagedThreadId);
             // The job was fetched by the server. To provide reliability,
             // we should ensure, that the job will be performed and acquired
             // resources will be disposed even if the server will crash 

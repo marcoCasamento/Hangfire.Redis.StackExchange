@@ -76,7 +76,7 @@ namespace Hangfire.Redis
         {
             return UseConnection(redis =>
             {
-                var jobIds = redis.SortedSetRangeByScore(
+                var jobIds = redis.SortedSetRangeByRank(
                     "hangfire:processing",
                     from,
                     from + count - 1).ToStringArray();
