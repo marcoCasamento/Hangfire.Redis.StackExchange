@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
+		HangFire.Redis.StackExchange.nuspec = HangFire.Redis.StackExchange.nuspec
 		README.md = README.md
 	EndProjectSection
 EndProject
