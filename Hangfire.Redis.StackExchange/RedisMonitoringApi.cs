@@ -100,7 +100,7 @@ namespace Hangfire.Redis
         {
             return UseConnection(redis =>
             {
-                var scheduledJobs = redis.SortedSetRangeByScoreWithScores(
+                var scheduledJobs = redis.SortedSetRangeByRankWithScores(
                     "hangfire:schedule",
                     from,
                     from + count - 1).ToList();
@@ -211,7 +211,7 @@ namespace Hangfire.Redis
         {
             return UseConnection(redis =>
             {
-                var failedJobIds = redis.SortedSetRangeByValue(
+                var failedJobIds = redis.SortedSetRangeByRank(
                     "hangfire:failed",
                     from,
                     from + count - 1)

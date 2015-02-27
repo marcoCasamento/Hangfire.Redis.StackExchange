@@ -79,12 +79,10 @@ namespace Hangfire.Redis
 				//		);
 				//	are.WaitOne();
 				//}
-				System.Diagnostics.Debug.WriteLine("Trying to fetch on queue {0}, ManagedThreadId {1}", queueName, Thread.CurrentThread.ManagedThreadId);
 				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
 				if (jobId == null)
 				{
 					Thread.Sleep(1000);
-					System.Diagnostics.Debug.WriteLine("No job to fetch on queue {0} ManagedThreadId {1}", queueName, Thread.CurrentThread.ManagedThreadId);
 				}
 
             } while (jobId == null);
