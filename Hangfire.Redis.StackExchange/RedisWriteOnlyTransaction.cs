@@ -120,7 +120,7 @@ namespace Hangfire.Redis
         {
 			 _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
 			 //Should I rather _transaction.PublishAsync ?
-			 _transaction.PublishAsync(RedisStorage.Prefix + "queues", queue);
+			 _transaction.PublishAsync(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix, queue), jobId);
 			
              _transaction.ListLeftPushAsync(
                 String.Format(RedisStorage.Prefix + "queue:{0}", queue), jobId);

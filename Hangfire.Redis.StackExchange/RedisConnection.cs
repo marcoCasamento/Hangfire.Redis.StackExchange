@@ -65,28 +65,26 @@ namespace Hangfire.Redis
                 var queueKey = RedisStorage.Prefix + String.Format("queue:{0}", queueName);
                 var fetchedKey = RedisStorage.Prefix + String.Format("queue:{0}:dequeued", queueName);
 
-				//jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
-
-				//if (jobId == null)
-				//{
-				//	AutoResetEvent are = new AutoResetEvent(false);
-				//	Redis.Multiplexer.GetSubscriber().Subscribe(RedisStorage.Prefix + "queues",
-				//		(channel, val) =>
-				//		{
-				//			jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
-				//			are.Set();
-				//		}
-				//		);
-				//	are.WaitOne();
-				//}
 				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
+				
 				if (jobId == null)
 				{
-					Thread.Sleep(1000);
+					AutoResetEvent are = new AutoResetEvent(false);
+					Redis.Multiplexer.GetSubscriber().Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix,  queueName),
+						(channel, val) =>
+						{
+							jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
+							System.Diagnostics.Debug.WriteLine("Received Val {0}, ManagedThreadId {1}", val.ToString(), Thread.CurrentThread.ManagedThreadId);
+							are.Set();
+							Redis.Multiplexer.GetSubscriber().Unsubscribe(channel);
+						}
+						);
+					System.Diagnostics.Debug.WriteLine("ManagedThreadId {0} Waiting for Jobs", Thread.CurrentThread.ManagedThreadId);
+					are.WaitOne();
 				}
-
+				System.Diagnostics.Debug.WriteLine("Succesfully fetched job {0} from queue {1} ManagedThreadId {2}", jobId, queueName, Thread.CurrentThread.ManagedThreadId);
             } while (jobId == null);
-			System.Diagnostics.Debug.WriteLine("Succesfully fetched job {0} from queue {1} ManagedThreadId {2}", jobId, queueName, Thread.CurrentThread.ManagedThreadId);
+			
             // The job was fetched by the server. To provide reliability,
             // we should ensure, that the job will be performed and acquired
             // resources will be disposed even if the server will crash 
