@@ -132,7 +132,7 @@ namespace Hangfire.Redis
                 }
 				
 				pipeline.Execute();
-				pipeline.WaitAll(tasks);
+				Task.WaitAll(tasks);
 
                 return new JobList<ScheduledJobDto>(scheduledJobs
                     .Select(job => new KeyValuePair<string, ScheduledJobDto>(
@@ -194,7 +194,7 @@ namespace Hangfire.Redis
                 }
 
 				pipeline.Execute();
-				pipeline.WaitAll(tasks);
+				Task.WaitAll(tasks);
 
                 return serverNames.Select(x => new ServerDto
                 {
@@ -314,7 +314,7 @@ namespace Hangfire.Redis
 						.ContinueWith(x => fetched = x.Result);
 
 					pipeline.Execute();
-					pipeline.WaitAll(tasks);
+					Task.WaitAll(tasks);
 
                     var jobs = GetJobsWithProperties(
                         redis,
@@ -541,7 +541,7 @@ namespace Hangfire.Redis
 						String.Format("hangfire:job:{0}", id),
                         properties.Union(new[] { "Type", "Method", "ParameterTypes", "Arguments" })
 						.Select(x=> (RedisValue)x).ToArray())
-				.ContinueWith(x => { if (!jobs.ContainsKey(id)) jobs.Add(id, x.Result.Select(v=> (string)v).ToList()); }));
+				.ContinueWith(x => {jobs[id] = x.Result.Select(v=> (string)v).ToList(); }));
                 if (stateProperties != null)
                 {
 					tasks.Add(pipeline.HashGetAsync(
@@ -551,7 +551,7 @@ namespace Hangfire.Redis
             }
 
             pipeline.Execute();
-			pipeline.WaitAll(tasks.ToArray());
+			Task.WaitAll(tasks.ToArray());
 
             return new JobList<T>(jobIds
                 .Select(x => new
@@ -622,7 +622,7 @@ namespace Hangfire.Redis
                 }
 				
 				pipeline.Execute();
-				pipeline.WaitAll(tasks);
+				Task.WaitAll(tasks);
 
                 return stats;
             });
