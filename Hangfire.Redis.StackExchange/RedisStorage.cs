@@ -23,6 +23,7 @@ using Hangfire.Annotations;
 using Hangfire.Logging;
 using StackExchange.Redis;
 using System.Text;
+using System.Net;
 
 namespace Hangfire.Redis
 {
@@ -56,7 +57,8 @@ namespace Hangfire.Redis
 
 			_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
 			_invisibilityTimeout = invisibilityTimeout;
-			ConnectionString = _connectionMultiplexer.GetEndPoints(true)[0].ToString();
+			var endpoint = (DnsEndPoint)_connectionMultiplexer.GetEndPoints()[0];
+			ConnectionString = string.Format("{0}:{1}", endpoint.Host, endpoint.Port);
 			Db = db;
 
 		}
