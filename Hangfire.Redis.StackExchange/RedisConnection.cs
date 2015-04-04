@@ -48,15 +48,14 @@ namespace Hangfire.Redis
         {
             return new RedisWriteOnlyTransaction(Redis.CreateTransaction());
         }
-
         public IFetchedJob FetchNextJob(string[] queues, CancellationToken cancellationToken)
         {
             string jobId = null;
             string queueName;
             var queueIndex = 0;
 			System.Diagnostics.Debug.WriteLine("queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
-            do
-            {
+			do
+			{
                 cancellationToken.ThrowIfCancellationRequested();
 
                 queueIndex = (queueIndex + 1) % queues.Length;
@@ -64,27 +63,36 @@ namespace Hangfire.Redis
 
                 var queueKey = RedisStorage.Prefix + String.Format("queue:{0}", queueName);
                 var fetchedKey = RedisStorage.Prefix + String.Format("queue:{0}:dequeued", queueName);
-
+				
 				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
 				
 				if (jobId == null)
 				{
+					ISubscriber sub = Redis.Multiplexer.GetSubscriber();
+					System.Diagnostics.Debug.WriteLine("**NO** Job to fetch queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
 					AutoResetEvent are = new AutoResetEvent(false);
-					Redis.Multiplexer.GetSubscriber().Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix,  queueName),
+					sub.Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix,  queueName),
 						(channel, val) =>
 						{
-							jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
-							System.Diagnostics.Debug.WriteLine("Received Val {0}, ManagedThreadId {1}", val.ToString(), Thread.CurrentThread.ManagedThreadId);
+							sub.Unsubscribe(channel);
+							System.Diagnostics.Debug.WriteLine("Received Val {0} - {1}, ManagedThreadId {2}", val.ToString(), jobId != null ? jobId.ToString() : "NULL", Thread.CurrentThread.ManagedThreadId);
 							are.Set();
-							Redis.Multiplexer.GetSubscriber().Unsubscribe(channel);
+							
 						}
 						);
 					System.Diagnostics.Debug.WriteLine("ManagedThreadId {0} Waiting for Jobs", Thread.CurrentThread.ManagedThreadId);
-					are.WaitOne();
+					are.WaitOne(TimeSpan.FromSeconds(10));
+					jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
 				}
-				System.Diagnostics.Debug.WriteLine("Succesfully fetched job {0} from queue {1} ManagedThreadId {2}", jobId, queueName, Thread.CurrentThread.ManagedThreadId);
-            } while (jobId == null);
+				if (jobId != null)
+					System.Diagnostics.Debug.WriteLine("Succesfully fetched job {0} from queue {1} ManagedThreadId {2}", jobId, queueName, Thread.CurrentThread.ManagedThreadId);
+				else
+					System.Diagnostics.Debug.WriteLine("No Job Fetched (are timed out) ManagedThreadId {0}", Thread.CurrentThread.ManagedThreadId);
+			} while (jobId == null);
+
 			
+
+
             // The job was fetched by the server. To provide reliability,
             // we should ensure, that the job will be performed and acquired
             // resources will be disposed even if the server will crash 

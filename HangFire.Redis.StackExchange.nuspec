@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>HangFire.Redis.StackExchange</id>
-        <version>1.0.0-beta</version>
+        <version>1.0.2-beta</version>
         <title>Hangfire Redis Storage (StackExchange.Redis)</title>
         <authors>Marco Casamento</authors>
         <owners>marcocasamento</owners>
@@ -22,6 +22,5 @@ See http://hangfire.io/ for some more info on the main project</description>
     </metadata>
     <files>
         <file src="Hangfire.Redis.StackExchange\bin\Release\Hangfire.Redis.StackExchange.dll" target="lib\net45\Hangfire.Redis.StackExchange.dll" />
-        <file src="Hangfire.Redis.StackExchange\bin\Release\Hangfire.Redis.StackExchange.pdb" target="lib\net45\Hangfire.Redis.StackExchange.pdb" />
     </files>
 </package>
