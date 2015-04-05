@@ -57,8 +57,18 @@ namespace Hangfire.Redis
 
 			_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
 			_invisibilityTimeout = invisibilityTimeout;
-			var endpoint = (DnsEndPoint)_connectionMultiplexer.GetEndPoints()[0];
-			ConnectionString = string.Format("{0}:{1}", endpoint.Host, endpoint.Port);
+			var endpoint = _connectionMultiplexer.GetEndPoints()[0];
+			if (endpoint is IPEndPoint)
+			{
+				var ipEp = endpoint as IPEndPoint;
+				ConnectionString = string.Format("{0}:{1}", Dns.GetHostEntry(ipEp.Address).HostName, ipEp.Port);
+			}
+			else 
+			{
+				var dnsEp = endpoint as DnsEndPoint;
+				ConnectionString = string.Format("{0}:{1}", dnsEp.Host, dnsEp.Port);
+			}
+			
 			Db = db;
 
 		}
@@ -75,7 +85,7 @@ namespace Hangfire.Redis
 
         public override IStorageConnection GetConnection()
         {
-            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db));
+            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _connectionMultiplexer.GetSubscriber());
         }
 
         public override IEnumerable<IServerComponent> GetComponents()

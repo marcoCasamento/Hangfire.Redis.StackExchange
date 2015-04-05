@@ -30,10 +30,10 @@ namespace Hangfire.Redis
     internal class RedisConnection : IStorageConnection
     {
         private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(1);
-		
-        public RedisConnection(IDatabase redis)
+		readonly ISubscriber _subscriber;
+        public RedisConnection(IDatabase redis, ISubscriber subscriber)
         {
-			
+			_subscriber = subscriber;
             Redis = redis;
         }
 
@@ -68,13 +68,12 @@ namespace Hangfire.Redis
 				
 				if (jobId == null)
 				{
-					ISubscriber sub = Redis.Multiplexer.GetSubscriber();
 					System.Diagnostics.Debug.WriteLine("**NO** Job to fetch queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
 					AutoResetEvent are = new AutoResetEvent(false);
-					sub.Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix,  queueName),
+					_subscriber.Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix,  queueName),
 						(channel, val) =>
 						{
-							sub.Unsubscribe(channel);
+							_subscriber.Unsubscribe(channel);
 							System.Diagnostics.Debug.WriteLine("Received Val {0} - {1}, ManagedThreadId {2}", val.ToString(), jobId != null ? jobId.ToString() : "NULL", Thread.CurrentThread.ManagedThreadId);
 							are.Set();
 							
