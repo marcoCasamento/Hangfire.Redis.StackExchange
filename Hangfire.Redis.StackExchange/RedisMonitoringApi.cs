@@ -92,7 +92,9 @@ namespace Hangfire.Redis
                         StartedAt = JobHelper.DeserializeNullableDateTime(state[0]),
                         InProcessingState = ProcessingState.StateName.Equals(
                             state[3], StringComparison.OrdinalIgnoreCase),
-                    }).OrderBy(x => x.Value.StartedAt).ToList());
+                    })
+					.Where(x=> x.Value.ServerId != null)
+					.OrderBy(x => x.Value.StartedAt).ToList());
             });
         }
 
@@ -533,27 +535,27 @@ namespace Hangfire.Redis
             properties = properties ?? new string[0];
 
             var pipeline = redis.CreateBatch();
-			var tasks = new List<Task>();
+			var tasks = new List<Task>(jobIds.Length * 2);
             foreach (var jobId in jobIds)
             {
                 var id = jobId;
-				tasks.Add(pipeline.HashGetAsync(
-						String.Format("hangfire:job:{0}", id),
-                        properties.Union(new[] { "Type", "Method", "ParameterTypes", "Arguments" })
-						.Select(x=> (RedisValue)x).ToArray())
-				.ContinueWith(x => {jobs[id] = x.Result.Select(v=> (string)v).ToList(); }));
-                if (stateProperties != null)
-                {
-					tasks.Add(pipeline.HashGetAsync(
-						String.Format("hangfire:job:{0}:state", id), stateProperties.Select(x=> (RedisValue) x).ToArray())
-							.ContinueWith(x => { if (!states.ContainsKey(id)) states.Add(id, x.Result.ToStringArray().ToList()); }));
-                }
+				var jobTask=pipeline.HashGetAsync(
+								String.Format("hangfire:job:{0}", id),
+								properties.Union(new[] { "Type", "Method", "ParameterTypes", "Arguments" }).Select(x=> (RedisValue)x).ToArray());
+				tasks.Add(jobTask);
+				tasks.Add(jobTask.ContinueWith(x => { jobs[id] = x.Result.Select(v => (string)v).ToList(); }));
+				if (stateProperties != null)
+				{
+					var taskStateJob = pipeline.HashGetAsync(String.Format("hangfire:job:{0}:state", id), stateProperties.Select(x => (RedisValue)x).ToArray());
+					tasks.Add(taskStateJob);
+					tasks.Add(taskStateJob.ContinueWith(x => { if (!states.ContainsKey(id)) states.Add(id, x.Result.ToStringArray().ToList()); }));
+				}
             }
 
             pipeline.Execute();
 			Task.WaitAll(tasks.ToArray());
-
-            return new JobList<T>(jobIds
+			
+			var jobList = new JobList<T>(jobIds
                 .Select(x => new
                 {
                     JobId = x,
@@ -571,6 +573,7 @@ namespace Hangfire.Redis
                         ? default(T)
                         : selector(x.Method, x.Job, x.State)))
                 .ToList());
+			return jobList;
         }
 
         public long SucceededListCount()

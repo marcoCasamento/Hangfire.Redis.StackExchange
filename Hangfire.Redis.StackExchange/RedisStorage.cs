@@ -32,6 +32,7 @@ namespace Hangfire.Redis
         internal static readonly string Prefix = "hangfire:";
 
 		private readonly ConnectionMultiplexer _connectionMultiplexer;
+		private readonly ConnectionMultiplexer _statConnectionMultiplexer;
 		private  TimeSpan _invisibilityTimeout;
 
         public RedisStorage()
@@ -56,6 +57,7 @@ namespace Hangfire.Redis
 			if (invisibilityTimeout == null) throw new ArgumentNullException("invisibilityTimeout");
 
 			_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
+			_statConnectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
 			_invisibilityTimeout = invisibilityTimeout;
 			var endpoint = _connectionMultiplexer.GetEndPoints()[0];
 			if (endpoint is IPEndPoint)
@@ -76,11 +78,9 @@ namespace Hangfire.Redis
 
         public string ConnectionString { get; private set; }
         public int Db { get; private set; }
- 		public ConnectionMultiplexer RConnectionMultiplexer { get { return _connectionMultiplexer; } }
-
         public override IMonitoringApi GetMonitoringApi()
         {
-            return new RedisMonitoringApi(_connectionMultiplexer.GetDatabase(Db));
+            return new RedisMonitoringApi(_statConnectionMultiplexer.GetDatabase(Db));
         }
 
         public override IStorageConnection GetConnection()
