@@ -4,7 +4,8 @@ language: csharp
 solution: Hangfire.Redis.StackExchange.sln
 install:
   - nuget restore Hangfire.Redis.StackExchange.sln
-  - nuget install xunit.runner.console -OutputDirectory ./Hangfire.Redis.Tests/bin/Release/
+  - nuget install xunit.runner.console -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
-  - mono ./testrunner/xunit.runner.console.2.0.0/tools/xunit.console.x86.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll
+  - cp -av ./testrunner/xunit.runner.console.2.0.0/tools/* ./Hangfire.Redis.Tests/bin/Release/
+  - mono ./Hangfire.Redis.Tests/bin/Release/xunit.console.x86.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll
