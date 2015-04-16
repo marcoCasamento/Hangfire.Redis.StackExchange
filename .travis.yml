@@ -1,10 +1,15 @@
-language: csharp
-solution: Hangfire.Redis.StackExchange.sln
-install:
-  - nuget restore Hangfire.Redis.StackExchange.sln
-  - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
-script:
-  - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
-  #- mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll
 services:
   - redis-server
+language: csharp
+solution: Hangfire.Redis.StackExchange.sln
+before_install:
+  - git clone https://github.com/StackExchange/StackExchange.Redis.git
+  - xbuild /p:Configuration=Release ./StackExchange.Redis/StackExchange.Redis/StackExchange.Redis.csproj
+install:
+  - nuget restore Hangfire.Redis.StackExchange.sln
+  - nuget install xunit.runner.console -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
+  - cp -av ./testrunner/xunit.runner.console.2.0.0/tools/* ./Hangfire.Redis.Tests/bin/Release/
+  - cp ./StackExchange.Redis/StackExchange.Redis/bin/Release/StackExchange.Redis.dll ./Hangfire.Redis.Tests/bin/Release/
+  - mono ./Hangfire.Redis.Tests/bin/Release/xunit.console.x86.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll -parallel none -maxthreads 1

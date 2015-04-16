@@ -65,7 +65,7 @@ namespace Hangfire.Redis
 		
 	}
 
-	public class RedisLock : IDisposable
+	public sealed class RedisLock : IDisposable
 	{
 		readonly IDatabase _redis;
 		readonly RedisKey _key;
