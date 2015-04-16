@@ -2,10 +2,14 @@ services:
   - redis-server
 language: csharp
 solution: Hangfire.Redis.StackExchange.sln
+before_install:
+  - git clone https://github.com/StackExchange/StackExchange.Redis.git
+  - ./StackExchange.Redis/monobuild.bash
 install:
   - nuget restore Hangfire.Redis.StackExchange.sln
   - nuget install xunit.runner.console -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
   - cp -av ./testrunner/xunit.runner.console.2.0.0/tools/* ./Hangfire.Redis.Tests/bin/Release/
+  - cp ./StackExchange.Redis/bin/mono/StackExchange.Redis.dll ./Hangfire.Redis.Tests/bin/Release/
   - mono ./Hangfire.Redis.Tests/bin/Release/xunit.console.x86.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll
