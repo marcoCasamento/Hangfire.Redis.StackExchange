@@ -12,4 +12,4 @@ script:
   - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
   - cp -av ./testrunner/xunit.runner.console.2.0.0/tools/* ./Hangfire.Redis.Tests/bin/Release/
   - cp ./StackExchange.Redis/StackExchange.Redis/bin/Release/StackExchange.Redis.dll ./Hangfire.Redis.Tests/bin/Release/
-  - mono ./Hangfire.Redis.Tests/bin/Release/xunit.console.x86.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll
+  - mono ./Hangfire.Redis.Tests/bin/Release/xunit.console.x86.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll -parallel none -maxthreads 1
