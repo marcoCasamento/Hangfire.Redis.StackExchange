@@ -18,7 +18,7 @@ namespace Hangfire.Redis.Tests
                 () => new ApplyStateContext(
                     StateContextValue.Object,
                     NewStateValue,
-                    OldStateValue));
+                    OldStateValue, new IState[0]));
         }
 
         public StateContextMock StateContextValue { get; set; }

@@ -29,8 +29,7 @@ namespace Hangfire.Redis
             this IBootstrapperConfiguration configuration)
         {
             var storage = new RedisStorage();
-            configuration.UseStorage(storage);
-
+			GlobalConfiguration.Configuration.UseStorage(storage);
             return storage;
         }
 
@@ -46,7 +45,7 @@ namespace Hangfire.Redis
             string hostAndPort)
         {
             var storage = new RedisStorage(hostAndPort);
-            configuration.UseStorage(storage);
+            GlobalConfiguration.Configuration.UseStorage(storage);
 
             return storage;
         }
@@ -66,7 +65,7 @@ namespace Hangfire.Redis
             int db)
         {
             var storage = new RedisStorage(hostAndPort, db);
-            configuration.UseStorage(storage);
+			GlobalConfiguration.Configuration.UseStorage(storage);
 
             return storage;
         }
@@ -87,7 +86,7 @@ namespace Hangfire.Redis
             TimeSpan invisibilityTimeout)
         {
 			var storage = new RedisStorage(connectionString, db, invisibilityTimeout);
-            configuration.UseStorage(storage);
+			GlobalConfiguration.Configuration.UseStorage(storage);
 
             return storage;
         }
