@@ -24,6 +24,7 @@ using Hangfire.Logging;
 using StackExchange.Redis;
 using System.Text;
 using System.Net;
+using System.Net.Sockets;
 
 namespace Hangfire.Redis
 {
@@ -61,7 +62,7 @@ namespace Hangfire.Redis
 			if (endpoint is IPEndPoint)
 			{
 				var ipEp = endpoint as IPEndPoint;
-				ConnectionString = string.Format("{0}:{1}", Dns.GetHostEntry(ipEp.Address).HostName, ipEp.Port);
+				ConnectionString = string.Format("{0}:{1}", TryGetHostName(ipEp.Address), ipEp.Port);
 			}
 			else 
 			{
@@ -72,7 +73,21 @@ namespace Hangfire.Redis
 			Db = db;
 
 		}
-
+		private static string TryGetHostName(IPAddress address)
+		{
+			string hostName = null;
+			try
+			{
+				var hostEntry = Dns.GetHostEntry(address);
+				hostName = hostEntry != null ? hostEntry.HostName : address.ToString();
+			}
+			catch 
+			{
+				//Whatever happens, just return address.ToString();
+				hostName = address.ToString();
+			}
+			return hostName;
+		}
 
         public string ConnectionString { get; private set; }
         public int Db { get; private set; }
