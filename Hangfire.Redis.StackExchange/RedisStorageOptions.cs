@@ -21,16 +21,21 @@ using System;
 
 namespace Hangfire.Redis
 {
-	//TODO: This class is pretty useless now, remove ASAP
     public class RedisStorageOptions 
     {
+        public const string DefaultPrefix = "hangfire:";
+
         public RedisStorageOptions() 
         {
             ConnectionPoolSize = 50;
             InvisibilityTimeout = TimeSpan.FromMinutes(30);
+            Db = 0;
+            Prefix = DefaultPrefix;
         }
 
         public int ConnectionPoolSize { get; set; }
         public TimeSpan InvisibilityTimeout { get; set; }
+        public string Prefix { get; set; }
+        public int Db { get; set; }
     }
 }

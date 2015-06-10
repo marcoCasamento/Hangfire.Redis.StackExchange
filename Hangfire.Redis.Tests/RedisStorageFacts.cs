@@ -30,7 +30,8 @@ namespace Hangfire.Redis.Tests
 
         private RedisStorage CreateStorage()
         {
-            return new RedisStorage(RedisUtils.GetHostAndPort(), RedisUtils.GetDb());
+            var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
+            return new RedisStorage(RedisUtils.GetHostAndPort(), options);
         }
     }
 }
