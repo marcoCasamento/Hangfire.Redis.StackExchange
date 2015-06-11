@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="Hangfire.Redis.Tests" Label="Hangfire.Redis.Tests" Category="Project" />
+    <Node Id="Hangfire.Core 1.4.1" Label="Hangfire.Core 1.4.1" Category="Package" />
+    <Node Id="Moq 4.2.1502.0911" Label="Moq 4.2.1502.0911" Category="Package" />
+    <Node Id="Newtonsoft.Json 6.0.8" Label="Newtonsoft.Json 6.0.8" Category="Package" />
+    <Node Id="Owin 1.0" Label="Owin 1.0" Category="Package" />
+    <Node Id="StackExchange.Redis 1.0.414" Label="StackExchange.Redis 1.0.414" Category="Package" />
+    <Node Id="xunit 2.0.0" Label="xunit 2.0.0" Category="Package" />
+    <Node Id="xunit.abstractions 2.0.0" Label="xunit.abstractions 2.0.0" Category="Package" />
+    <Node Id="xunit.assert 2.0.0" Label="xunit.assert 2.0.0" Category="Package" />
+    <Node Id="xunit.core 2.0.0" Label="xunit.core 2.0.0" Category="Package" />
+    <Node Id="xunit.extensibility.core 2.0.0" Label="xunit.extensibility.core 2.0.0" Category="Package" />
+    <Node Id="xunit.runner.visualstudio 2.0.0" Label="xunit.runner.visualstudio 2.0.0" Category="Package" />
+    <Node Id="Hangfire.Redis.StackExchange" Label="Hangfire.Redis.StackExchange" Category="Project" />
+    <Node Id="Hangfire.Core 1.4.1" Label="Hangfire.Core 1.4.1" Category="Package" />
+    <Node Id="Newtonsoft.Json 6.0.8" Label="Newtonsoft.Json 6.0.8" Category="Package" />
+    <Node Id="Owin 1.0" Label="Owin 1.0" Category="Package" />
+    <Node Id="StackExchange.Redis 1.0.414" Label="StackExchange.Redis 1.0.414" Category="Package" />
+  </Nodes>
+  <Links>
+    <Link Source="Hangfire.Core 1.4.1" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Hangfire.Core 1.4.1" Target="Newtonsoft.Json 6.0.8" Category="Package Dependency" />
+    <Link Source="xunit 2.0.0" Target="xunit.core 2.0.0" Category="Package Dependency" />
+    <Link Source="xunit 2.0.0" Target="xunit.assert 2.0.0" Category="Package Dependency" />
+    <Link Source="xunit.core 2.0.0" Target="xunit.extensibility.core 2.0.0" Category="Package Dependency" />
+    <Link Source="xunit.extensibility.core 2.0.0" Target="xunit.abstractions 2.0.0" Category="Package Dependency" />
+    <Link Source="Hangfire.Redis.Tests" Target="Hangfire.Core 1.4.1" Category="Installed Package" />
+    <Link Source="Hangfire.Redis.Tests" Target="Moq 4.2.1502.0911" Category="Installed Package" />
+    <Link Source="Hangfire.Redis.Tests" Target="StackExchange.Redis 1.0.414" Category="Installed Package" />
+    <Link Source="Hangfire.Redis.Tests" Target="xunit 2.0.0" Category="Installed Package" />
+    <Link Source="Hangfire.Redis.Tests" Target="xunit.runner.visualstudio 2.0.0" Category="Installed Package" />
+    <Link Source="Hangfire.Core 1.4.1" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Hangfire.Core 1.4.1" Target="Newtonsoft.Json 6.0.8" Category="Package Dependency" />
+    <Link Source="Hangfire.Redis.StackExchange" Target="Hangfire.Core 1.4.1" Category="Installed Package" />
+    <Link Source="Hangfire.Redis.StackExchange" Target="StackExchange.Redis 1.0.414" Category="Installed Package" />
+  </Links>
+  <Categories>
+    <Category Id="Project" />
+    <Category Id="Package" />
+  </Categories>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Project" ValueLabel="True">
+      <Condition Expression="HasCategory('Project')" />
+      <Setter Property="Background" Value="Blue" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Package Dependency" ValueLabel="True">
+      <Condition Expression="HasCategory('Package Dependency')" />
+      <Setter Property="Background" Value="Yellow" />
+    </Style>
+  </Styles>
+</DirectedGraph>

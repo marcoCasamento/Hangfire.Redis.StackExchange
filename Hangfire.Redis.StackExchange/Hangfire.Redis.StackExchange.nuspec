@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>James Han</authors>
+    <owners>James Han</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Redis storage for Hangfire with option to prefix keys</description>
+    <releaseNotes>Initial release</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>Hangfire Redis</tags>
+  </metadata>
+</package>
