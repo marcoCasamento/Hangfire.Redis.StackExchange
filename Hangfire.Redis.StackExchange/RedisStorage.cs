@@ -1,18 +1,18 @@
-// This file is part of Hangfire.
-// Copyright © 2013-2014 Sergey Odinokov.
-// 
-// Hangfire is free software: you can redistribute it and/or modify
+// Written by Marco Casamento.
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+
+// Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as 
 // published by the Free Software Foundation, either version 3 
 // of the License, or any later version.
 // 
-// Hangfire is distributed in the hope that it will be useful,
+// Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 // 
 // You should have received a copy of the GNU Lesser General Public 
-// License along with Hangfire. If not, see <http://www.gnu.org/licenses/>.
+// License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
 using System.Collections.Generic;
@@ -22,9 +22,7 @@ using Hangfire.Storage;
 using Hangfire.Annotations;
 using Hangfire.Logging;
 using StackExchange.Redis;
-using System.Text;
 using System.Net;
-using System.Net.Sockets;
 
 namespace Hangfire.Redis
 {
@@ -123,7 +121,7 @@ namespace Hangfire.Redis
 
         public override string ToString()
         {
-			return String.Format("redis://{0}/{1}", ConnectionString, Db);
+			return string.Format("redis://{0}/{1}", ConnectionString, Db);
         }
 
         internal static string GetRedisKey([NotNull] string key)

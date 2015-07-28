@@ -1,18 +1,18 @@
-// This file is part of Hangfire.
-// Copyright © 2013-2014 Sergey Odinokov.
-// 
-// Hangfire is free software: you can redistribute it and/or modify
+// Written by Marco Casamento.
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+
+// Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as 
 // published by the Free Software Foundation, either version 3 
 // of the License, or any later version.
 // 
-// Hangfire is distributed in the hope that it will be useful,
+// Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 // 
 // You should have received a copy of the GNU Lesser General Public 
-// License along with Hangfire. If not, see <http://www.gnu.org/licenses/>.
+// License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
 using System.Collections.Generic;
@@ -23,11 +23,10 @@ using Hangfire.Common;
 using Hangfire.Server;
 using Hangfire.Storage;
 using StackExchange.Redis;
-using System.Threading.Tasks;
 
 namespace Hangfire.Redis
 {
-	internal class RedisConnection : JobStorageConnection
+    internal class RedisConnection : JobStorageConnection
     {
         private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(1);
 		readonly ISubscriber _subscriber;
@@ -50,26 +49,26 @@ namespace Hangfire.Redis
 			transaction.KeyDeleteAsync(
 				new RedisKey[]
 				{
-					String.Format(RedisStorage.Prefix + "server:{0}", serverId),
-					String.Format(RedisStorage.Prefix + "server:{0}:queues", serverId)
+                    string.Format(RedisStorage.Prefix + "server:{0}", serverId),
+                    string.Format(RedisStorage.Prefix + "server:{0}:queues", serverId)
 				});
 
 			transaction.Execute();
 		}
 
-		public override IDisposable AcquireDistributedLock(string resource, TimeSpan timeout)
-		{
-			return Redis.AcquireLock(RedisStorage.Prefix + resource, Environment.MachineName + Guid.NewGuid(), timeout);
-		}
+        public override IDisposable AcquireDistributedLock(string resource, TimeSpan timeout)
+        {
+            return new RedisLock(Redis, resource, timeout);
+        }
 
-		public override void AnnounceServer(string serverId, ServerContext context)
+        public override void AnnounceServer(string serverId, ServerContext context)
 		{
 			var transaction = Redis.CreateTransaction();
 
 			transaction.SetAddAsync(RedisStorage.Prefix + "servers", serverId);
 
 			transaction.HashSetAsync(
-				String.Format(RedisStorage.Prefix + "server:{0}", serverId),
+                string.Format(RedisStorage.Prefix + "server:{0}", serverId),
 				new Dictionary<string, string>
                     {
                         { "WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture) },
@@ -80,7 +79,7 @@ namespace Hangfire.Redis
 			{
 				var queue1 = queue;
 				transaction.ListRightPushAsync(
-					String.Format(RedisStorage.Prefix + "server:{0}:queues", serverId),
+                    string.Format(RedisStorage.Prefix + "server:{0}:queues", serverId),
 					queue1);
 			}
 
@@ -109,11 +108,11 @@ namespace Hangfire.Redis
 			var transaction = Redis.CreateTransaction();
 
 			transaction.HashSetAsync(
-					String.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                    string.Format(RedisStorage.Prefix + "job:{0}", jobId),
 					storedParameters.ToHashEntries());
 
 			transaction.KeyExpireAsync(
-				String.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                string.Format(RedisStorage.Prefix + "job:{0}", jobId),
 				expireIn);
 
 			// TODO: check return value
@@ -137,7 +136,6 @@ namespace Hangfire.Redis
 			string jobId = null;
 			string queueName;
 			var queueIndex = 0;
-			System.Diagnostics.Debug.WriteLine("queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
 			do
 			{
 				cancellationToken.ThrowIfCancellationRequested();
@@ -145,26 +143,27 @@ namespace Hangfire.Redis
 				queueIndex = (queueIndex + 1) % queues.Length;
 				queueName = queues[queueIndex];
 
-				var queueKey = RedisStorage.Prefix + String.Format("queue:{0}", queueName);
-				var fetchedKey = RedisStorage.Prefix + String.Format("queue:{0}:dequeued", queueName);
+				var queueKey = RedisStorage.Prefix + string.Format("queue:{0}", queueName);
+				var fetchedKey = RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queueName);
 
 				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
 
 				if (jobId == null)
 				{
 					System.Diagnostics.Debug.WriteLine("**NO** Job to fetch queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
-					AutoResetEvent are = new AutoResetEvent(false);
-					_subscriber.Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix, queueName),
-						(channel, val) =>
-						{
-							_subscriber.Unsubscribe(channel);
-							System.Diagnostics.Debug.WriteLine("Received Val {0} - {1}, ManagedThreadId {2}", val.ToString(), jobId != null ? jobId.ToString() : "NULL", Thread.CurrentThread.ManagedThreadId);
-							are.Set();
+					//AutoResetEvent are = new AutoResetEvent(false);
+					//_subscriber.Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix, queueName),
+					//	(channel, val) =>
+					//	{
+					//		_subscriber.Unsubscribe(channel);
+					//		System.Diagnostics.Debug.WriteLine("Received Val {0} - {1}, ManagedThreadId {2}", val.ToString(), jobId != null ? jobId.ToString() : "NULL", Thread.CurrentThread.ManagedThreadId);
+					//		are.Set();
 
-						}
-						);
+					//	}
+					//	);
 					System.Diagnostics.Debug.WriteLine("ManagedThreadId {0} Waiting for Jobs", Thread.CurrentThread.ManagedThreadId);
-					are.WaitOne(TimeSpan.FromSeconds(10));
+                    //are.WaitOne(TimeSpan.FromSeconds(5));
+                    Thread.Sleep(1000);
 					jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
 				}
 				if (jobId != null)
@@ -192,7 +191,7 @@ namespace Hangfire.Redis
 			// Job's has the implicit 'Fetched' state.
 
 			Redis.HashSet(
-				String.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                string.Format(RedisStorage.Prefix + "job:{0}", jobId),
 				"Fetched",
 				JobHelper.SerializeDateTime(DateTime.UtcNow));
 
@@ -252,7 +251,7 @@ namespace Hangfire.Redis
 		}
 		public override JobData GetJobData(string id)
 		{
-			var storedData = Redis.HashGetAll(String.Format(RedisStorage.Prefix + "job:{0}", id));
+			var storedData = Redis.HashGetAll(string.Format(RedisStorage.Prefix + "job:{0}", id));
 
 			if (storedData.Length == 0) return null;
 
@@ -309,7 +308,7 @@ namespace Hangfire.Redis
 		public override string GetJobParameter(string id, string name)
 		{
 			return Redis.HashGet(
-				String.Format(RedisStorage.Prefix + "job:{0}", id),
+                string.Format(RedisStorage.Prefix + "job:{0}", id),
 				name);
 		}
 
@@ -342,7 +341,7 @@ namespace Hangfire.Redis
 			if (jobId == null) throw new ArgumentNullException("jobId");
 
 			var entries = Redis.HashGetAll(
-				RedisStorage.Prefix + String.Format("job:{0}:state", jobId));
+				RedisStorage.Prefix + string.Format("job:{0}:state", jobId));
 
 			if (entries.Length == 0) return null;
 
@@ -366,7 +365,7 @@ namespace Hangfire.Redis
 		public override void Heartbeat(string serverId)
 		{
 			Redis.HashSet(
-				String.Format(RedisStorage.Prefix + "server:{0}", serverId),
+                string.Format(RedisStorage.Prefix + "server:{0}", serverId),
 				"Heartbeat",
 				JobHelper.SerializeDateTime(DateTime.UtcNow));
 		}
@@ -387,7 +386,7 @@ namespace Hangfire.Redis
 			foreach (var serverName in serverNames)
 			{
 				var name = serverName;
-				var srv = Redis.HashGet(String.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "StartedAt", "Heartbeat" });
+				var srv = Redis.HashGet(string.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "StartedAt", "Heartbeat" });
 				heartbeats.Add(name,
 								new Tuple<DateTime, DateTime?>(
 								JobHelper.DeserializeDateTime(srv[0]),
@@ -413,7 +412,7 @@ namespace Hangfire.Redis
 		public override void SetJobParameter(string id, string name, string value)
         {
             Redis.HashSet(
-                String.Format(RedisStorage.Prefix + "job:{0}", id),
+                string.Format(RedisStorage.Prefix + "job:{0}", id),
                 name,
                 value);
         }

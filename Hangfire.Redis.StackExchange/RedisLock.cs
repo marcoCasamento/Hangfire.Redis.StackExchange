@@ -14,15 +14,24 @@
 // You should have received a copy of the GNU Lesser General Public 
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
+using StackExchange.Redis;
 using System;
 
 namespace Hangfire.Redis
 {
-    public class HangFireRedisException : Exception
-	{
-		public HangFireRedisException(string message) : base (message)
-		{
+    public sealed class RedisLock : IDisposable
+    {
+        readonly IDatabase _redis;
+        readonly RedisKey _key;
+        public RedisLock(IDatabase redis, RedisKey key, TimeSpan? timeOut)
+        {
+            
+        }
 
-		}
-	}
+        public void Dispose()
+        {
+            _redis.KeyDelete(_key);
+
+        }
+    }
 }
