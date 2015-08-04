@@ -4,14 +4,13 @@
         <id>HangFire.Redis.StackExchange</id>
         <version>1.4.2</version>
         <title>HangFire Redis Storage</title>
-        <authors>Marco Casamento</authors>
-        <owners>marcocasamento</owners>
+        <authors>James Han</authors>
+        <owners>James Han</owners>
         <projectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Hangfire Redis Storage Based on Redis.StackExchange
 See http://hangfire.io/ for some more info on the main project</description>
-        <releaseNotes>Updated to HangFire 1.4.1;
-Aligned Package Version to HangFire</releaseNotes>
+      <releaseNotes>Initial release</releaseNotes>
         <copyright />
         <tags>Hangfire</tags>
         <dependencies>

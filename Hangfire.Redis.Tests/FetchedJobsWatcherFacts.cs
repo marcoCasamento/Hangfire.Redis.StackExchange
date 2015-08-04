@@ -14,7 +14,8 @@ namespace Hangfire.Redis.Tests
 
         public FetchedJobsWatcherFacts()
         {
-            _storage = new RedisStorage(RedisUtils.GetHostAndPort(), RedisUtils.GetDb());
+            var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
+            _storage = new RedisStorage(RedisUtils.GetHostAndPort(), options);
 			_cts = new CancellationTokenSource();
 			_cts.Cancel();
         }
