@@ -1,4 +1,4 @@
-// Written by Marco Casamento.
+// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
 // This software is based on https://github.com/HangfireIO/Hangfire.Redis 
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
