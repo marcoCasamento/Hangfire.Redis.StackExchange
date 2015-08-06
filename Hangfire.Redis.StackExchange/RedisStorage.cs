@@ -29,7 +29,7 @@ namespace Hangfire.Redis
     public class RedisStorage : JobStorage
     {
         internal static string Prefix;
-
+        internal static readonly string Identity = Guid.NewGuid().ToString();
 		private readonly ConnectionMultiplexer _connectionMultiplexer;
 		private  TimeSpan _invisibilityTimeout;
 

@@ -81,6 +81,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedisConnectionFacts.cs" />
     <Compile Include="RedisFetchedJobFacts.cs" />
+    <Compile Include="RedisLockFacts.cs" />
     <Compile Include="RedisStorageFacts.cs" />
     <Compile Include="RedisStorageOptionsFacts.cs" />
     <Compile Include="RedisTest.cs" />

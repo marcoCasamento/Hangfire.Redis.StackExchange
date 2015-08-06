@@ -37,7 +37,7 @@ namespace Hangfire.Redis.Tests
             _transaction.Verify(x => x.InsertToList(
                 "succeeded", JobId));
             _transaction.Verify(x => x.TrimList(
-                "succeeded", 0, 99));
+                "succeeded", 0, 499));
         }
 
         [Fact]
