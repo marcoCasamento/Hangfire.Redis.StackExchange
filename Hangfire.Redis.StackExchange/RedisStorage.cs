@@ -28,7 +28,7 @@ namespace Hangfire.Redis
 {
     public class RedisStorage : JobStorage
     {
-        internal static readonly string Prefix = "hangfire:";
+        internal static string Prefix;
 
 		private readonly ConnectionMultiplexer _connectionMultiplexer;
 		private  TimeSpan _invisibilityTimeout;
@@ -38,24 +38,13 @@ namespace Hangfire.Redis
         {
         }
 
-        public RedisStorage(string connectionString)
-			: this(connectionString, (int)0)
-        {
-        }
-
-		
-		public RedisStorage(string connectionString, int db)
-			: this(connectionString, db, TimeSpan.FromMinutes(30))
-        {
-        }
-
-		public RedisStorage(string connectionString, int db, TimeSpan invisibilityTimeout)
+        public RedisStorage(string connectionString, RedisStorageOptions options = null)
 		{
 			if (connectionString == null) throw new ArgumentNullException("connectionString");
-			if (invisibilityTimeout == null) throw new ArgumentNullException("invisibilityTimeout");
+			if (options == null) options = new RedisStorageOptions();
 
 			_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
-			_invisibilityTimeout = invisibilityTimeout;
+            _invisibilityTimeout = options.InvisibilityTimeout;
 			var endpoint = _connectionMultiplexer.GetEndPoints()[0];
 			if (endpoint is IPEndPoint)
 			{
@@ -67,9 +56,12 @@ namespace Hangfire.Redis
 				var dnsEp = endpoint as DnsEndPoint;
 				ConnectionString = string.Format("{0}:{1}", dnsEp.Host, dnsEp.Port);
 			}
-			
-			Db = db;
 
+            Db = options.Db;
+            if (Prefix != options.Prefix)
+            {
+                Prefix = options.Prefix;
+            }
 		}
 		private static string TryGetHostName(IPAddress address)
 		{
