@@ -35,24 +35,28 @@ namespace Hangfire.Redis
             _key = key;
             _owner = owner;
 
-            TimeSpan waitingTimeToObtainLock = TimeSpan.Zero;
             //The comparison below uses timeOut as a max timeSpan in waiting Lock
             int i = 0;
-            DateTime startedAt = DateTime.UtcNow;
-            while (waitingTimeToObtainLock < timeOut)
+            DateTime lockExpirationTime = DateTime.UtcNow +timeOut;
+            while (DateTime.UtcNow < lockExpirationTime)
             {
                 if (_redis.LockTake(key, owner, timeOut))
                     return;
                 //assumes that a second call made by the same owner means an extension request
                 var lockOwner = _redis.LockQuery(key);
-                if (lockOwner.Equals(owner) && _redis.LockExtend(key, owner, timeOut))
+                
+                if (lockOwner.Equals(owner))
                 {
+                    //extends the lock only for the remaining time
+                    var ttl = redis.KeyTimeToLive(key) ?? TimeSpan.Zero;
+                    var extensionTTL = lockExpirationTime - DateTime.UtcNow;
+                    if (extensionTTL > ttl)
+                        _redis.LockExtend(key, owner, extensionTTL - ttl);
                     isRoot = false;
                     return;
                 }
                 SleepBackOffMultiplier(i);
                 i++;
-                waitingTimeToObtainLock += DateTime.UtcNow.Subtract(startedAt);
             }
             throw new TimeoutException(string.Format("Lock on {0} with owner identifier {1} Exceeded timeout of {2}", key, owner.ToString(), timeOut));
         }
