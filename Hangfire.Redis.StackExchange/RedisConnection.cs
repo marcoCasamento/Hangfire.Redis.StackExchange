@@ -29,387 +29,378 @@ namespace Hangfire.Redis
     internal class RedisConnection : JobStorageConnection
     {
         private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(1);
-		readonly ISubscriber _subscriber;
-        public RedisConnection(IDatabase redis, ISubscriber subscriber)
+        readonly ISubscriber _subscriber;
+        string _jobStorageIdentity;
+        public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity)
         {
-			_subscriber = subscriber;
+            _subscriber = subscriber;
+            _jobStorageIdentity = jobStorageIdentity;
             Redis = redis;
         }
-		
-		public IDatabase Redis { get; private set; }
 
-		public static void RemoveServer(IDatabase redis, string serverId)
-		{
-			var transaction = redis.CreateTransaction();
+        public IDatabase Redis { get; private set; }
 
-			transaction.SetRemoveAsync(
-				RedisStorage.Prefix + "servers",
-				serverId);
+        public static void RemoveServer(IDatabase redis, string serverId)
+        {
+            var transaction = redis.CreateTransaction();
 
-			transaction.KeyDeleteAsync(
-				new RedisKey[]
-				{
+            transaction.SetRemoveAsync(
+                RedisStorage.Prefix + "servers",
+                serverId);
+
+            transaction.KeyDeleteAsync(
+                new RedisKey[]
+                {
                     string.Format(RedisStorage.Prefix + "server:{0}", serverId),
                     string.Format(RedisStorage.Prefix + "server:{0}:queues", serverId)
-				});
+                });
 
-			transaction.Execute();
-		}
+            transaction.Execute();
+        }
 
         public override IDisposable AcquireDistributedLock(string resource, TimeSpan timeout)
         {
-            return new RedisLock(Redis, resource, RedisStorage.Identity, timeout);
+            return new RedisLock(Redis, resource, _jobStorageIdentity, timeout);
         }
 
         public override void AnnounceServer(string serverId, ServerContext context)
-		{
-			var transaction = Redis.CreateTransaction();
+        {
+            var transaction = Redis.CreateTransaction();
 
-			transaction.SetAddAsync(RedisStorage.Prefix + "servers", serverId);
+            transaction.SetAddAsync(RedisStorage.Prefix + "servers", serverId);
 
-			transaction.HashSetAsync(
+            transaction.HashSetAsync(
                 string.Format(RedisStorage.Prefix + "server:{0}", serverId),
-				new Dictionary<string, string>
+                new Dictionary<string, string>
                     {
                         { "WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture) },
                         { "StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow) },
                     }.ToHashEntries());
 
-			foreach (var queue in context.Queues)
-			{
-				var queue1 = queue;
-				transaction.ListRightPushAsync(
+            foreach (var queue in context.Queues)
+            {
+                var queue1 = queue;
+                transaction.ListRightPushAsync(
                     string.Format(RedisStorage.Prefix + "server:{0}:queues", serverId),
-					queue1);
-			}
+                    queue1);
+            }
 
-			transaction.Execute();
+            transaction.Execute();
 
-		}
+        }
 
-		public override string CreateExpiredJob(
-			Job job,
-			IDictionary<string, string> parameters,
-			DateTime createdAt,
-			TimeSpan expireIn)
-		{
-			var jobId = Guid.NewGuid().ToString();
+        public override string CreateExpiredJob(
+            Job job,
+            IDictionary<string, string> parameters,
+            DateTime createdAt,
+            TimeSpan expireIn)
+        {
+            var jobId = Guid.NewGuid().ToString();
 
-			var invocationData = InvocationData.Serialize(job);
+            var invocationData = InvocationData.Serialize(job);
 
-			// Do not modify the original parameters.
-			var storedParameters = new Dictionary<string, string>(parameters);
-			storedParameters.Add("Type", invocationData.Type);
-			storedParameters.Add("Method", invocationData.Method);
-			storedParameters.Add("ParameterTypes", invocationData.ParameterTypes);
-			storedParameters.Add("Arguments", invocationData.Arguments);
-			storedParameters.Add("CreatedAt", JobHelper.SerializeDateTime(createdAt));
+            // Do not modify the original parameters.
+            var storedParameters = new Dictionary<string, string>(parameters);
+            storedParameters.Add("Type", invocationData.Type);
+            storedParameters.Add("Method", invocationData.Method);
+            storedParameters.Add("ParameterTypes", invocationData.ParameterTypes);
+            storedParameters.Add("Arguments", invocationData.Arguments);
+            storedParameters.Add("CreatedAt", JobHelper.SerializeDateTime(createdAt));
 
-			var transaction = Redis.CreateTransaction();
+            var transaction = Redis.CreateTransaction();
 
-			transaction.HashSetAsync(
+            transaction.HashSetAsync(
                     string.Format(RedisStorage.Prefix + "job:{0}", jobId),
-					storedParameters.ToHashEntries());
+                    storedParameters.ToHashEntries());
 
-			transaction.KeyExpireAsync(
+            transaction.KeyExpireAsync(
                 string.Format(RedisStorage.Prefix + "job:{0}", jobId),
-				expireIn);
+                expireIn);
 
-			// TODO: check return value
-			transaction.Execute();
+            // TODO: check return value
+            transaction.Execute();
 
-			return jobId;
-		}
+            return jobId;
+        }
 
-		public override IWriteOnlyTransaction CreateWriteTransaction()
-		{
-			return new RedisWriteOnlyTransaction(Redis.CreateTransaction());
-		}
+        public override IWriteOnlyTransaction CreateWriteTransaction()
+        {
+            return new RedisWriteOnlyTransaction(Redis.CreateTransaction());
+        }
 
-		public override void Dispose()
-		{
-			//Don't need to be disposable anymore
-		}
+        public override void Dispose()
+        {
+            //Don't need to be disposable anymore
+        }
 
-		public override IFetchedJob FetchNextJob(string[] queues, CancellationToken cancellationToken)
-		{
-			string jobId = null;
-			string queueName;
-			var queueIndex = 0;
-			do
-			{
-				cancellationToken.ThrowIfCancellationRequested();
+        public override IFetchedJob FetchNextJob(string[] queues, CancellationToken cancellationToken)
+        {
+            string jobId = null;
+            string queueName = null;
+            do
+            {
+                cancellationToken.ThrowIfCancellationRequested();
 
-				queueIndex = (queueIndex + 1) % queues.Length;
-				queueName = queues[queueIndex];
+                for (int i = 0; i < queues.Length; i++)
+                {
+                    queueName = queues[i];
+                    var queueKey = RedisStorage.Prefix + string.Format("queue:{0}", queueName);
+                    var fetchedKey = RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queueName);
+                    jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
+                    if (jobId != null) break;
+                }
 
-				var queueKey = RedisStorage.Prefix + string.Format("queue:{0}", queueName);
-				var fetchedKey = RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queueName);
+                if (jobId == null)
+                {
+                    using (ManualResetEvent are = new ManualResetEvent(false))
+                    {
+                        _subscriber.Subscribe(string.Format("{0}JobFetchChannel", RedisStorage.Prefix),
+                            (channel, val) =>
+                            {
+                                _subscriber.Unsubscribe(channel);
+                                are.Set();
+                            });
+                        WaitHandle.WaitAny(new[] { are, cancellationToken.WaitHandle }, TimeSpan.FromMinutes(3));
 
-				jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
+                    }
+                }
+            } while (jobId == null);
 
-				if (jobId == null)
-				{
-					System.Diagnostics.Debug.WriteLine("**NO** Job to fetch queues Lenght {0}, ManagedThreadId {1}", queues.Length, Thread.CurrentThread.ManagedThreadId);
-					//AutoResetEvent are = new AutoResetEvent(false);
-					//_subscriber.Subscribe(String.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix, queueName),
-					//	(channel, val) =>
-					//	{
-					//		_subscriber.Unsubscribe(channel);
-					//		System.Diagnostics.Debug.WriteLine("Received Val {0} - {1}, ManagedThreadId {2}", val.ToString(), jobId != null ? jobId.ToString() : "NULL", Thread.CurrentThread.ManagedThreadId);
-					//		are.Set();
+            // The job was fetched by the server. To provide reliability,
+            // we should ensure, that the job will be performed and acquired
+            // resources will be disposed even if the server will crash 
+            // while executing one of the subsequent lines of code.
 
-					//	}
-					//	);
-					System.Diagnostics.Debug.WriteLine("ManagedThreadId {0} Waiting for Jobs", Thread.CurrentThread.ManagedThreadId);
-                    //are.WaitOne(TimeSpan.FromSeconds(5));
-                    Thread.Sleep(1000);
-					jobId = Redis.ListRightPopLeftPush(queueKey, fetchedKey);
-				}
-				if (jobId != null)
-					System.Diagnostics.Debug.WriteLine("Succesfully fetched job {0} from queue {1} ManagedThreadId {2}", jobId, queueName, Thread.CurrentThread.ManagedThreadId);
-				else
-					System.Diagnostics.Debug.WriteLine("No Job Fetched (are timed out) ManagedThreadId {0}", Thread.CurrentThread.ManagedThreadId);
-			} while (jobId == null);
+            // The job's processing is splitted into a couple of checkpoints.
+            // Each checkpoint occurs after successful update of the 
+            // job information in the storage. And each checkpoint describes
+            // the way to perform the job when the server was crashed after
+            // reaching it.
 
+            // Checkpoint #1-1. The job was fetched into the fetched list,
+            // that is being inspected by the FetchedJobsWatcher instance.
+            // Job's has the implicit 'Fetched' state.
 
-
-
-			// The job was fetched by the server. To provide reliability,
-			// we should ensure, that the job will be performed and acquired
-			// resources will be disposed even if the server will crash 
-			// while executing one of the subsequent lines of code.
-
-			// The job's processing is splitted into a couple of checkpoints.
-			// Each checkpoint occurs after successful update of the 
-			// job information in the storage. And each checkpoint describes
-			// the way to perform the job when the server was crashed after
-			// reaching it.
-
-			// Checkpoint #1-1. The job was fetched into the fetched list,
-			// that is being inspected by the FetchedJobsWatcher instance.
-			// Job's has the implicit 'Fetched' state.
-
-			Redis.HashSet(
+            Redis.HashSet(
                 string.Format(RedisStorage.Prefix + "job:{0}", jobId),
-				"Fetched",
-				JobHelper.SerializeDateTime(DateTime.UtcNow));
+                "Fetched",
+                JobHelper.SerializeDateTime(DateTime.UtcNow));
 
-			// Checkpoint #2. The job is in the implicit 'Fetched' state now.
-			// This state stores information about fetched time. The job will
-			// be re-queued when the JobTimeout will be expired.
+            // Checkpoint #2. The job is in the implicit 'Fetched' state now.
+            // This state stores information about fetched time. The job will
+            // be re-queued when the JobTimeout will be expired.
 
-			return new RedisFetchedJob(Redis, jobId, queueName);
-		}
+            return new RedisFetchedJob(Redis, jobId, queueName);
+        }
 
-		public override Dictionary<string, string> GetAllEntriesFromHash(string key)
-		{
-			if (key == null) throw new ArgumentNullException("key");
+        public override Dictionary<string, string> GetAllEntriesFromHash(string key)
+        {
+            if (key == null) throw new ArgumentNullException("key");
 
-			var result = Redis.HashGetAll(RedisStorage.GetRedisKey(key)).ToStringDictionary();
+            var result = Redis.HashGetAll(RedisStorage.GetRedisKey(key)).ToStringDictionary();
 
-			return result.Count != 0 ? result : null;
-		}
+            return result.Count != 0 ? result : null;
+        }
 
-		public override List<string> GetAllItemsFromList(string key)
-		{
-			
-			return Redis.ListRange(key).ToStringArray().ToList();
-		}
+        public override List<string> GetAllItemsFromList(string key)
+        {
 
-		public override HashSet<string> GetAllItemsFromSet(string key)
-		{
-			if (key == null) throw new ArgumentNullException("key");
+            return Redis.ListRange(key).ToStringArray().ToList();
+        }
 
-			HashSet<string> result = new HashSet<string>();
-			foreach (var item in Redis.SortedSetScan(RedisStorage.GetRedisKey(key)))
-			{
-				result.Add(item.Element);
-			}
+        public override HashSet<string> GetAllItemsFromSet(string key)
+        {
+            if (key == null) throw new ArgumentNullException("key");
 
-			return result;
-		}
+            HashSet<string> result = new HashSet<string>();
+            foreach (var item in Redis.SortedSetScan(RedisStorage.GetRedisKey(key)))
+            {
+                result.Add(item.Element);
+            }
 
-		public override long GetCounter(string key)
-		{
-			return Convert.ToInt64(Redis.StringGet(RedisStorage.Prefix + key));
-		}
+            return result;
+        }
 
-		public override string GetFirstByLowestScoreFromSet(string key, double fromScore, double toScore)
-		{
-			return Redis.SortedSetRangeByScore(RedisStorage.Prefix + key, fromScore, toScore, skip: 0, take: 1)
-				.FirstOrDefault();
-		}
+        public override long GetCounter(string key)
+        {
+            return Convert.ToInt64(Redis.StringGet(RedisStorage.Prefix + key));
+        }
 
-		public override long GetHashCount(string key)
-		{
-			return Redis.HashLength(RedisStorage.Prefix + key);
-		}
-		public override TimeSpan GetHashTtl(string key)
-		{
-			return Redis.KeyTimeToLive(RedisStorage.Prefix + key) ?? TimeSpan.Zero;
-		}
-		public override JobData GetJobData(string id)
-		{
-			var storedData = Redis.HashGetAll(string.Format(RedisStorage.Prefix + "job:{0}", id));
+        public override string GetFirstByLowestScoreFromSet(string key, double fromScore, double toScore)
+        {
+            return Redis.SortedSetRangeByScore(RedisStorage.Prefix + key, fromScore, toScore, skip: 0, take: 1)
+                .FirstOrDefault();
+        }
 
-			if (storedData.Length == 0) return null;
+        public override long GetHashCount(string key)
+        {
+            return Redis.HashLength(RedisStorage.Prefix + key);
+        }
+        public override TimeSpan GetHashTtl(string key)
+        {
+            return Redis.KeyTimeToLive(RedisStorage.Prefix + key) ?? TimeSpan.Zero;
+        }
+        public override JobData GetJobData(string id)
+        {
+            var storedData = Redis.HashGetAll(string.Format(RedisStorage.Prefix + "job:{0}", id));
 
-			string type = null;
-			string method = null;
-			string parameterTypes = null;
-			string arguments = null;
-			string createdAt = null;
+            if (storedData.Length == 0) return null;
 
-			if (storedData.ContainsKey("Type"))
-			{
-				type = storedData.First(x => x.Name == "Type").Value;
-			}
-			if (storedData.ContainsKey("Method"))
-			{
-				method = storedData.First(x => x.Name == "Method").Value;
-			}
-			if (storedData.ContainsKey("ParameterTypes"))
-			{
-				parameterTypes = storedData.First(x => x.Name == "ParameterTypes").Value;
-			}
-			if (storedData.ContainsKey("Arguments"))
-			{
-				arguments = storedData.First(x => x.Name == "Arguments").Value;
-			}
-			if (storedData.ContainsKey("CreatedAt"))
-			{
-				createdAt = storedData.First(x => x.Name == "CreatedAt").Value;
-			}
+            string type = null;
+            string method = null;
+            string parameterTypes = null;
+            string arguments = null;
+            string createdAt = null;
 
-			Job job = null;
-			JobLoadException loadException = null;
+            if (storedData.ContainsKey("Type"))
+            {
+                type = storedData.First(x => x.Name == "Type").Value;
+            }
+            if (storedData.ContainsKey("Method"))
+            {
+                method = storedData.First(x => x.Name == "Method").Value;
+            }
+            if (storedData.ContainsKey("ParameterTypes"))
+            {
+                parameterTypes = storedData.First(x => x.Name == "ParameterTypes").Value;
+            }
+            if (storedData.ContainsKey("Arguments"))
+            {
+                arguments = storedData.First(x => x.Name == "Arguments").Value;
+            }
+            if (storedData.ContainsKey("CreatedAt"))
+            {
+                createdAt = storedData.First(x => x.Name == "CreatedAt").Value;
+            }
 
-			var invocationData = new InvocationData(type, method, parameterTypes, arguments);
+            Job job = null;
+            JobLoadException loadException = null;
 
-			try
-			{
-				job = invocationData.Deserialize();
-			}
-			catch (JobLoadException ex)
-			{
-				loadException = ex;
-			}
+            var invocationData = new InvocationData(type, method, parameterTypes, arguments);
 
-			return new JobData
-			{
-				Job = job,
-				State = storedData.ContainsKey("State") ? (string)storedData.First(x => x.Name == "State").Value : null,
-				CreatedAt = JobHelper.DeserializeNullableDateTime(createdAt) ?? DateTime.MinValue,
-				LoadException = loadException
-			};
-		}
+            try
+            {
+                job = invocationData.Deserialize();
+            }
+            catch (JobLoadException ex)
+            {
+                loadException = ex;
+            }
 
-		public override string GetJobParameter(string id, string name)
-		{
-			return Redis.HashGet(
+            return new JobData
+            {
+                Job = job,
+                State = storedData.ContainsKey("State") ? (string)storedData.First(x => x.Name == "State").Value : null,
+                CreatedAt = JobHelper.DeserializeNullableDateTime(createdAt) ?? DateTime.MinValue,
+                LoadException = loadException
+            };
+        }
+
+        public override string GetJobParameter(string id, string name)
+        {
+            return Redis.HashGet(
                 string.Format(RedisStorage.Prefix + "job:{0}", id),
-				name);
-		}
+                name);
+        }
 
-		public override long GetListCount(string key)
-		{
-			return Redis.ListLength(RedisStorage.Prefix + key);
-		}
-		public override TimeSpan GetListTtl(string key)
-		{
-			return Redis.KeyTimeToLive(RedisStorage.Prefix + key) ?? TimeSpan.Zero;
-		}
-		public override List<string> GetRangeFromList(string key, int startingFrom, int endingAt)
-		{
-			return Redis.ListRange(RedisStorage.Prefix + key, startingFrom, endingAt).ToStringArray().ToList();
-		}
-		public override List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
-		{
-			return Redis.SortedSetRangeByRank(RedisStorage.Prefix + key, startingFrom, endingAt).ToStringArray().ToList();
-		}
-		public override long GetSetCount(string key)
-		{
-			return Redis.SortedSetLength(RedisStorage.Prefix + key);
-		}
-		public override TimeSpan GetSetTtl(string key)
-		{
-			return Redis.KeyTimeToLive(RedisStorage.Prefix + key) ?? TimeSpan.Zero;
-		}
-		public override StateData GetStateData(string jobId)
-		{
-			if (jobId == null) throw new ArgumentNullException("jobId");
+        public override long GetListCount(string key)
+        {
+            return Redis.ListLength(RedisStorage.Prefix + key);
+        }
+        public override TimeSpan GetListTtl(string key)
+        {
+            return Redis.KeyTimeToLive(RedisStorage.Prefix + key) ?? TimeSpan.Zero;
+        }
+        public override List<string> GetRangeFromList(string key, int startingFrom, int endingAt)
+        {
+            return Redis.ListRange(RedisStorage.Prefix + key, startingFrom, endingAt).ToStringArray().ToList();
+        }
+        public override List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
+        {
+            return Redis.SortedSetRangeByRank(RedisStorage.Prefix + key, startingFrom, endingAt).ToStringArray().ToList();
+        }
+        public override long GetSetCount(string key)
+        {
+            return Redis.SortedSetLength(RedisStorage.Prefix + key);
+        }
+        public override TimeSpan GetSetTtl(string key)
+        {
+            return Redis.KeyTimeToLive(RedisStorage.Prefix + key) ?? TimeSpan.Zero;
+        }
+        public override StateData GetStateData(string jobId)
+        {
+            if (jobId == null) throw new ArgumentNullException("jobId");
 
-			var entries = Redis.HashGetAll(
-				RedisStorage.Prefix + string.Format("job:{0}:state", jobId));
+            var entries = Redis.HashGetAll(
+                RedisStorage.Prefix + string.Format("job:{0}:state", jobId));
 
-			if (entries.Length == 0) return null;
+            if (entries.Length == 0) return null;
 
-			var stateData = entries.ToStringDictionary();
+            var stateData = entries.ToStringDictionary();
 
-			stateData.Remove("State");
-			stateData.Remove("Reason");
+            stateData.Remove("State");
+            stateData.Remove("Reason");
 
-			return new StateData
-			{
-				Name = entries.First(x => x.Name == "State").Value,
-				Reason = entries.ContainsKey("Reason") ? (string)entries.First(x => x.Name == "Reason").Value : null,
-				Data = stateData
-			};
-		}
+            return new StateData
+            {
+                Name = entries.First(x => x.Name == "State").Value,
+                Reason = entries.ContainsKey("Reason") ? (string)entries.First(x => x.Name == "Reason").Value : null,
+                Data = stateData
+            };
+        }
 
-		public override string GetValueFromHash(string key, string name)
-		{
-			return Redis.HashGet(RedisStorage.Prefix + key, name);
-		}
-		public override void Heartbeat(string serverId)
-		{
-			Redis.HashSet(
+        public override string GetValueFromHash(string key, string name)
+        {
+            return Redis.HashGet(RedisStorage.Prefix + key, name);
+        }
+        public override void Heartbeat(string serverId)
+        {
+            Redis.HashSet(
                 string.Format(RedisStorage.Prefix + "server:{0}", serverId),
-				"Heartbeat",
-				JobHelper.SerializeDateTime(DateTime.UtcNow));
-		}
+                "Heartbeat",
+                JobHelper.SerializeDateTime(DateTime.UtcNow));
+        }
 
-		public override void RemoveServer(string serverId)
-		{
-			RemoveServer(Redis, serverId);
-		}
+        public override void RemoveServer(string serverId)
+        {
+            RemoveServer(Redis, serverId);
+        }
 
-		public override int RemoveTimedOutServers(TimeSpan timeOut)
-		{
-			var serverNames = Redis.SetMembers(RedisStorage.Prefix + "servers");
-			var heartbeats = new Dictionary<string, Tuple<DateTime, DateTime?>>();
+        public override int RemoveTimedOutServers(TimeSpan timeOut)
+        {
+            var serverNames = Redis.SetMembers(RedisStorage.Prefix + "servers");
+            var heartbeats = new Dictionary<string, Tuple<DateTime, DateTime?>>();
 
-			var utcNow = DateTime.UtcNow;
+            var utcNow = DateTime.UtcNow;
 
 
-			foreach (var serverName in serverNames)
-			{
-				var name = serverName;
-				var srv = Redis.HashGet(string.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "StartedAt", "Heartbeat" });
-				heartbeats.Add(name,
-								new Tuple<DateTime, DateTime?>(
-								JobHelper.DeserializeDateTime(srv[0]),
-								JobHelper.DeserializeNullableDateTime(srv[1])));
-			}
+            foreach (var serverName in serverNames)
+            {
+                var name = serverName;
+                var srv = Redis.HashGet(string.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "StartedAt", "Heartbeat" });
+                heartbeats.Add(name,
+                                new Tuple<DateTime, DateTime?>(
+                                JobHelper.DeserializeDateTime(srv[0]),
+                                JobHelper.DeserializeNullableDateTime(srv[1])));
+            }
 
-			var removedServerCount = 0;
-			foreach (var heartbeat in heartbeats)
-			{
-				var maxTime = new DateTime(
-					Math.Max(heartbeat.Value.Item1.Ticks, (heartbeat.Value.Item2 ?? DateTime.MinValue).Ticks));
+            var removedServerCount = 0;
+            foreach (var heartbeat in heartbeats)
+            {
+                var maxTime = new DateTime(
+                    Math.Max(heartbeat.Value.Item1.Ticks, (heartbeat.Value.Item2 ?? DateTime.MinValue).Ticks));
 
-				if (utcNow > maxTime.Add(timeOut))
-				{
-					RemoveServer(Redis, heartbeat.Key);
-					removedServerCount++;
-				}
-			}
+                if (utcNow > maxTime.Add(timeOut))
+                {
+                    RemoveServer(Redis, heartbeat.Key);
+                    removedServerCount++;
+                }
+            }
 
-			return removedServerCount;
-		}
+            return removedServerCount;
+        }
 
-		public override void SetJobParameter(string id, string name, string value)
+        public override void SetJobParameter(string id, string name, string value)
         {
             Redis.HashSet(
                 string.Format(RedisStorage.Prefix + "job:{0}", id),

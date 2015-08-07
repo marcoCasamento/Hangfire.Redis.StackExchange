@@ -22,42 +22,45 @@ using System.Threading;
 
 namespace Hangfire.Redis
 {
-    public sealed class RedisLock : IDisposable
+    
+    internal class RedisLock : IDisposable
     {
         readonly IDatabase _redis;
         readonly RedisKey _key;
         readonly RedisValue _owner;
+        private bool isRoot = true;
         public RedisLock([NotNull]IDatabase redis, [NotNull]RedisKey key, [NotNull]RedisValue owner, [NotNull]TimeSpan timeOut)
         {
             _redis = redis;
             _key = key;
             _owner = owner;
 
-            bool lockObtained = false;
             TimeSpan waitingTimeToObtainLock = TimeSpan.Zero;
             //The comparison below uses timeOut as a max timeSpan in waiting Lock
             int i = 0;
-            while (!lockObtained && waitingTimeToObtainLock < timeOut )
+            DateTime startedAt = DateTime.UtcNow;
+            while (waitingTimeToObtainLock < timeOut)
             {
-                lockObtained = _redis.LockTake(key, owner, timeOut);
-                if (!lockObtained)
-                    //Maybe the lock already belongs to the owner, in that case, extends it
-                    lockObtained = _redis.LockExtend(key, owner, timeOut);
-
-                if (!lockObtained)
+                if (_redis.LockTake(key, owner, timeOut))
+                    return;
+                //assumes that a second call made by the same owner means an extension request
+                var lockOwner = _redis.LockQuery(key);
+                if (lockOwner.Equals(owner) && _redis.LockExtend(key, owner, timeOut))
                 {
-                    SleepBackOffMultiplier(i);
-                    i++;
+                    isRoot = false;
+                    return;
                 }
+                SleepBackOffMultiplier(i);
+                i++;
+                waitingTimeToObtainLock += DateTime.UtcNow.Subtract(startedAt);
             }
-            if (!lockObtained)
-                throw new TimeoutException(string.Format("Lock on {0} with owner identifier {1} Exceeded timeout of {2}", key, RedisStorage.Identity, timeOut));
+            throw new TimeoutException(string.Format("Lock on {0} with owner identifier {1} Exceeded timeout of {2}", key, owner.ToString(), timeOut));
         }
 
         public void Dispose()
         {
-            if (!_redis.LockRelease(_key, _owner))
-                Debug.WriteLine("Can't release lock {0} - {1}",_key, _owner);
+            if (isRoot && !_redis.LockRelease(_key, _owner))
+                Debug.WriteLine("Can't release lock {0} - {1}", _key, _owner);
 
         }
 

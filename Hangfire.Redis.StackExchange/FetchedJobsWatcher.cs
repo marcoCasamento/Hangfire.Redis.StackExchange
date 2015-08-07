@@ -28,16 +28,16 @@ namespace Hangfire.Redis
         private readonly TimeSpan _invisibilityTimeout;
         private static readonly ILog Logger = LogProvider.GetLogger(typeof(FetchedJobsWatcher));
 
-        private readonly JobStorage _storage;
+        private readonly RedisStorage _storage;
         private readonly FetchedJobsWatcherOptions _options;
 
-        public FetchedJobsWatcher(JobStorage storage, TimeSpan invisibilityTimeout)
+        public FetchedJobsWatcher(RedisStorage storage, TimeSpan invisibilityTimeout)
             : this(storage, invisibilityTimeout, new FetchedJobsWatcherOptions())
         {
         }
 
         public FetchedJobsWatcher(
-            JobStorage storage,
+            RedisStorage storage,
             TimeSpan invisibilityTimeout,
             FetchedJobsWatcherOptions options)
         {
@@ -76,7 +76,7 @@ namespace Hangfire.Redis
             Logger.DebugFormat(
                 "Acquiring the lock for the fetched list of the '{0}' queue...", queue);
 
-            using (new RedisLock(connection.Redis, string.Format(RedisStorage.Prefix + "queue:{0}:dequeued:lock", queue), RedisStorage.Identity, _options.FetchedLockTimeout))
+            using (new RedisLock(connection.Redis, string.Format(RedisStorage.Prefix + "queue:{0}:dequeued:lock", queue), _storage.Identity, _options.FetchedLockTimeout))
             {
                 Logger.DebugFormat(
                     "Looking for timed out jobs in the '{0}' queue...", queue);

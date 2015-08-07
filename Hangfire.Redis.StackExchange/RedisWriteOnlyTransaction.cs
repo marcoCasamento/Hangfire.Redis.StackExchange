@@ -144,12 +144,9 @@ namespace Hangfire.Redis
 
         public override void AddToQueue(string queue, string jobId)
         {
-			 _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
-			 //Should I rather _transaction.PublishAsync ?
-			 _transaction.PublishAsync(string.Format("{0}JobFetchChannel:{1}", RedisStorage.Prefix, queue), jobId);
-			
-             _transaction.ListLeftPushAsync(
-                string.Format(RedisStorage.Prefix + "queue:{0}", queue), jobId);
+            _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
+            _transaction.ListLeftPushAsync(string.Format(RedisStorage.Prefix + "queue:{0}", queue), jobId);
+            _transaction.PublishAsync(string.Format("{0}JobFetchChannel", RedisStorage.Prefix), jobId);
         }
 
         public override void IncrementCounter(string key)

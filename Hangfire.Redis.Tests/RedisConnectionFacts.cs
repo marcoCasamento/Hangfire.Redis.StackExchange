@@ -188,7 +188,7 @@ namespace Hangfire.Redis.Tests
         private void UseConnections(Action<IDatabase, RedisConnection> action)
         {
 			var redis = RedisUtils.CreateClient();
-            using (var connection = new RedisConnection(redis, RedisUtils.CreateSubscriber()))
+            using (var connection = new RedisConnection(redis, RedisUtils.CreateSubscriber(), Guid.NewGuid().ToString()))
             {
 				action(redis, connection);
             }
@@ -196,7 +196,7 @@ namespace Hangfire.Redis.Tests
 
         private void UseConnection(Action<RedisConnection> action)
         {
-            using (var connection = new RedisConnection(RedisUtils.CreateClient(), RedisUtils.CreateSubscriber()))
+            using (var connection = new RedisConnection(RedisUtils.CreateClient(), RedisUtils.CreateSubscriber(), Guid.NewGuid().ToString()))
             {
 				action(connection);
             }

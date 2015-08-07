@@ -29,8 +29,8 @@ namespace Hangfire.Redis
     public class RedisStorage : JobStorage
     {
         internal static string Prefix;
-        internal static readonly string Identity = Guid.NewGuid().ToString();
-		private readonly ConnectionMultiplexer _connectionMultiplexer;
+        private readonly string identity;
+        private readonly ConnectionMultiplexer _connectionMultiplexer;
 		private  TimeSpan _invisibilityTimeout;
 
         public RedisStorage()
@@ -62,7 +62,8 @@ namespace Hangfire.Redis
             {
                 Prefix = options.Prefix;
             }
-		}
+            identity = Guid.NewGuid().ToString();
+        }
 		private static string TryGetHostName(IPAddress address)
 		{
 			string hostName = null;
@@ -81,6 +82,15 @@ namespace Hangfire.Redis
 
         public string ConnectionString { get; private set; }
         public int Db { get; private set; }
+
+        internal string Identity
+        {
+            get
+            {
+                return identity;
+            }
+        }
+
         public override IMonitoringApi GetMonitoringApi()
         {
 			return new RedisMonitoringApi(_connectionMultiplexer.GetDatabase(Db));
@@ -88,7 +98,7 @@ namespace Hangfire.Redis
 
         public override IStorageConnection GetConnection()
         {
-            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _connectionMultiplexer.GetSubscriber());
+            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _connectionMultiplexer.GetSubscriber(), identity);
         }
 
         public override IEnumerable<IServerComponent> GetComponents()
