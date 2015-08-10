@@ -28,7 +28,7 @@ namespace Hangfire.Redis
 {
     public class RedisStorage : JobStorage
     {
-        internal static string Prefix;
+        internal static string Prefix = "hangfire:";
         private readonly string identity;
         private readonly ConnectionMultiplexer _connectionMultiplexer;
 		private  TimeSpan _invisibilityTimeout;

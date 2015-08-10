@@ -38,35 +38,35 @@ namespace Hangfire.Redis
         }
         public override void AddRangeToSet([NotNull]string key, [NotNull]IList<string> items)
         {
-            _transaction.SetAddAsync(key, items.Select(x => (RedisValue)x).ToArray());
+            _transaction.SortedSetAddAsync(RedisStorage.Prefix + key, items.Select(x => new SortedSetEntry(x, 0)).ToArray());
         }
         public override void ExpireHash([NotNull]string key, TimeSpan expireIn)
         {
-            _transaction.KeyExpireAsync(key, expireIn);
+            _transaction.KeyExpireAsync(RedisStorage.Prefix + key, expireIn);
         }
         public override void ExpireList([NotNull]string key, TimeSpan expireIn)
         {
-            _transaction.KeyExpireAsync(key, expireIn);
+            _transaction.KeyExpireAsync(RedisStorage.Prefix + key, expireIn);
         }
         public override void ExpireSet([NotNull]string key, TimeSpan expireIn)
         {
-            _transaction.KeyExpireAsync(key, expireIn);
+            _transaction.KeyExpireAsync(RedisStorage.Prefix + key, expireIn);
         }
         public override void PersistHash([NotNull]string key)
         {
-            _transaction.KeyPersistAsync(key);
+            _transaction.KeyPersistAsync(RedisStorage.Prefix + key);
         }
         public override void PersistList([NotNull]string key)
         {
-            _transaction.KeyPersistAsync(key);
+            _transaction.KeyPersistAsync(RedisStorage.Prefix + key);
         }
         public override void PersistSet([NotNull]string key)
         {
-            _transaction.KeyPersistAsync(key);
+            _transaction.KeyPersistAsync(RedisStorage.Prefix + key);
         }
         public override void RemoveSet([NotNull]string key)
         {
-            _transaction.KeyDeleteAsync(key);
+            _transaction.KeyDeleteAsync(RedisStorage.Prefix + key);
         }
         public override void Commit()
         {
