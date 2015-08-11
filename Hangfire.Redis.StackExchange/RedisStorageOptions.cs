@@ -26,15 +26,18 @@ namespace Hangfire.Redis
 
         public RedisStorageOptions() 
         {
-            ConnectionPoolSize = 50;
             InvisibilityTimeout = TimeSpan.FromMinutes(30);
             Db = 0;
             Prefix = DefaultPrefix;
+            SucceededListSize = 499;
+            DeletedListSize = 499;
         }
 
-        public int ConnectionPoolSize { get; set; }
         public TimeSpan InvisibilityTimeout { get; set; }
         public string Prefix { get; set; }
         public int Db { get; set; }
+
+        public int SucceededListSize { get; set; }
+        public int DeletedListSize { get; set; }
     }
 }

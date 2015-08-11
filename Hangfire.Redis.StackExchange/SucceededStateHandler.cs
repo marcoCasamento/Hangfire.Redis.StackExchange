@@ -24,7 +24,7 @@ namespace Hangfire.Redis
         public void Apply(ApplyStateContext context, IWriteOnlyTransaction transaction)
         {
             transaction.InsertToList("succeeded", context.JobId);
-            transaction.TrimList("succeeded", 0, 499);
+            transaction.TrimList("succeeded", 0, RedisStorage.SucceededListSize);
         }
 
         public void Unapply(ApplyStateContext context, IWriteOnlyTransaction transaction)

@@ -29,6 +29,8 @@ namespace Hangfire.Redis
     public class RedisStorage : JobStorage
     {
         internal static string Prefix = "hangfire:";
+        internal static int SucceededListSize= 499;
+        internal static int DeletedListSize = 499;
         private readonly string identity;
         private readonly ConnectionMultiplexer _connectionMultiplexer;
 		private  TimeSpan _invisibilityTimeout;
