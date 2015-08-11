@@ -64,6 +64,7 @@
     <Compile Include="RedisConnection.cs" />
     <Compile Include="RedisDatabaseExtensions.cs" />
     <Compile Include="RedisFetchedJob.cs" />
+    <Compile Include="RedisInfoKeys.cs" />
     <Compile Include="RedisLock.cs" />
     <Compile Include="RedisMonitoringApi.cs" />
     <Compile Include="RedisStorage.cs" />

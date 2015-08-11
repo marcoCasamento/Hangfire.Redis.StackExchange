@@ -15,6 +15,7 @@
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Hangfire.Server;
 using Hangfire.States;
@@ -23,17 +24,18 @@ using Hangfire.Annotations;
 using Hangfire.Logging;
 using StackExchange.Redis;
 using System.Net;
+using Hangfire.Dashboard;
 
 namespace Hangfire.Redis
 {
     public class RedisStorage : JobStorage
     {
         internal static string Prefix = "hangfire:";
-        internal static int SucceededListSize= 499;
+        internal static int SucceededListSize = 499;
         internal static int DeletedListSize = 499;
         private readonly string identity;
         private readonly ConnectionMultiplexer _connectionMultiplexer;
-		private  TimeSpan _invisibilityTimeout;
+        private TimeSpan _invisibilityTimeout;
 
         public RedisStorage()
             : this("localhost:6379")
@@ -41,23 +43,23 @@ namespace Hangfire.Redis
         }
 
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
-		{
-			if (connectionString == null) throw new ArgumentNullException("connectionString");
-			if (options == null) options = new RedisStorageOptions();
+        {
+            if (connectionString == null) throw new ArgumentNullException("connectionString");
+            if (options == null) options = new RedisStorageOptions();
 
-			_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
+            _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
             _invisibilityTimeout = options.InvisibilityTimeout;
-			var endpoint = _connectionMultiplexer.GetEndPoints()[0];
-			if (endpoint is IPEndPoint)
-			{
-				var ipEp = endpoint as IPEndPoint;
-				ConnectionString = string.Format("{0}:{1}", TryGetHostName(ipEp.Address), ipEp.Port);
-			}
-			else 
-			{
-				var dnsEp = endpoint as DnsEndPoint;
-				ConnectionString = string.Format("{0}:{1}", dnsEp.Host, dnsEp.Port);
-			}
+            var endpoint = _connectionMultiplexer.GetEndPoints()[0];
+            if (endpoint is IPEndPoint)
+            {
+                var ipEp = endpoint as IPEndPoint;
+                ConnectionString = string.Format("{0}:{1}", TryGetHostName(ipEp.Address), ipEp.Port);
+            }
+            else
+            {
+                var dnsEp = endpoint as DnsEndPoint;
+                ConnectionString = string.Format("{0}:{1}", dnsEp.Host, dnsEp.Port);
+            }
 
             Db = options.Db;
             if (Prefix != options.Prefix)
@@ -66,21 +68,21 @@ namespace Hangfire.Redis
             }
             identity = Guid.NewGuid().ToString();
         }
-		private static string TryGetHostName(IPAddress address)
-		{
-			string hostName = null;
-			try
-			{
-				var hostEntry = Dns.GetHostEntry(address);
-				hostName = hostEntry != null ? hostEntry.HostName : address.ToString();
-			}
-			catch 
-			{
-				//Whatever happens, just return address.ToString();
-				hostName = address.ToString();
-			}
-			return hostName;
-		}
+        private static string TryGetHostName(IPAddress address)
+        {
+            string hostName = null;
+            try
+            {
+                var hostEntry = Dns.GetHostEntry(address);
+                hostName = hostEntry != null ? hostEntry.HostName : address.ToString();
+            }
+            catch
+            {
+                //Whatever happens, just return address.ToString();
+                hostName = address.ToString();
+            }
+            return hostName;
+        }
 
         public string ConnectionString { get; private set; }
         public int Db { get; private set; }
@@ -95,7 +97,7 @@ namespace Hangfire.Redis
 
         public override IMonitoringApi GetMonitoringApi()
         {
-			return new RedisMonitoringApi(_connectionMultiplexer.GetDatabase(Db));
+            return new RedisMonitoringApi(_connectionMultiplexer.GetDatabase(Db));
         }
 
         public override IStorageConnection GetConnection()
@@ -106,6 +108,24 @@ namespace Hangfire.Redis
         public override IEnumerable<IServerComponent> GetComponents()
         {
             yield return new FetchedJobsWatcher(this, _invisibilityTimeout);
+        }
+
+        public DashboardMetric GetDashboardMetricFromRedisInfo(string title, string key)
+        {
+            return new DashboardMetric("redis:" + key, title, (razorPage) =>
+            {
+                using (var redisCnn = razorPage.Storage.GetConnection())
+                {
+                    var db = (redisCnn as RedisConnection).Redis;
+                    var cnnMultiplexer = db.Multiplexer;
+                    var srv = cnnMultiplexer.GetServer(db.IdentifyEndpoint());
+                    var rawInfo = srv.InfoRaw().Split('\n')
+                        .Where(x => x.Contains(':'))
+                        .ToDictionary(x => x.Split(':')[0], x => x.Split(':')[1]);
+
+                    return new Metric(rawInfo[key]);
+                }
+            });
         }
 
         public override IEnumerable<IStateHandler> GetStateHandlers()
@@ -119,13 +139,13 @@ namespace Hangfire.Redis
         public override void WriteOptionsToLog(ILog logger)
         {
             logger.Info("Using the following options for Redis job storage:");
-	
-			logger.InfoFormat("ConnectionString: {0}\nDN: {1}", ConnectionString, Db);
+
+            logger.InfoFormat("ConnectionString: {0}\nDN: {1}", ConnectionString, Db);
         }
 
         public override string ToString()
         {
-			return string.Format("redis://{0}/{1}", ConnectionString, Db);
+            return string.Format("redis://{0}/{1}", ConnectionString, Db);
         }
 
         internal static string GetRedisKey([NotNull] string key)

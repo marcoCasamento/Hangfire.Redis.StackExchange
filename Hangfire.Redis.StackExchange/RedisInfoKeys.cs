@@ -1,0 +1,86 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Hangfire.Redis
+{
+    public class RedisInfoKeys
+    {
+        public static string redis_version = "redis_version";
+        public static string redis_git_sha1 = "redis_git_sha1";
+        public static string redis_git_dirty = "redis_git_dirty";
+        public static string redis_build_id = "redis_build_id";
+        public static string redis_mode = "redis_mode";
+        public static string os = "os";
+        public static string arch_bits = "arch_bits";
+        public static string multiplexing_api = "multiplexing_api";
+        public static string process_id = "process_id";
+        public static string run_id = "run_id";
+        public static string tcp_port = "tcp_port";
+        public static string uptime_in_seconds = "uptime_in_seconds";
+        public static string uptime_in_days = "uptime_in_days";
+        public static string hz = "hz";
+        public static string lru_clock = "lru_clock";
+        public static string config_file = "config_file";
+        public static string connected_clients = "connected_clients";
+        public static string client_longest_output_list = "client_longest_output_list";
+        public static string client_biggest_input_buf = "client_biggest_input_buf";
+        public static string blocked_clients = "blocked_clients";
+        public static string used_memory = "used_memory";
+        public static string used_memory_human = "used_memory_human";
+        public static string used_memory_rss = "used_memory_rss";
+        public static string used_memory_peak = "used_memory_peak";
+        public static string used_memory_peak_human = "used_memory_peak_human";
+        public static string used_memory_lua = "used_memory_lua";
+        public static string mem_fragmentation_ratio = "mem_fragmentation_ratio";
+        public static string mem_allocator = "mem_allocator";
+        public static string loading = "loading";
+        public static string rdb_changes_since_last_save = "rdb_changes_since_last_save";
+        public static string rdb_bgsave_in_progress = "rdb_bgsave_in_progress";
+        public static string rdb_last_save_time = "rdb_last_save_time";
+        public static string rdb_last_bgsave_status = "rdb_last_bgsave_status";
+        public static string rdb_last_bgsave_time_sec = "rdb_last_bgsave_time_sec";
+        public static string rdb_current_bgsave_time_sec = "rdb_current_bgsave_time_sec";
+        public static string aof_enabled = "aof_enabled";
+        public static string aof_rewrite_in_progress = "aof_rewrite_in_progress";
+        public static string aof_rewrite_scheduled = "aof_rewrite_scheduled";
+        public static string aof_last_rewrite_time_sec = "aof_last_rewrite_time_sec";
+        public static string aof_current_rewrite_time_sec = "aof_current_rewrite_time_sec";
+        public static string aof_last_bgrewrite_status = "aof_last_bgrewrite_status";
+        public static string aof_last_write_status = "aof_last_write_status";
+        public static string total_connections_received = "total_connections_received";
+        public static string total_commands_processed = "total_commands_processed";
+        public static string instantaneous_ops_per_sec = "instantaneous_ops_per_sec";
+        public static string total_net_input_bytes = "total_net_input_bytes";
+        public static string total_net_output_bytes = "total_net_output_bytes";
+        public static string instantaneous_input_kbps = "instantaneous_input_kbps";
+        public static string instantaneous_output_kbps = "instantaneous_output_kbps";
+        public static string rejected_connections = "rejected_connections";
+        public static string sync_full = "sync_full";
+        public static string sync_partial_ok = "sync_partial_ok";
+        public static string sync_partial_err = "sync_partial_err";
+        public static string expired_keys = "expired_keys";
+        public static string evicted_keys = "evicted_keys";
+        public static string keyspace_hits = "keyspace_hits";
+        public static string keyspace_misses = "keyspace_misses";
+        public static string pubsub_channels = "pubsub_channels";
+        public static string pubsub_patterns = "pubsub_patterns";
+        public static string latest_fork_usec = "latest_fork_usec";
+        public static string migrate_cached_sockets = "migrate_cached_sockets";
+        public static string role = "role";
+        public static string connected_slaves = "connected_slaves";
+        public static string master_repl_offset = "master_repl_offset";
+        public static string repl_backlog_active = "repl_backlog_active";
+        public static string repl_backlog_size = "repl_backlog_size";
+        public static string repl_backlog_first_byte_offset = "repl_backlog_first_byte_offset";
+        public static string repl_backlog_histlen = "repl_backlog_histlen";
+        public static string used_cpu_sys = "used_cpu_sys";
+        public static string used_cpu_user = "used_cpu_user";
+        public static string used_cpu_sys_children = "used_cpu_sys_children";
+        public static string used_cpu_user_children = "used_cpu_user_children";
+        public static string cluster_enabled = "cluster_enabled";
+        public static string db0 = "db0";
+    }
+}
