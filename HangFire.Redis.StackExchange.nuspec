@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>HangFire.Redis.StackExchange</id>
-        <version>1.4.5</version>
+        <version>1.4.6</version>
         <title>HangFire Redis Storage</title>
         <authors>Marco Casamento</authors>
         <owners>marcocasamento</owners>
@@ -11,7 +11,12 @@
         <description>Hangfire Redis Storage Based on Redis.StackExchange
 See http://hangfire.io/ for some more info on the main project</description>
         <releaseNotes>
-          Added support for index prefixing (thanks to @jamesjhhan);
+          1.4.6
+          * Added - Support for Hangfire Pro Batched
+          * Added - Allow customization of Succeeded and Deleted List Size
+          * Added - Support for Dashboard Metrics
+          1.4.5
+          * Added - Support for index prefixing (thanks to @jamesjhhan);
         </releaseNotes>
         <copyright />
         <tags>Hangfire</tags>
