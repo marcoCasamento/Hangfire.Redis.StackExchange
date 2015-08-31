@@ -200,7 +200,7 @@ namespace Hangfire.Redis
         public override List<string> GetAllItemsFromList(string key)
         {
 
-            return Redis.ListRange(key).ToStringArray().ToList();
+            return Redis.ListRange(RedisStorage.Prefix + key).ToStringArray().ToList();
         }
 
         public override HashSet<string> GetAllItemsFromSet(string key)
