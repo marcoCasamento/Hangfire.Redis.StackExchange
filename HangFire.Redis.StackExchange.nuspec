@@ -11,11 +11,13 @@
         <description>Hangfire Redis Storage Based on Redis.StackExchange
 See http://hangfire.io/ for some more info on the main project</description>
         <releaseNotes>
+          
+          1.4.7
+          * Fixed - Don't show batch states details
           1.4.6
           * Added - Support for Hangfire Pro Batched
           * Added - Allow customization of Succeeded and Deleted List Size
           * Added - Support for Dashboard Metrics
-          
           1.4.5
           * Added - Support for index prefixing (thanks to @jamesjhhan);
         </releaseNotes>
