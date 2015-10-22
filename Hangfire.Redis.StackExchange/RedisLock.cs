@@ -31,8 +31,6 @@ namespace Hangfire.Redis
         private bool isRoot = true;
         public RedisLock([NotNull]IDatabase redis, [NotNull]RedisKey key, [NotNull]RedisValue owner, [NotNull]TimeSpan timeOut)
         {
-            owner = Thread.CurrentThread.ManagedThreadId.ToString();
-
             _redis = redis;
             _key = key;
             _owner = owner;
