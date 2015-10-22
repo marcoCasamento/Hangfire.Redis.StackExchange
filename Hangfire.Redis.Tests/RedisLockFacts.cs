@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Hangfire.Annotations;
+using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +12,6 @@ namespace Hangfire.Redis.Tests
 {
     public class RedisLockFacts
     {
-
         [Fact, CleanRedis]
         public void AcquireAndDisposeLock()
         {
@@ -54,7 +55,14 @@ namespace Hangfire.Redis.Tests
             var db = RedisUtils.CreateClient();
 
             using (var testLock1 = new RedisLock(db, "testLock", "owner", TimeSpan.FromMilliseconds(100)))
-                Assert.Throws<TimeoutException>(() => new RedisLock(db, "testLock", "otherOwner", TimeSpan.FromMilliseconds(10)));
+            {
+                Assert.Throws<TimeoutException>(() =>
+                    {
+                        using (var testLock2 = new RedisLock(db, "testLock", "otherOwner", TimeSpan.FromMilliseconds(1)))
+                        { }
+                    }
+                );
+            }
         }
 
         [Fact, CleanRedis]
@@ -100,6 +108,42 @@ namespace Hangfire.Redis.Tests
                 Thread.Sleep(60);
                 using (var testLock2 = new RedisLock(db, "testLock", "otherOwner", TimeSpan.FromMilliseconds(1))) { };
                 Assert.True(true);
+            }
+        }
+
+        [Fact, CleanRedis]
+        public void MultiThreadLock()
+        {
+            var db = RedisUtils.CreateClient();
+
+            int concurrentCount = 0;
+            Task[] tasks = new Task[2];
+            tasks[0] = Task.Factory.StartNew(() => MultiThreadLockWorker.DoWork(db, "testLock", TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(300), ref concurrentCount));
+            tasks[1] = Task.Factory.StartNew(() => MultiThreadLockWorker.DoWork(db, "testLock", TimeSpan.FromMilliseconds(5), TimeSpan.FromMilliseconds(10), ref concurrentCount));
+            Task.WaitAll(tasks);
+            Assert.Equal<int>(1, concurrentCount);
+        }
+    }
+
+    internal class MultiThreadLockWorker
+    {
+        internal static void DoWork([NotNull]IDatabase redis, [NotNull]RedisKey key, [NotNull]TimeSpan timeOut, [NotNull]TimeSpan sleep, ref int concurrentCount)
+        {
+            try
+            {
+                using (var testLock = new RedisLock(redis, key, Thread.CurrentThread.ManagedThreadId.ToString(), timeOut))
+                {
+                    Thread.Sleep(sleep);
+                    concurrentCount++;
+                };
+            }
+            catch(TimeoutException)
+            {
+                
+            }
+            catch(Exception)
+            {
+                throw;
             }
         }
     }

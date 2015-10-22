@@ -30,12 +30,10 @@ namespace Hangfire.Redis
     {
         private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(1);
         readonly ISubscriber _subscriber;
-        string _jobStorageIdentity;
         readonly ManualResetEvent mre;
         public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity)
         {
             _subscriber = subscriber;
-            _jobStorageIdentity = jobStorageIdentity;
             Redis = redis;
             mre = new ManualResetEvent(false);
 
@@ -64,7 +62,7 @@ namespace Hangfire.Redis
 
         public override IDisposable AcquireDistributedLock(string resource, TimeSpan timeout)
         {
-            return new RedisLock(Redis, resource, _jobStorageIdentity, timeout);
+            return new RedisLock(Redis, resource, Thread.CurrentThread.ManagedThreadId.ToString(), timeout);
         }
 
         public override void AnnounceServer(string serverId, ServerContext context)
