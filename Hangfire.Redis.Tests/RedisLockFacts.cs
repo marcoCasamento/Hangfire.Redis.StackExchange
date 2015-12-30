@@ -75,9 +75,9 @@ namespace Hangfire.Redis.Tests
         {
             var db = RedisUtils.CreateClient();
 
-            using (var testLock1 = new RedisLock(db, "testLock", "owner", TimeSpan.FromMilliseconds(100)))
+            using (var testLock1 = new RedisLock(db, "testLock", "owner", TimeSpan.FromMilliseconds(1000)))
             {
-                using (var testLock2 = new RedisLock(db, "testLock", "owner", TimeSpan.FromMilliseconds(100)))
+                using (var testLock2 = new RedisLock(db, "testLock", "owner", TimeSpan.FromMilliseconds(1000)))
                 { }
 
                 Assert.Throws<TimeoutException>(() =>

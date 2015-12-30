@@ -14,10 +14,7 @@ namespace Hangfire.Redis.Tests
         
         public SucceededStateHandlerFacts()
         {
-            _context = new ApplyStateContextMock();
-            _context.StateContextValue.JobIdValue = JobId;
-            _context.NewStateValue = new SucceededState(null, 11, 123);
-
+            _context = new ApplyStateContextMock(JobId);
             _transaction = new Mock<IWriteOnlyTransaction>();
         }
 

@@ -14,10 +14,7 @@ namespace Hangfire.Redis.Tests
 
         public DeletedStateHandlerFacts()
         {
-            _context = new ApplyStateContextMock();
-            _context.StateContextValue.JobIdValue = JobId;
-            _context.NewStateValue = new DeletedState();
-
+            _context = new ApplyStateContextMock(JobId);
             _transaction = new Mock<IWriteOnlyTransaction>();
         }
 

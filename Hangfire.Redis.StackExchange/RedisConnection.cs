@@ -64,7 +64,7 @@ namespace Hangfire.Redis
 
         public override IDisposable AcquireDistributedLock(string resource, TimeSpan timeout)
         {
-            return new RedisLock(Redis, resource, _jobStorageIdentity, timeout);
+            return new RedisLock(Redis, RedisStorage.Prefix + resource, _jobStorageIdentity + Thread.CurrentThread.ManagedThreadId, timeout);
         }
 
         public override void AnnounceServer(string serverId, ServerContext context)

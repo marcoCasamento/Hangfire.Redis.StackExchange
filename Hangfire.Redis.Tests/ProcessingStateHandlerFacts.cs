@@ -14,10 +14,7 @@ namespace Hangfire.Redis.Tests
         
         public ProcessingStateHandlerFacts()
         {
-            _context = new ApplyStateContextMock();
-            _context.StateContextValue.JobIdValue = JobId;
-            _context.NewStateValue = new ProcessingState("server", 1);
-
+            _context = new ApplyStateContextMock(JobId);
             _transaction = new Mock<IWriteOnlyTransaction>();
         }
 

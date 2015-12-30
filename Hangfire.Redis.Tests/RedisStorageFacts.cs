@@ -6,18 +6,9 @@ namespace Hangfire.Redis.Tests
     public class RedisStorageFacts
     {
         [Fact, CleanRedis]
-        public void DefaultCtor_InitializesCorrectDefaultValues()
-        {
-            var storage = new RedisStorage();
-
-            Assert.True(storage.ConnectionString.Contains("localhost:6379"));
-            Assert.Equal(0, storage.Db);
-        }
-
-        [Fact, CleanRedis]
         public void GetStateHandlers_ReturnsAllHandlers()
         {
-            var storage = new RedisStorage();
+            var storage = CreateStorage();
 
             var handlers = storage.GetStateHandlers();
 
