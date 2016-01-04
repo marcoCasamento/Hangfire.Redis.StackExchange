@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>HangFire.Redis.StackExchange</id>
-        <version>1.4.5</version>
+        <version>1.5.3-rc</version>
         <title>HangFire Redis Storage</title>
         <authors>Marco Casamento</authors>
         <owners>marcocasamento</owners>
@@ -16,10 +16,10 @@ See http://hangfire.io/ for some more info on the main project</description>
         <copyright />
         <tags>Hangfire</tags>
         <dependencies>
-            <dependency id="HangFire.Core" version="1.4.1" />
-            <dependency id="Newtonsoft.Json" version="6.0.8" />
+            <dependency id="HangFire.Core" version="1.5.3" />
+            <dependency id="Newtonsoft.Json" version="8.0.1" />
             <dependency id="Owin" version="1.0" />
-            <dependency id="StackExchange.Redis" version="1.0.414" />
+            <dependency id="StackExchange.Redis" version="1.0.488" />
         </dependencies>
     </metadata>
     <files>
