@@ -21,8 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D47EF6
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebServerHangfireHosting", "WebServerHangfireHosting\WebServerHangfireHosting.csproj", "{143DC1D4-CA37-4BDF-BFEA-D29E8131B1AA}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{8E2239C0-03FF-487C-B61E-019FD677E6B4}"
 EndProject
 Global
