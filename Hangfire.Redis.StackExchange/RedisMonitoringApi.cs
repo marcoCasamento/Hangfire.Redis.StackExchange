@@ -178,25 +178,20 @@ namespace Hangfire.Redis
                 var servers = new Dictionary<string, List<string>>();
                 var queues = new Dictionary<string, List<string>>();
 
-				var pipeline = redis.CreateBatch();
-				var tasks = new Task[serverNames.Count * 2];
-				var i = 0;
                 foreach (var serverName in serverNames)
                 {
                     var name = serverName;
+                    servers.Add(name,
+                        redis.HashGet(String.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
+                            .ToStringArray().ToList()
+                        );
+                    queues.Add(name,
+                        redis.ListRange(String.Format(RedisStorage.Prefix + "server:{0}:queues", name))
+                            .ToStringArray().ToList()
+                        );
 
-                    tasks[i] = pipeline.HashGetAsync(
-                            String.Format(RedisStorage.Prefix + "server:{0}", name),
-							new RedisValue[]{"WorkerCount", "StartedAt", "Heartbeat"})
-						.ContinueWith(x => servers.Add(name, x.Result.ToStringArray().ToList()));
-					i++;
-                    tasks[i] = pipeline.ListRangeAsync(String.Format(RedisStorage.Prefix + "server:{0}:queues", name))
-						.ContinueWith(x => queues.Add(name, x.Result.ToStringArray().ToList()));
-					i++; 
                 }
 
-				pipeline.Execute();
-				Task.WaitAll(tasks);
 
                 return serverNames.Select(x => new ServerDto
                 {
