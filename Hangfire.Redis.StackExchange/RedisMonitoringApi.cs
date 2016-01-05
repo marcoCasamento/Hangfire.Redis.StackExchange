@@ -422,17 +422,17 @@ namespace Hangfire.Redis
                 var stateHistory = new List<StateHistoryDto>(history.Count);
                 foreach (var entry in history)
                 {
+                    var stateData = new Dictionary<string, string>(entry, StringComparer.OrdinalIgnoreCase);
                     var dto = new StateHistoryDto
                     {
-                        StateName = entry["State"],
-                        Reason = entry.ContainsKey("Reason") ? entry["Reason"] : null,
-                        CreatedAt = JobHelper.DeserializeDateTime(entry["CreatedAt"]),
+                        StateName = stateData["State"],
+                        Reason = stateData.ContainsKey("Reason") ? stateData["Reason"] : null,
+                        CreatedAt = JobHelper.DeserializeDateTime(stateData["CreatedAt"]),
                     };
 
                     // Each history item contains all of the information,
                     // but other code should not know this. We'll remove
                     // unwanted keys.
-                    var stateData = new Dictionary<string, string>(entry);
                     stateData.Remove("State");
                     stateData.Remove("Reason");
                     stateData.Remove("CreatedAt");
@@ -529,8 +529,8 @@ namespace Hangfire.Redis
         {
             if (jobIds.Length == 0) return new JobList<T>(new List<KeyValuePair<string, T>>());
 
-            var jobs = new Dictionary<string, Task<RedisValue[]>>(jobIds.Length);
-            var states = new Dictionary<string, Task<RedisValue[]>>(jobIds.Length);
+            var jobs = new Dictionary<string, Task<RedisValue[]>>(jobIds.Length, StringComparer.OrdinalIgnoreCase);
+            var states = new Dictionary<string, Task<RedisValue[]>>(jobIds.Length, StringComparer.OrdinalIgnoreCase);
 
             properties = properties ?? new string[0];
 
