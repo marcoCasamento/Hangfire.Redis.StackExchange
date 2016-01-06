@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>HangFire.Redis.StackExchange</id>
-        <version>1.4.6</version>
+        <version>1.4.8</version>
         <title>HangFire Redis Storage</title>
         <authors>Marco Casamento</authors>
         <owners>marcocasamento</owners>
@@ -11,7 +11,8 @@
         <description>Hangfire Redis Storage Based on Redis.StackExchange
 See http://hangfire.io/ for some more info on the main project</description>
         <releaseNotes>
-          
+          1.4.8
+          * Fixed error when using CaseInsensitive Json Serializer settings (thanks to @VictorTomaili)
           1.4.7
           * Fixed - Don't show batch states details
           1.4.6
