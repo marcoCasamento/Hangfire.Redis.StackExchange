@@ -3,11 +3,8 @@ services:
   - redis-server
 language: csharp
 solution: Hangfire.Redis.StackExchange.sln
-before_install:
-  - git clone https://github.com/StackExchange/StackExchange.Redis.git
-  - xbuild /p:Configuration=Release ./StackExchange.Redis/StackExchange.Redis/StackExchange.Redis.csproj
 install:
-  - nuget restore Hangfire.Redis.StackExchange.sln
+  - nuget restore Hangfire.Redis.StackExchange.sln -Verbosity detailed
   - nuget install xunit.runner.console -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
