@@ -15,8 +15,7 @@ namespace Hangfire.Redis.Tests
 
         public FailedStateHandlerFacts()
         {
-            _context = new ApplyStateContextMock();
-            _context.StateContextValue.JobIdValue = JobId;
+            _context = new ApplyStateContextMock(JobId);
             _context.NewStateValue = new FailedState(new InvalidOperationException());
 
             _transaction = new Mock<IWriteOnlyTransaction>();

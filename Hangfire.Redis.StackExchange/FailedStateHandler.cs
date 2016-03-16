@@ -27,13 +27,13 @@ namespace Hangfire.Redis
         {
             transaction.AddToSet(
                 "failed",
-                context.JobId,
+                context.BackgroundJob.Id,
                 JobHelper.ToTimestamp(DateTime.UtcNow));
         }
 
         public void Unapply(ApplyStateContext context, IWriteOnlyTransaction transaction)
         {
-            transaction.RemoveFromSet("failed", context.JobId);
+            transaction.RemoveFromSet("failed", context.BackgroundJob.Id);
         }
 
         public string StateName

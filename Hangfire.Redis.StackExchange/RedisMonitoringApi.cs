@@ -178,25 +178,20 @@ namespace Hangfire.Redis
                 var servers = new Dictionary<string, List<string>>();
                 var queues = new Dictionary<string, List<string>>();
 
-				var pipeline = redis.CreateBatch();
-				var tasks = new Task[serverNames.Count * 2];
-				var i = 0;
                 foreach (var serverName in serverNames)
                 {
                     var name = serverName;
+                    servers.Add(name,
+                        redis.HashGet(String.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
+                            .ToStringArray().ToList()
+                        );
+                    queues.Add(name,
+                        redis.ListRange(String.Format(RedisStorage.Prefix + "server:{0}:queues", name))
+                            .ToStringArray().ToList()
+                        );
 
-                    tasks[i] = pipeline.HashGetAsync(
-                            String.Format(RedisStorage.Prefix + "server:{0}", name),
-							new RedisValue[]{"WorkerCount", "StartedAt", "Heartbeat"})
-						.ContinueWith(x => servers.Add(name, x.Result.ToStringArray().ToList()));
-					i++;
-                    tasks[i] = pipeline.ListRangeAsync(String.Format(RedisStorage.Prefix + "server:{0}:queues", name))
-						.ContinueWith(x => queues.Add(name, x.Result.ToStringArray().ToList()));
-					i++; 
                 }
 
-				pipeline.Execute();
-				Task.WaitAll(tasks);
 
                 return serverNames.Select(x => new ServerDto
                 {
@@ -544,13 +539,11 @@ namespace Hangfire.Redis
 								properties.Union(new[] { "Type", "Method", "ParameterTypes", "Arguments" }).Select(x=> (RedisValue)x).ToArray());
 				tasks.Add(jobTask);
                 jobs.Add(jobId, jobTask);
-				//tasks.Add(jobTask.ContinueWith(x => { jobs[id] = x.Result.Select(v => (string)v).ToList(); }));
 				if (stateProperties != null)
 				{
                     var taskStateJob = pipeline.HashGetAsync(String.Format(RedisStorage.Prefix + "job:{0}:state", id), stateProperties.Select(x => (RedisValue)x).ToArray());
 					tasks.Add(taskStateJob);
                     states.Add(jobId, taskStateJob);
-					//tasks.Add(taskStateJob.ContinueWith(x => { if (!states.ContainsKey(id)) states.Add(id, x.Result.ToStringArray().ToList()); }));
 				}
             }
 
@@ -589,39 +582,39 @@ namespace Hangfire.Redis
             {
                 var stats = new StatisticsDto();
 
-                var queues = redis.SetMembers(RedisStorage.Prefix + "queues");
+                var queues = redis.SetMembers(RedisStorage.Prefix + "queues", CommandFlags.HighPriority);
 
 				var pipeline = redis.CreateBatch();
 				var tasks = new Task[queues.Length + 8];
 
-                tasks[0] = pipeline.SetLengthAsync(RedisStorage.Prefix + "servers")
+                tasks[0] = pipeline.SetLengthAsync(RedisStorage.Prefix + "servers", CommandFlags.HighPriority)
 					.ContinueWith(x=> stats.Servers = x.Result);
 
-                tasks[1] = pipeline.SetLengthAsync(RedisStorage.Prefix + "queues")
+                tasks[1] = pipeline.SetLengthAsync(RedisStorage.Prefix + "queues", CommandFlags.HighPriority)
                     .ContinueWith(x => stats.Queues = x.Result);
 
-                tasks[2] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "schedule")
+            tasks[2] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "schedule", flags: CommandFlags.HighPriority)
 					.ContinueWith(x => stats.Scheduled = x.Result);
 
-                tasks[3] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "processing")
+                tasks[3] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "processing", flags: CommandFlags.HighPriority)
 					.ContinueWith(x => stats.Processing = x.Result);
 
-                tasks[4] = pipeline.StringGetAsync(RedisStorage.Prefix + "stats:succeeded")
+                tasks[4] = pipeline.StringGetAsync(RedisStorage.Prefix + "stats:succeeded", CommandFlags.HighPriority)
                     .ContinueWith(x => stats.Succeeded = long.Parse(x.Result.HasValue ?  (string)x.Result: "0"));
 
-                tasks[5] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "failed")
+                tasks[5] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "failed", flags: CommandFlags.HighPriority)
 					.ContinueWith(x => stats.Failed = x.Result);
 
-                tasks[6] = pipeline.StringGetAsync(RedisStorage.Prefix + "stats:deleted")
+                tasks[6] = pipeline.StringGetAsync(RedisStorage.Prefix + "stats:deleted", CommandFlags.HighPriority)
 					.ContinueWith(x => stats.Deleted = long.Parse(x.Result.HasValue ?  (string)x.Result : "0"));
 
-                tasks[7] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "recurring-jobs")
+                tasks[7] = pipeline.SortedSetLengthAsync(RedisStorage.Prefix + "recurring-jobs", flags: CommandFlags.HighPriority)
                     .ContinueWith(x => stats.Recurring = x.Result);
 				var i = 8;
                 foreach (var queue in queues)
                 {
                     var queueName = queue;
-                    tasks[i] = pipeline.ListLengthAsync(String.Format(RedisStorage.Prefix + "queue:{0}", queueName))
+                    tasks[i] = pipeline.ListLengthAsync(String.Format(RedisStorage.Prefix + "queue:{0}", queueName), CommandFlags.HighPriority)
 						.ContinueWith(x => stats.Enqueued += x.Result);
 					i++;
                 }

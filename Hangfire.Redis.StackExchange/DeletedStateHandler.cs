@@ -23,13 +23,13 @@ namespace Hangfire.Redis
     {
         public void Apply(ApplyStateContext context, IWriteOnlyTransaction transaction)
         {
-            transaction.InsertToList("deleted", context.JobId);
+            transaction.InsertToList("deleted", context.BackgroundJob.Id);
             transaction.TrimList("deleted", 0, RedisStorage.DeletedListSize);
         }
 
         public void Unapply(ApplyStateContext context, IWriteOnlyTransaction transaction)
         {
-            transaction.RemoveFromList("deleted", context.JobId);
+            transaction.RemoveFromList("deleted", context.BackgroundJob.Id);
         }
 
         public string StateName

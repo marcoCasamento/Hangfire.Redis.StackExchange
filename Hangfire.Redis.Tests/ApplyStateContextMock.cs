@@ -1,6 +1,8 @@
 ﻿using System;
 using Hangfire.States;
 using Moq;
+using Hangfire.Common;
+using System.Reflection;
 
 namespace Hangfire.Redis.Tests
 {
@@ -8,20 +10,24 @@ namespace Hangfire.Redis.Tests
     {
         private readonly Lazy<ApplyStateContext> _context;
 
-        public ApplyStateContextMock()
+        public ApplyStateContextMock(string jobId)
         {
-            StateContextValue = new StateContextMock();
             NewStateValue = new Mock<IState>().Object;
             OldStateValue = null;
+            var storage = CreateStorage();
+            var connection = storage.GetConnection();
+            var writeOnlyTransaction = connection.CreateWriteTransaction();
 
+            var job = new Job(this.GetType().GetMethod("GetType"));
+            var backgroundJob = new BackgroundJob(jobId, job, DateTime.MinValue);
+            
             _context = new Lazy<ApplyStateContext>(
                 () => new ApplyStateContext(
-                    StateContextValue.Object,
+                    storage, connection, writeOnlyTransaction, backgroundJob, 
                     NewStateValue,
-                    OldStateValue, new IState[0]));
+                    OldStateValue));
         }
 
-        public StateContextMock StateContextValue { get; set; }
         public IState NewStateValue { get; set; }
         public string OldStateValue { get; set; }
 
@@ -29,5 +35,11 @@ namespace Hangfire.Redis.Tests
         {
             get { return _context.Value; }
         }
+        private RedisStorage CreateStorage()
+        {
+            var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
+            return new RedisStorage(RedisUtils.GetHostAndPort(), options);
+        }
+        
     }
 }
