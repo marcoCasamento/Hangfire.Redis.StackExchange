@@ -43,11 +43,17 @@ namespace Hangfire.Redis
         }
 
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
+            : this(ConnectionMultiplexer.Connect(connectionString))
         {
-            if (connectionString == null) throw new ArgumentNullException("connectionString");
-            if (options == null) options = new RedisStorageOptions();
+        }
 
-            _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
+        public RedisStorage(ConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options = null)
+        {
+            if (connectionMultiplexer == null)
+                throw new ArgumentNullException(nameof(connectionMultiplexer));
+            if (options == null)
+                options = new RedisStorageOptions();
+            _connectionMultiplexer = connectionMultiplexer;
             _invisibilityTimeout = options.InvisibilityTimeout;
             var endpoint = _connectionMultiplexer.GetEndPoints()[0];
             if (endpoint is IPEndPoint)
@@ -68,6 +74,7 @@ namespace Hangfire.Redis
             }
             identity = Guid.NewGuid().ToString();
         }
+
         private static string TryGetHostName(IPAddress address)
         {
             string hostName = null;
