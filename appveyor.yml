@@ -1,10 +1,32 @@
-version: 1.5.{build}
+version: 1.5.4.{build}
+branches:
+  only:
+  - master
 install: 
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\tools\redis-server.exe --service-install 
 - cmd: redis-64\tools\redis-server.exe --service-start
 - nuget restore Hangfire.Redis.StackExchange.sln
 build:
-  publish_nuget: false
-  publish_nuget_symbols: false
+  publish_nuget: true
+  publish_nuget_symbols: true
   verbosity: minimal
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+nuget:
+  account_feed: true
+  project_feed: true
+
+
+deploy:
+  provider: NuGet
+  api_key:
+    secure: hiLTKk/ItMBgRI5HCemg6kARhcAGs6/V/eQpymZAdwQOtHgD8waLBtb3VMdgPRYG
+  artifact: /.*\.nupkg/
+
+
+  

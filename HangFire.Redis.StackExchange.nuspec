@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Hangfire.Redis.StackExchange</id>
-        <version>1.5.3</version>
+        <version>$version$</version>
         <title>Hangfire Redis Storage</title>
         <authors>Marco Casamento</authors>
         <owners>marcocasamento</owners>
@@ -11,13 +11,13 @@
         <description>Hangfire Redis Storage Based on Redis.StackExchange
 See http://hangfire.io/ for some more info on the main project</description>
         <releaseNotes>
-          Support for Hangfire.Core 1.5.3;
-          Improve statistics retrieval
+          Aligned Dependecies to Hangfire.Core 1.5.4;
+          Automating Nuget Package publish
         </releaseNotes>
         <copyright />
         <tags>Hangfire</tags>
         <dependencies>
-            <dependency id="HangFire.Core" version="1.5.3" />
+            <dependency id="HangFire.Core" version="1.5.4" />
             <dependency id="Newtonsoft.Json" version="5.0.0" />
             <dependency id="Owin" version="1.0" />
             <dependency id="StackExchange.Redis" version="1.0.488" />
