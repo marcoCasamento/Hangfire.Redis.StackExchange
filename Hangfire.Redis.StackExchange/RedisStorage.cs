@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
+// Copyright Â© 2013-2015 Sergey Odinokov, Marco Casamento 
 // This software is based on https://github.com/HangfireIO/Hangfire.Redis 
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
@@ -43,7 +43,7 @@ namespace Hangfire.Redis
         }
 
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
-            : this(ConnectionMultiplexer.Connect(connectionString))
+            : this(ConnectionMultiplexer.Connect(connectionString), options)
         {
         }
 
