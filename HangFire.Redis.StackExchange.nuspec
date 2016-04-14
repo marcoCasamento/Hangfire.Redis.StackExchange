@@ -18,7 +18,7 @@ See http://hangfire.io/ for some more info on the main project</description>
         <tags>Hangfire</tags>
         <dependencies>
             <dependency id="HangFire.Core" version="1.5.3" />
-            <dependency id="Newtonsoft.Json" version="6.0.8" />
+            <dependency id="Newtonsoft.Json" version="5.0.0" />
             <dependency id="Owin" version="1.0" />
             <dependency id="StackExchange.Redis" version="1.0.488" />
         </dependencies>
