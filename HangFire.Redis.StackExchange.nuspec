@@ -24,6 +24,6 @@ See http://hangfire.io/ for some more info on the main project</description>
         </dependencies>
     </metadata>
     <files>
-        <file src="Hangfire.Redis.StackExchange\bin\Release\Hangfire.Redis.StackExchange.dll" target="lib\net45\Hangfire.Redis.StackExchange.dll" />
+        <file src="\bin\release\Hangfire.Redis.StackExchange.dll" target="lib\net45\Hangfire.Redis.StackExchange.dll" />
     </files>
 </package>
