@@ -2,6 +2,10 @@ version: 1.5.4.{build}
 branches:
   only:
   - master
+image: Visual Studio 2015
+configuration: Release
+platform: Any CPU
+
 install: 
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\tools\redis-server.exe --service-install 
