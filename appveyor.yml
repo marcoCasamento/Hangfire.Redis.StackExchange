@@ -14,8 +14,8 @@ before_build:
 - nuget restore
 build:
   project: Hangfire.Redis.StackExchange.sln
-  publish_nuget: true
-  publish_nuget_symbols: true
+#  publish_nuget: true
+#  publish_nuget_symbols: true
   verbosity: minimal
 assembly_info:
   patch: true
@@ -27,12 +27,8 @@ nuget:
   account_feed: true
   project_feed: true
 
-
 deploy:
   provider: NuGet
   api_key:
     secure: hiLTKk/ItMBgRI5HCemg6kARhcAGs6/V/eQpymZAdwQOtHgD8waLBtb3VMdgPRYG
   artifact: /.*\.nupkg/
-
-
-  
