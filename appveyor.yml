@@ -10,8 +10,10 @@ install:
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\tools\redis-server.exe --service-install 
 - cmd: redis-64\tools\redis-server.exe --service-start
-- nuget restore Hangfire.Redis.StackExchange.sln
+before_build:
+- nuget restore
 build:
+  project: Hangfire.Redis.StackExchange.sln
   publish_nuget: true
   publish_nuget_symbols: true
   verbosity: minimal
