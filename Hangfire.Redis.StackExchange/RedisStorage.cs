@@ -45,9 +45,13 @@ namespace Hangfire.Redis
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
         {
             if (connectionString == null) throw new ArgumentNullException("connectionString");
-            if (options == null) options = new RedisStorageOptions();
+            var redisOptions = ConfigurationOptions.Parse(connectionString);
+            if (options == null) options = new RedisStorageOptions
+            {
+                Db = redisOptions.DefaultDatabase.GetValueOrDefault(0)
+            };
 
-            _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
+            _connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
             _invisibilityTimeout = options.InvisibilityTimeout;
             var endpoint = _connectionMultiplexer.GetEndPoints()[0];
             if (endpoint is IPEndPoint)
