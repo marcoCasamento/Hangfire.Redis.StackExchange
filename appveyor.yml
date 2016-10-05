@@ -11,7 +11,7 @@ install:
 - cmd: redis-64\tools\redis-server.exe --service-install 
 - cmd: redis-64\tools\redis-server.exe --service-start
 before_build:
-- nuget restore
+- dotnet restore
 build:
   project: Hangfire.Redis.StackExchange.sln
   publish_nuget: true
