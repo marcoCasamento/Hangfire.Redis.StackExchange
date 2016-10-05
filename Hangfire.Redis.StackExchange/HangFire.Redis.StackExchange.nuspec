@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Hangfire.Redis.StackExchange</id>
+        <version>$version$</version>
+        <title>Hangfire Redis Storage</title>
+        <authors>Marco Casamento</authors>
+        <owners>marcocasamento</owners>
+        <projectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Hangfire Redis Storage Based on Redis.StackExchange
+See http://hangfire.io/ for some more info on the main project</description>
+        <releaseNotes>
+          Aligned Dependecies to Hangfire.Core 1.5.4;
+          Automating Nuget Package publish
+        </releaseNotes>
+        <copyright />
+        <tags>Hangfire</tags>
+        <dependencies>
+            <dependency id="HangFire.Core" version="1.5.4" />
+            <dependency id="Newtonsoft.Json" version="5.0.0" />
+            <dependency id="Owin" version="1.0" />
+            <dependency id="StackExchange.Redis" version="1.0.488" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="\bin\release\Hangfire.Redis.StackExchange.dll" target="lib\net45\Hangfire.Redis.StackExchange.dll" />
+    </files>
+</package>
