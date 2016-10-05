@@ -73,7 +73,7 @@ namespace Hangfire.Redis
             string hostName = null;
             try
             {
-                var hostEntry = Dns.GetHostEntry(address);
+                var hostEntry = Dns.GetHostEntryAsync(address).GetAwaiter().GetResult();
                 hostName = hostEntry != null ? hostEntry.HostName : address.ToString();
             }
             catch
