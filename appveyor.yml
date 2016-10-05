@@ -27,7 +27,8 @@ nuget:
   account_feed: true
   project_feed: true
 test_script:
-- dotnet test "Hangfire.Redis.Tests"
+- dotnet test "Hangfire.Redis.Tests" -f netcoreapp1.0
+- dotnet test "Hangfire.Redis.Tests" -f net451
 deploy:
   provider: NuGet
   api_key:
