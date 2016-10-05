@@ -53,7 +53,7 @@ namespace Hangfire.Redis
             if (endpoint is IPEndPoint)
             {
                 var ipEp = endpoint as IPEndPoint;
-                ConnectionString = string.Format("{0}:{1}", TryGetHostName(ipEp.Address), ipEp.Port);
+                ConnectionString = string.Format("{0}:{1}", ipEp.Address, ipEp.Port);
             }
             else
             {
@@ -67,21 +67,6 @@ namespace Hangfire.Redis
                 Prefix = options.Prefix;
             }
             identity = Guid.NewGuid().ToString();
-        }
-        private static string TryGetHostName(IPAddress address)
-        {
-            string hostName = null;
-            try
-            {
-                var hostEntry = Dns.GetHostEntryAsync(address).GetAwaiter().GetResult();
-                hostName = hostEntry != null ? hostEntry.HostName : address.ToString();
-            }
-            catch
-            {
-                //Whatever happens, just return address.ToString();
-                hostName = address.ToString();
-            }
-            return hostName;
         }
 
         public string ConnectionString { get; private set; }
