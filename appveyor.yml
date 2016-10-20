@@ -17,6 +17,8 @@ build:
   publish_nuget: true
   publish_nuget_symbols: true
   verbosity: minimal
+artifacts:
+- path: .\**\*.nupkg
 assembly_info:
   patch: true
   file: '**\AssemblyInfo.*'
