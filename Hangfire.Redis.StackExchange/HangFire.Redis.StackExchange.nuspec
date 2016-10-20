@@ -21,7 +21,7 @@ Aligned dependency to Hangfire.Core</releaseNotes>
             <group targetFramework=".NETFramework4.5.1">
                 <dependency id="HangFire.Core" version="1.6.5" />
                 <dependency id="Newtonsoft.Json" version="9.0.1" />
-                <dependency id="StackExchange.Redis" version="1.1.606" />
+                <dependency id="StackExchange.Redis" version="1.0.488" />
             </group>
             <group targetFramework=".NETStandard1.6">
                 <dependency id="HangFire.Core" version="1.6.5" />
