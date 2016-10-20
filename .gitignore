@@ -50,6 +50,7 @@ Temporary Items
 *.user
 *.userosscache
 *.sln.docstates
+*.lock.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -106,6 +107,7 @@ dlldata.c
 *.pidb
 *.svclog
 *.scc
+
 
 # Chutzpah Test files
 _Chutzpah*

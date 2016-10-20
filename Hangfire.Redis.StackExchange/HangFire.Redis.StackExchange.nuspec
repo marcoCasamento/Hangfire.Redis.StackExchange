@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Hangfire.Redis.StackExchange</id>
         <version>$version$</version>
@@ -10,20 +10,28 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Hangfire Redis Storage Based on Redis.StackExchange
 See http://hangfire.io/ for some more info on the main project</description>
-        <releaseNotes>
-          Aligned Dependecies to Hangfire.Core 1.5.4;
-          Automating Nuget Package publish
-        </releaseNotes>
+        <summary>Enjoy Redis outstanding performance when fetch your jobs!
+Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
+It also supports Batches (Pro Feature)</summary>
+        <releaseNotes>.Net Core Support (thanks to Stefan Polyanszky)
+Aligned dependency to Hangfire.Core</releaseNotes>
         <copyright />
-        <tags>Hangfire</tags>
+        <tags>Hangfire Redis</tags>
         <dependencies>
-            <dependency id="HangFire.Core" version="1.5.4" />
-            <dependency id="Newtonsoft.Json" version="5.0.0" />
-            <dependency id="Owin" version="1.0" />
-            <dependency id="StackExchange.Redis" version="1.0.488" />
+            <group targetFramework=".NETFramework4.5.1">
+                <dependency id="HangFire.Core" version="1.6.5" />
+                <dependency id="Newtonsoft.Json" version="9.0.1" />
+                <dependency id="StackExchange.Redis" version="1.1.606" />
+            </group>
+            <group targetFramework=".NETStandard1.6">
+                <dependency id="HangFire.Core" version="1.6.5" />
+                <dependency id="Newtonsoft.Json" version="9.0.1" />
+                <dependency id="StackExchange.Redis" version="1.1.606" />
+            </group>
         </dependencies>
     </metadata>
     <files>
-        <file src="\bin\release\Hangfire.Redis.StackExchange.dll" target="lib\net45\Hangfire.Redis.StackExchange.dll" />
+        <file src="bin\Release\net451\Hangfire.Redis.StackExchange.dll" target="lib\net451\Hangfire.Redis.StackExchange.dll" />
+        <file src="bin\Release\netstandard1.6\Hangfire.Redis.StackExchange.dll" target="lib\netstandard1.6\Hangfire.Redis.StackExchange.dll" />
     </files>
 </package>
