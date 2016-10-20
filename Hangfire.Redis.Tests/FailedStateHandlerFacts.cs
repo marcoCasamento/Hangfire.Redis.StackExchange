@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
+    [CleanRedis]
     public class FailedStateHandlerFacts
     {
         private const string JobId = "1";

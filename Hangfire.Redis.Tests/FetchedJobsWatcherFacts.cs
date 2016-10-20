@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
+    [CleanRedis]
     public class FetchedJobsWatcherFacts
     {
         private static readonly TimeSpan InvisibilityTimeout = TimeSpan.FromSeconds(10);
@@ -47,7 +48,7 @@ namespace Hangfire.Redis.Tests
             Assert.Equal("invisibilityTimeout", exception.ParamName);
         }
 
-        [Fact, CleanRedis]
+        [Fact]
         public void Execute_EnqueuesTimedOutJobs_AndDeletesThemFromFetchedList()
         {
 			var redis = RedisUtils.CreateClient();
