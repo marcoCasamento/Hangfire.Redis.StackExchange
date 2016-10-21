@@ -49,6 +49,7 @@ namespace Hangfire.Redis
             if (options == null) options = new RedisStorageOptions();
 
             _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
+            _connectionMultiplexer.PreserveAsyncOrder = false;
             _invisibilityTimeout = options.InvisibilityTimeout;
             _fetchTimeout = options.FetchTimeout;
 
