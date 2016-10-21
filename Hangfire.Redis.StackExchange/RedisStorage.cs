@@ -36,6 +36,7 @@ namespace Hangfire.Redis
         private readonly string identity;
         private readonly ConnectionMultiplexer _connectionMultiplexer;
         private TimeSpan _invisibilityTimeout;
+        private TimeSpan _fetchTimeout;
 
         public RedisStorage()
             : this("localhost:6379")
@@ -49,6 +50,8 @@ namespace Hangfire.Redis
 
             _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
             _invisibilityTimeout = options.InvisibilityTimeout;
+            _fetchTimeout = options.FetchTimeout;
+
             var endpoint = _connectionMultiplexer.GetEndPoints()[0];
             if (endpoint is IPEndPoint)
             {
@@ -87,7 +90,7 @@ namespace Hangfire.Redis
 
         public override IStorageConnection GetConnection()
         {
-            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _connectionMultiplexer.GetSubscriber(), identity);
+            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _connectionMultiplexer.GetSubscriber(), identity, _fetchTimeout);
         }
 
         public override IEnumerable<IServerComponent> GetComponents()

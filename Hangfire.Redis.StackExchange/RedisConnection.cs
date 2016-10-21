@@ -28,14 +28,16 @@ namespace Hangfire.Redis
 {
     internal class RedisConnection : JobStorageConnection
     {
-        private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(1);
         readonly ISubscriber _subscriber;
-        string _jobStorageIdentity;
+        readonly string _jobStorageIdentity;
+        readonly TimeSpan _fetchTimeout;
         readonly ManualResetEvent mre;
-        public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity)
+        public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity, TimeSpan fetchTimeout)
         {
-            _subscriber = subscriber;
+            _subscriber = subscriber;            
             _jobStorageIdentity = jobStorageIdentity;
+            _fetchTimeout = fetchTimeout;
+
             Redis = redis;
             mre = new ManualResetEvent(false);
 
@@ -156,7 +158,7 @@ namespace Hangfire.Redis
 
                 if (jobId == null)
                 {
-                    WaitHandle.WaitAny(new[] { mre, cancellationToken.WaitHandle }, TimeSpan.FromMinutes(3));
+                    WaitHandle.WaitAny(new[] { mre, cancellationToken.WaitHandle }, _fetchTimeout);
                     mre.Reset();
                 }
             } while (jobId == null);
