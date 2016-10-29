@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
+// Copyright ï¿½ 2013-2015 Sergey Odinokov, Marco Casamento 
 // This software is based on https://github.com/HangfireIO/Hangfire.Redis 
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
@@ -28,14 +28,16 @@ namespace Hangfire.Redis
 {
     internal class RedisConnection : JobStorageConnection
     {
-        private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(1);
         readonly ISubscriber _subscriber;
-        string _jobStorageIdentity;
+        readonly string _jobStorageIdentity;
+        readonly TimeSpan _fetchTimeout = TimeSpan.FromMinutes(3);
         readonly ManualResetEvent mre;
-        public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity)
+        public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity, TimeSpan fetchTimeout)
         {
-            _subscriber = subscriber;
+            _subscriber = subscriber;            
             _jobStorageIdentity = jobStorageIdentity;
+            _fetchTimeout = fetchTimeout;
+
             Redis = redis;
             mre = new ManualResetEvent(false);
 
@@ -156,7 +158,7 @@ namespace Hangfire.Redis
 
                 if (jobId == null)
                 {
-                    WaitHandle.WaitAny(new[] { mre, cancellationToken.WaitHandle }, TimeSpan.FromMinutes(3));
+                    WaitHandle.WaitAny(new[] { mre, cancellationToken.WaitHandle }, _fetchTimeout);
                     mre.Reset();
                 }
             } while (jobId == null);
