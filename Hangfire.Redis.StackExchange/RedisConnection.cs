@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
+// Copyright ï¿½ 2013-2015 Sergey Odinokov, Marco Casamento 
 // This software is based on https://github.com/HangfireIO/Hangfire.Redis 
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ namespace Hangfire.Redis
     {
         readonly ISubscriber _subscriber;
         readonly string _jobStorageIdentity;
-        readonly TimeSpan _fetchTimeout;
+        readonly TimeSpan _fetchTimeout = TimeSpan.FromMinutes(3);
         readonly ManualResetEvent mre;
         public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity, TimeSpan fetchTimeout)
         {
