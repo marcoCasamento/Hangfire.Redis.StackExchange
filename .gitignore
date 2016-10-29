@@ -51,6 +51,7 @@ Temporary Items
 *.userosscache
 *.sln.docstates
 *.lock.json
+.vscode/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -235,10 +236,5 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 
-# Visual Studio 6 build log
-*.plg
-
-# Visual Studio 6 workspace options file
-*.opt
-
-/ConsoleApplication1
+# Redis DB dump
+*.rdb

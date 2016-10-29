@@ -13,8 +13,11 @@ See http://hangfire.io/ for some more info on the main project</description>
         <summary>Enjoy Redis outstanding performance when fetch your jobs!
 Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
 It also supports Batches (Pro Feature)</summary>
-        <releaseNotes>.Net Core Support (thanks to Stefan Polyanszky)
-Aligned dependency to Hangfire.Core</releaseNotes>
+        <releaseNotes>
+1.6.6   Configurable timeout for FetchNextJob (thanks to WebApelsin)
+1.6.5   .Net Core Support (thanks to Stefan Polyanszky)
+        Aligned dependency to Hangfire.Core
+        </releaseNotes>
         <copyright />
         <tags>Hangfire Redis</tags>
         <dependencies>
