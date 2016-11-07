@@ -11,8 +11,7 @@ namespace Hangfire.Redis
 
         private readonly ManualResetEvent _mre = new ManualResetEvent(false);
         private readonly ISubscriber _subscriber;
-        private bool _disposed;
-
+        
         public RedisSubscription(ISubscriber subscriber)
         {
             _subscriber = subscriber;
@@ -28,11 +27,11 @@ namespace Hangfire.Redis
         
         void IServerComponent.Execute(CancellationToken cancellationToken)
         {
-            cancellationToken.Register(() =>
+            if (cancellationToken.IsCancellationRequested)
             {
                 _subscriber.Unsubscribe(Channel);
                 _mre.Dispose();
-            });
+            }
         }
     }
 }
