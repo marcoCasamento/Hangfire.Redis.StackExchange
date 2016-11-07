@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Threading;
+using Hangfire.Server;
 using StackExchange.Redis;
 
 namespace Hangfire.Redis
 {
-    internal class RedisSubscription : IDisposable
+    internal class RedisSubscription : IServerComponent
     {
         internal static string Channel = string.Format("{0}JobFetchChannel", RedisStorage.Prefix);
 
         private readonly ManualResetEvent _mre = new ManualResetEvent(false);
         private readonly ISubscriber _subscriber;
+        private bool _disposed;
 
         public RedisSubscription(ISubscriber subscriber)
         {
@@ -23,11 +25,14 @@ namespace Hangfire.Redis
             _mre.Reset();
             WaitHandle.WaitAny(new[] { _mre, cancellationToken.WaitHandle }, timeout);
         }
-
-        public void Dispose()
+        
+        void IServerComponent.Execute(CancellationToken cancellationToken)
         {
-            _subscriber.Unsubscribe(Channel);
-            _mre.Dispose();
+            cancellationToken.Register(() =>
+            {
+                _subscriber.Unsubscribe(Channel);
+                _mre.Dispose();
+            });
         }
     }
 }

@@ -100,6 +100,7 @@ namespace Hangfire.Redis
         public override IEnumerable<IServerComponent> GetComponents()
         {
             yield return new FetchedJobsWatcher(this, _invisibilityTimeout);
+            yield return _subscription;
         }
 
         public DashboardMetric GetDashboardMetricFromRedisInfo(string title, string key)
