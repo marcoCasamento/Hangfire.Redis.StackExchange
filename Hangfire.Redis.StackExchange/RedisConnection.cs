@@ -28,20 +28,17 @@ namespace Hangfire.Redis
 {
     internal class RedisConnection : JobStorageConnection
     {
-        readonly ISubscriber _subscriber;
+        readonly RedisSubscription _subscription;
         readonly string _jobStorageIdentity;
         readonly TimeSpan _fetchTimeout = TimeSpan.FromMinutes(3);
-        readonly ManualResetEvent mre;
-        public RedisConnection(IDatabase redis, ISubscriber subscriber, string jobStorageIdentity, TimeSpan fetchTimeout)
+        
+        public RedisConnection(IDatabase redis, RedisSubscription subscription, string jobStorageIdentity, TimeSpan fetchTimeout)
         {
-            _subscriber = subscriber;            
+            _subscription = subscription;            
             _jobStorageIdentity = jobStorageIdentity;
             _fetchTimeout = fetchTimeout;
 
             Redis = redis;
-            mre = new ManualResetEvent(false);
-
-            _subscriber.Subscribe(string.Format("{0}JobFetchChannel", RedisStorage.Prefix), (channel, val) => { mre.Set();});
         }
 
         public IDatabase Redis { get; private set; }
@@ -136,7 +133,7 @@ namespace Hangfire.Redis
 
         public override void Dispose()
         {
-            //mre.Dispose();
+            // nothing to dispose
         }
 
         public override IFetchedJob FetchNextJob(string[] queues, CancellationToken cancellationToken)
@@ -158,8 +155,7 @@ namespace Hangfire.Redis
 
                 if (jobId == null)
                 {
-                    WaitHandle.WaitAny(new[] { mre, cancellationToken.WaitHandle }, _fetchTimeout);
-                    mre.Reset();
+                    _subscription.WaitForJob(_fetchTimeout, cancellationToken);
                 }
             } while (jobId == null);
 

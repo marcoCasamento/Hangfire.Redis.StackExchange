@@ -35,6 +35,7 @@ namespace Hangfire.Redis
         internal static int DeletedListSize = 499;
         private readonly string identity;
         private readonly ConnectionMultiplexer _connectionMultiplexer;
+        private readonly RedisSubscription _subscription;
         private TimeSpan _invisibilityTimeout;
         private TimeSpan _fetchTimeout;
 
@@ -71,6 +72,8 @@ namespace Hangfire.Redis
                 Prefix = options.Prefix;
             }
             identity = Guid.NewGuid().ToString();
+
+            _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
         }
 
         public string ConnectionString { get; private set; }
@@ -91,12 +94,13 @@ namespace Hangfire.Redis
 
         public override IStorageConnection GetConnection()
         {
-            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _connectionMultiplexer.GetSubscriber(), identity, _fetchTimeout);
+            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _subscription, identity, _fetchTimeout);
         }
 
         public override IEnumerable<IServerComponent> GetComponents()
         {
             yield return new FetchedJobsWatcher(this, _invisibilityTimeout);
+            yield return _subscription;
         }
 
         public DashboardMetric GetDashboardMetricFromRedisInfo(string title, string key)
