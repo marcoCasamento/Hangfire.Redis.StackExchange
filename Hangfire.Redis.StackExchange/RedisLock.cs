@@ -51,7 +51,10 @@ namespace Hangfire.Redis
                     var ttl = redis.KeyTimeToLive(key) ?? TimeSpan.Zero;
                     var extensionTTL = lockExpirationTime - DateTime.UtcNow;
                     if (extensionTTL > ttl)
-                        _redis.LockExtend(key, owner, extensionTTL - ttl);
+                    {
+                        Debug.WriteLine("Extending lock {0} - {1} by {2}", _key, _owner, (extensionTTL));
+                        _redis.LockExtend(key, owner, extensionTTL);
+                    }
                     isRoot = false;
                     return;
                 }
@@ -64,8 +67,7 @@ namespace Hangfire.Redis
         public void Dispose()
         {
             if (isRoot && !_redis.LockRelease(_key, _owner))
-                Debug.WriteLine("Can't release lock {0} - {1}", _key, _owner);
-
+                Debug.WriteLine("Lock {0} - {1} already timed out", _key, _owner);
         }
 
         private static void SleepBackOffMultiplier(int i)
