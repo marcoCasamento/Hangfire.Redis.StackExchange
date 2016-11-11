@@ -23,7 +23,6 @@ using Hangfire.States;
 using Hangfire.Storage;
 using StackExchange.Redis;
 
-
 namespace Hangfire.Redis
 {
     internal class RedisWriteOnlyTransaction : JobStorageTransaction
@@ -146,7 +145,7 @@ namespace Hangfire.Redis
         {
             _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
             _transaction.ListLeftPushAsync(string.Format(RedisStorage.Prefix + "queue:{0}", queue), jobId);
-            _transaction.PublishAsync(string.Format("{0}JobFetchChannel", RedisStorage.Prefix), jobId);
+            _transaction.PublishAsync(RedisSubscription.Channel, jobId);
         }
 
         public override void IncrementCounter(string key)
