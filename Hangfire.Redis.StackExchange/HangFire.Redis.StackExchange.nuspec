@@ -21,15 +21,15 @@ It also supports Batches (Pro Feature)</summary>
         <copyright />
         <tags>Hangfire Redis</tags>
         <dependencies>
-            <group targetFramework=".NETFramework4.5.1">
+            <group targetFramework=".NETFramework4.5.0">
                 <dependency id="HangFire.Core" version="1.6.5" />
-                <dependency id="Newtonsoft.Json" version="9.0.1" />
-                <dependency id="StackExchange.Redis" version="1.1.606" />
+                <dependency id="Newtonsoft.Json" version="5.0.1" />
+                <dependency id="StackExchange.Redis" version="1.1.608" />
             </group>
             <group targetFramework=".NETStandard1.6">
                 <dependency id="HangFire.Core" version="1.6.5" />
                 <dependency id="Newtonsoft.Json" version="9.0.1" />
-                <dependency id="StackExchange.Redis" version="1.1.606" />
+                <dependency id="StackExchange.Redis" version="1.1.608" />
             </group>
         </dependencies>
     </metadata>
