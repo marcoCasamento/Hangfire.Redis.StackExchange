@@ -43,7 +43,17 @@ namespace Hangfire.Redis
             : this("localhost:6379")
         {
         }
+        public RedisStorage(ConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options = null)
+        {
+            if (connectionMultiplexer == null) throw new ArgumentNullException("connectionMultiplexer");
+            if (options == null) options = new RedisStorageOptions();
 
+            Init(_connectionMultiplexer, options);
+
+            identity = Guid.NewGuid().ToString();
+            _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
+
+        }
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
         {
             if (connectionString == null) throw new ArgumentNullException("connectionString");
@@ -51,6 +61,15 @@ namespace Hangfire.Redis
 
             _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
             _connectionMultiplexer.PreserveAsyncOrder = false;
+
+            Init(_connectionMultiplexer, options);
+
+            identity = Guid.NewGuid().ToString();
+            _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
+
+        }
+        private void Init(ConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options)
+        {
             _invisibilityTimeout = options.InvisibilityTimeout;
             _fetchTimeout = options.FetchTimeout;
 
@@ -71,11 +90,8 @@ namespace Hangfire.Redis
             {
                 Prefix = options.Prefix;
             }
-            identity = Guid.NewGuid().ToString();
 
-            _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
         }
-
         public string ConnectionString { get; private set; }
         public int Db { get; private set; }
 

@@ -34,7 +34,7 @@ It also supports Batches (Pro Feature)</summary>
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\Release\net45\Hangfire.Redis.StackExchange.dll" target="lib\net451\Hangfire.Redis.StackExchange.dll" />
+        <file src="bin\Release\net45\Hangfire.Redis.StackExchange.dll" target="lib\net45\Hangfire.Redis.StackExchange.dll" />
         <file src="bin\Release\netstandard1.6\Hangfire.Redis.StackExchange.dll" target="lib\netstandard1.6\Hangfire.Redis.StackExchange.dll" />
     </files>
 </package>

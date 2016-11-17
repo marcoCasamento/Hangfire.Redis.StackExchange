@@ -13,7 +13,7 @@
       }
 
     },
-    "net450": {
+    "net45": {
       "frameworkAssemblies": {
       },
       "dependencies": { 
