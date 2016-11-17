@@ -57,7 +57,11 @@ namespace Hangfire.Redis
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
         {
             if (connectionString == null) throw new ArgumentNullException("connectionString");
-            if (options == null) options = new RedisStorageOptions();
+            var redisOptions = ConfigurationOptions.Parse(connectionString);
+            if (options == null) options = new RedisStorageOptions
+            {
+                Db = redisOptions.DefaultDatabase.GetValueOrDefault(0)
+            };
 
             _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
             _connectionMultiplexer.PreserveAsyncOrder = false;
