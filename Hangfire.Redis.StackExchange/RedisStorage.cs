@@ -48,6 +48,8 @@ namespace Hangfire.Redis
             if (connectionMultiplexer == null) throw new ArgumentNullException("connectionMultiplexer");
             if (options == null) options = new RedisStorageOptions();
 
+            _connectionMultiplexer = connectionMultiplexer;
+
             Init(_connectionMultiplexer, options);
 
             identity = Guid.NewGuid().ToString();
