@@ -1,6 +1,7 @@
 # Hangfire.Redis.StackExchange
 
 ![Build Status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva/branch/master?svg=true)
+[![Nuget Badge](https://buildstats.info/nuget/Hangfire.Redis.StackExchange)](https://www.nuget.org/packages/Hangfire.Redis.StackExchange/)
 
 HangFire Redis storage based on [HangFire.Redis](https://github.com/HangfireIO/Hangfire.Redis/) but using lovely [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) client.
 
@@ -9,3 +10,4 @@ HangFire Redis storage based on [HangFire.Redis](https://github.com/HangfireIO/H
 - Efficient use of Redis resources thanks to ConnectionMultiplexer
 - Support for Redis Prefix, allow multiple Hangfire Instances against a single Redis DB
 - Allow customization of Succeeded and Failed lists size
+
