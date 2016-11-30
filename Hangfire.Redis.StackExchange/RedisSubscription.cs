@@ -2,6 +2,7 @@
 using System.Threading;
 using Hangfire.Server;
 using StackExchange.Redis;
+using Hangfire.Annotations;
 
 namespace Hangfire.Redis
 {
@@ -14,6 +15,7 @@ namespace Hangfire.Redis
         
         public RedisSubscription(ISubscriber subscriber)
         {
+            if (subscriber == null) throw new ArgumentNullException("subscriber");
             _subscriber = subscriber;
             _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());
         }
@@ -27,6 +29,8 @@ namespace Hangfire.Redis
         
         void IServerComponent.Execute(CancellationToken cancellationToken)
         {
+            cancellationToken.WaitHandle.WaitOne();
+
             if (cancellationToken.IsCancellationRequested)
             {
                 _subscriber.Unsubscribe(Channel);

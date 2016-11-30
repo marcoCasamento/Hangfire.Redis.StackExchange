@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Hangfire.Redis.StackExchange</id>
-        <version>$version$</version>
+        <version>$version$-beta</version>
         <title>Hangfire Redis Storage</title>
         <authors>Marco Casamento</authors>
         <owners>marcocasamento</owners>
