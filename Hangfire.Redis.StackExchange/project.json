@@ -6,15 +6,9 @@
 
     "frameworks": {
         "netstandard1.6": {
-            "dependencies": {
-                "Newtonsoft.Json": "9.0.1"
-            }
 
         },
         "net45": {
-            "dependencies": {
-                "Newtonsoft.Json": "5.0.0"
-            }
         }
     }
 }
