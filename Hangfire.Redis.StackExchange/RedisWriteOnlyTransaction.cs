@@ -90,32 +90,32 @@ namespace Hangfire.Redis
         public override void ExpireJob(string jobId, TimeSpan expireIn)
         {
              _transaction.KeyExpireAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}", jobId),
                 expireIn);
 
 			 _transaction.KeyExpireAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}:history", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}:history", jobId),
                 expireIn);
 
 			 _transaction.KeyExpireAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}:state", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}:state", jobId),
                 expireIn);
         }
 
         public override void PersistJob(string jobId)
         {
-             _transaction.KeyPersistAsync(string.Format(RedisStorage.Prefix + "job:{0}", jobId));
-             _transaction.KeyPersistAsync(string.Format(RedisStorage.Prefix + "job:{0}:history", jobId));
-             _transaction.KeyPersistAsync(string.Format(RedisStorage.Prefix + "job:{0}:state", jobId));
+             _transaction.KeyPersistAsync(RedisStorage.Prefix + string.Format("job:{0}", jobId));
+             _transaction.KeyPersistAsync(RedisStorage.Prefix + string.Format("job:{0}:history", jobId));
+             _transaction.KeyPersistAsync(RedisStorage.Prefix + string.Format("job:{0}:state", jobId));
         }
 
         public override void SetJobState(string jobId, IState state)
         {
             _transaction.HashSetAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}", jobId),
                 "State",
                 state.Name);
-			_transaction.KeyDeleteAsync(string.Format(RedisStorage.Prefix + "job:{0}:state", jobId));
+			_transaction.KeyDeleteAsync(RedisStorage.Prefix + string.Format("job:{0}:state", jobId));
 
             var storedData = new Dictionary<string, string>(state.SerializeData());
             storedData.Add("State", state.Name);
@@ -124,7 +124,7 @@ namespace Hangfire.Redis
             {
                 storedData.Add("Reason", state.Reason);
             }
-			_transaction.HashSetAsync(string.Format(RedisStorage.Prefix + "job:{0}:state", jobId),storedData.ToHashEntries());
+			_transaction.HashSetAsync(RedisStorage.Prefix + string.Format("job:{0}:state", jobId),storedData.ToHashEntries());
 
             AddJobState(jobId, state);
         }
@@ -137,14 +137,14 @@ namespace Hangfire.Redis
             storedData.Add("CreatedAt", JobHelper.SerializeDateTime(DateTime.UtcNow));
 
             _transaction.ListRightPushAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}:history", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}:history", jobId),
                 JobHelper.ToJson(storedData));
         }
 
         public override void AddToQueue(string queue, string jobId)
         {
             _transaction.SetAddAsync(RedisStorage.Prefix + "queues", queue);
-            _transaction.ListLeftPushAsync(string.Format(RedisStorage.Prefix + "queue:{0}", queue), jobId);
+            _transaction.ListLeftPushAsync(RedisStorage.Prefix + string.Format("queue:{0}", queue), jobId);
             _transaction.PublishAsync(RedisSubscription.Channel, jobId);
         }
 

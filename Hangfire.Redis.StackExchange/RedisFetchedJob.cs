@@ -1,17 +1,17 @@
-﻿// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
-// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+﻿// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as 
-// published by the Free Software Foundation, either version 3 
+// it under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3
 // of the License, or any later version.
-// 
+//
 // Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public 
+//
+// You should have received a copy of the GNU Lesser General Public
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
@@ -45,9 +45,9 @@ namespace Hangfire.Redis
         {
             var transaction = _redis.CreateTransaction();
 			RemoveFromFetchedList(transaction);
-				
+
 			transaction.Execute();
-            
+
             _removedFromQueue = true;
         }
 
@@ -55,7 +55,7 @@ namespace Hangfire.Redis
         {
 			var transaction = _redis.CreateTransaction();
             transaction.ListRightPushAsync(
-                string.Format(RedisStorage.Prefix + "queue:{0}", Queue),
+                RedisStorage.Prefix + string.Format("queue:{0}", Queue),
                 JobId);
 
             RemoveFromFetchedList(transaction);
@@ -80,15 +80,15 @@ namespace Hangfire.Redis
         private void RemoveFromFetchedList(ITransaction transaction)
         {
             transaction.ListRemoveAsync(
-                        string.Format(RedisStorage.Prefix + "queue:{0}:dequeued", Queue),
+                        RedisStorage.Prefix + string.Format("queue:{0}:dequeued", Queue),
                         JobId,
                         -1);
 
             transaction.HashDeleteAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}", JobId),
+                RedisStorage.Prefix + string.Format("job:{0}", JobId),
                 "Fetched");
             transaction.HashDeleteAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}", JobId),
+                RedisStorage.Prefix + string.Format("job:{0}", JobId),
                 "Checked");
         }
     }

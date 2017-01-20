@@ -1,17 +1,17 @@
-﻿// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
-// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+﻿// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as 
-// published by the Free Software Foundation, either version 3 
+// it under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3
 // of the License, or any later version.
-// 
+//
 // Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public 
+//
+// You should have received a copy of the GNU Lesser General Public
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
@@ -40,20 +40,20 @@ namespace Hangfire.Redis
 
         public long ScheduledCount()
         {
-            return UseConnection(redis => 
+            return UseConnection(redis =>
                 redis.SortedSetLength(RedisStorage.Prefix+"schedule"));
         }
 
         public long EnqueuedCount(string queue)
         {
-            return UseConnection(redis => 
-                redis.ListLength(String.Format(RedisStorage.Prefix + "queue:{0}", queue)));
+            return UseConnection(redis =>
+                redis.ListLength(RedisStorage.Prefix + string.Format("queue:{0}", queue)));
         }
 
         public long FetchedCount(string queue)
         {
-            return UseConnection(redis => 
-                redis.ListLength(String.Format(RedisStorage.Prefix + "queue:{0}:dequeued", queue)));
+            return UseConnection(redis =>
+                redis.ListLength(RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queue)));
         }
 
         public long FailedCount()
@@ -122,17 +122,17 @@ namespace Hangfire.Redis
                 {
                     var job = scheduledJob;
 					tasks[i] = pipeline.HashGetAsync(
-								String.Format(RedisStorage.Prefix + "job:{0}", job.Element),
+								RedisStorage.Prefix + string.Format("job:{0}", job.Element),
 								new RedisValue[] { "Type", "Method", "ParameterTypes", "Arguments" })
 						.ContinueWith(x => jobs.Add(job.Element, x.Result.ToStringArray().ToList()));
 					i++;
 					tasks[i] = pipeline.HashGetAsync(
-								String.Format(RedisStorage.Prefix + "job:{0}:state", job.Element),
+								RedisStorage.Prefix + string.Format("job:{0}:state", job.Element),
 								new RedisValue[] { "State", "ScheduledAt" })
 						.ContinueWith(x => states.Add(job.Element, x.Result.ToStringArray().ToList()));
 					i++;
                 }
-				
+
 				pipeline.Execute();
 				Task.WaitAll(tasks);
 
@@ -182,11 +182,11 @@ namespace Hangfire.Redis
                 {
                     var name = serverName;
                     servers.Add(name,
-                        redis.HashGet(String.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
+                        redis.HashGet(RedisStorage.Prefix + string.Format("server:{0}", name), new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
                             .ToStringArray().ToList()
                         );
                     queues.Add(name,
-                        redis.ListRange(String.Format(RedisStorage.Prefix + "server:{0}:queues", name))
+                        redis.ListRange(RedisStorage.Prefix + string.Format("server:{0}:queues", name))
                             .ToStringArray().ToList()
                         );
 
@@ -297,17 +297,17 @@ namespace Hangfire.Redis
                     long length = 0;
                     long fetched = 0;
 
-					
+
 					var pipeline = redis.CreateBatch();
 					Task[] tasks = new Task[3];
 					tasks[0] = pipeline.ListRangeAsync(
-                            String.Format(RedisStorage.Prefix + "queue:{0}", queue), -5, -1)
+                            RedisStorage.Prefix + string.Format("queue:{0}", queue), -5, -1)
 							.ContinueWith(x => firstJobIds = x.Result.ToStringArray());
 
-                    tasks[1] = pipeline.ListLengthAsync(String.Format(RedisStorage.Prefix + "queue:{0}", queue))
+                    tasks[1] = pipeline.ListLengthAsync(RedisStorage.Prefix + string.Format("queue:{0}", queue))
 						.ContinueWith(x => length = x.Result);
 
-                    tasks[2] = pipeline.ListLengthAsync(String.Format(RedisStorage.Prefix + "queue:{0}:dequeued", queue))
+                    tasks[2] = pipeline.ListLengthAsync(RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queue))
 						.ContinueWith(x => fetched = x.Result);
 
 					pipeline.Execute();
@@ -345,7 +345,7 @@ namespace Hangfire.Redis
             return UseConnection(redis =>
             {
                 var jobIds = redis.ListRange(
-                    String.Format(RedisStorage.Prefix + "queue:{0}", queue),
+                    RedisStorage.Prefix + string.Format("queue:{0}", queue),
                     from,
                     from + perPage - 1).ToStringArray();
 
@@ -370,10 +370,10 @@ namespace Hangfire.Redis
             return UseConnection(redis =>
             {
                 var jobIds = redis.ListRange(
-                    String.Format(RedisStorage.Prefix + "queue:{0}:dequeued", queue),
+                    RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queue),
                     from, from + perPage - 1).ToStringArray();
 				RedisValue[] rk = new RedisValue[1];
-				
+
                 return GetJobsWithProperties(
                     redis,
                     jobIds,
@@ -402,12 +402,12 @@ namespace Hangfire.Redis
         {
             return UseConnection(redis =>
             {
-                var job = redis.HashGetAll(String.Format(RedisStorage.Prefix + "job:{0}", jobId)).ToStringDictionary();
+                var job = redis.HashGetAll(RedisStorage.Prefix + string.Format("job:{0}", jobId)).ToStringDictionary();
                 if (job.Count == 0) return null;
 
                 var hiddenProperties = new[] { "Type", "Method", "ParameterTypes", "Arguments", "State", "CreatedAt" };
 
-                var historyList = redis.ListRange(String.Format(RedisStorage.Prefix + "job:{0}:history", jobId))
+                var historyList = redis.ListRange(RedisStorage.Prefix + string.Format("job:{0}:history", jobId))
 					.Select(x=> (string)x).ToList();
 
                 var history = historyList
@@ -465,7 +465,7 @@ namespace Hangfire.Redis
                 endDate = endDate.AddHours(-1);
             }
 
-            var keys = dates.Select(x => String.Format(RedisStorage.Prefix + "stats:{0}:{1}", type, x.ToString("yyyy-MM-dd-HH"))).ToArray();
+            var keys = dates.Select(x => RedisStorage.Prefix + string.Format("stats:{0}:{1}", type, x.ToString("yyyy-MM-dd-HH"))).ToArray();
             var valuesMap = redis.GetValuesMap(keys);
 
             var result = new Dictionary<DateTime, long>();
@@ -497,7 +497,7 @@ namespace Hangfire.Redis
             }
 
             var stringDates = dates.Select(x => x.ToString("yyyy-MM-dd")).ToList();
-            var keys = stringDates.Select(x => String.Format(RedisStorage.Prefix + "stats:{0}:{1}", type, x)).ToArray();
+            var keys = stringDates.Select(x => RedisStorage.Prefix + string.Format("stats:{0}:{1}", type, x)).ToArray();
 
             var valuesMap = redis.GetValuesMap(keys);
 
@@ -535,13 +535,13 @@ namespace Hangfire.Redis
             {
                 var id = jobId;
 				var jobTask=pipeline.HashGetAsync(
-                                String.Format(RedisStorage.Prefix + "job:{0}", id),
+                                RedisStorage.Prefix + string.Format("job:{0}", id),
 								properties.Union(new[] { "Type", "Method", "ParameterTypes", "Arguments" }).Select(x=> (RedisValue)x).ToArray());
 				tasks.Add(jobTask);
                 jobs.Add(jobId, jobTask);
 				if (stateProperties != null)
 				{
-                    var taskStateJob = pipeline.HashGetAsync(String.Format(RedisStorage.Prefix + "job:{0}:state", id), stateProperties.Select(x => (RedisValue)x).ToArray());
+                    var taskStateJob = pipeline.HashGetAsync(RedisStorage.Prefix + string.Format("job:{0}:state", id), stateProperties.Select(x => (RedisValue)x).ToArray());
 					tasks.Add(taskStateJob);
                     states.Add(jobId, taskStateJob);
 				}
@@ -549,7 +549,7 @@ namespace Hangfire.Redis
 
             pipeline.Execute();
 			Task.WaitAll(tasks.ToArray());
-			
+
 			var jobList = new JobList<T>(jobIds
                 .Select(x => new
                 {
@@ -614,11 +614,11 @@ namespace Hangfire.Redis
                 foreach (var queue in queues)
                 {
                     var queueName = queue;
-                    tasks[i] = pipeline.ListLengthAsync(String.Format(RedisStorage.Prefix + "queue:{0}", queueName), CommandFlags.HighPriority)
+                    tasks[i] = pipeline.ListLengthAsync(RedisStorage.Prefix + string.Format("queue:{0}", queueName), CommandFlags.HighPriority)
 						.ContinueWith(x => stats.Enqueued += x.Result);
 					i++;
                 }
-				
+
 				pipeline.Execute();
 				Task.WaitAll(tasks);
 
