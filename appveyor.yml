@@ -14,8 +14,8 @@ before_build:
 - dotnet restore
 build:
   project: Hangfire.Redis.StackExchange.sln
-  publish_nuget: true
-  publish_nuget_symbols: true
+  publish_nuget: false
+  publish_nuget_symbols: false
   verbosity: minimal
 artifacts:
 - path: .\**\*.nupkg
