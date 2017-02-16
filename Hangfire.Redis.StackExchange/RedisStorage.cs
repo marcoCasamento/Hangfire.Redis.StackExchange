@@ -34,7 +34,7 @@ namespace Hangfire.Redis
         internal static int SucceededListSize = 499;
         internal static int DeletedListSize = 499;
         private readonly string identity;
-        private readonly ConnectionMultiplexer _connectionMultiplexer;
+        private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly RedisSubscription _subscription;
         private TimeSpan _invisibilityTimeout;
         private TimeSpan _fetchTimeout;
@@ -43,7 +43,7 @@ namespace Hangfire.Redis
             : this("localhost:6379")
         {
         }
-        public RedisStorage(ConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options = null)
+        public RedisStorage(IConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options = null)
         {
             if (connectionMultiplexer == null) throw new ArgumentNullException("connectionMultiplexer");
             if (options == null) options = new RedisStorageOptions();
@@ -74,7 +74,7 @@ namespace Hangfire.Redis
             _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
 
         }
-        private void Init(ConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options)
+        private void Init(IConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options)
         {
             _invisibilityTimeout = options.InvisibilityTimeout;
             _fetchTimeout = options.FetchTimeout;
