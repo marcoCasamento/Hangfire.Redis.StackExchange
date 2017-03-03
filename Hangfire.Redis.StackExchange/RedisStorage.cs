@@ -1,17 +1,17 @@
-// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
-// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+// Copyright ?2013-2015 Sergey Odinokov, Marco Casamento
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as 
-// published by the Free Software Foundation, either version 3 
+// it under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3
 // of the License, or any later version.
-// 
+//
 // Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public 
+//
+// You should have received a copy of the GNU Lesser General Public
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
@@ -30,7 +30,8 @@ namespace Hangfire.Redis
 {
     public class RedisStorage : JobStorage
     {
-        internal static string Prefix = "hangfire:";
+        // Make sure in Redis Cluster all traction in the same slot !!
+        internal static string Prefix = "{hangfire}:";
         internal static int SucceededListSize = 499;
         internal static int DeletedListSize = 499;
         private readonly string identity;
@@ -56,6 +57,7 @@ namespace Hangfire.Redis
             _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
 
         }
+
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
         {
             if (connectionString == null) throw new ArgumentNullException("connectionString");
@@ -78,26 +80,16 @@ namespace Hangfire.Redis
         {
             _invisibilityTimeout = options.InvisibilityTimeout;
             _fetchTimeout = options.FetchTimeout;
-
-            var endpoint = _connectionMultiplexer.GetEndPoints()[0];
-            if (endpoint is IPEndPoint)
-            {
-                var ipEp = endpoint as IPEndPoint;
-                ConnectionString = string.Format("{0}:{1}", ipEp.Address, ipEp.Port);
-            }
-            else
-            {
-                var dnsEp = endpoint as DnsEndPoint;
-                ConnectionString = string.Format("{0}:{1}", dnsEp.Host, dnsEp.Port);
-            }
+            ConnectionString = connectionMultiplexer.Configuration;
 
             Db = options.Db;
+
             if (Prefix != options.Prefix)
             {
                 Prefix = options.Prefix;
             }
-
         }
+
         public string ConnectionString { get; private set; }
         public int Db { get; private set; }
 
