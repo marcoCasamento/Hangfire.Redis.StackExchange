@@ -1,17 +1,17 @@
-// Copyright � 2013-2015 Sergey Odinokov, Marco Casamento 
-// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+// Copyright � 2013-2015 Sergey Odinokov, Marco Casamento
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as 
-// published by the Free Software Foundation, either version 3 
+// it under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3
 // of the License, or any later version.
-// 
+//
 // Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public 
+//
+// You should have received a copy of the GNU Lesser General Public
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
@@ -31,10 +31,10 @@ namespace Hangfire.Redis
         readonly RedisSubscription _subscription;
         readonly string _jobStorageIdentity;
         readonly TimeSpan _fetchTimeout = TimeSpan.FromMinutes(3);
-        
+
         public RedisConnection(IDatabase redis, RedisSubscription subscription, string jobStorageIdentity, TimeSpan fetchTimeout)
         {
-            _subscription = subscription;            
+            _subscription = subscription;
             _jobStorageIdentity = jobStorageIdentity;
             _fetchTimeout = fetchTimeout;
 
@@ -54,8 +54,8 @@ namespace Hangfire.Redis
             transaction.KeyDeleteAsync(
                 new RedisKey[]
                 {
-                    string.Format(RedisStorage.Prefix + "server:{0}", serverId),
-                    string.Format(RedisStorage.Prefix + "server:{0}:queues", serverId)
+                    RedisStorage.Prefix + string.Format("server:{0}", serverId),
+                    RedisStorage.Prefix + string.Format("server:{0}:queues", serverId)
                 });
 
             transaction.Execute();
@@ -73,7 +73,7 @@ namespace Hangfire.Redis
             transaction.SetAddAsync(RedisStorage.Prefix + "servers", serverId);
 
             transaction.HashSetAsync(
-                string.Format(RedisStorage.Prefix + "server:{0}", serverId),
+                RedisStorage.Prefix + string.Format("server:{0}", serverId),
                 new Dictionary<string, string>
                     {
                         { "WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture) },
@@ -84,7 +84,7 @@ namespace Hangfire.Redis
             {
                 var queue1 = queue;
                 transaction.ListRightPushAsync(
-                    string.Format(RedisStorage.Prefix + "server:{0}:queues", serverId),
+                    RedisStorage.Prefix + string.Format("server:{0}:queues", serverId),
                     queue1);
             }
 
@@ -113,11 +113,11 @@ namespace Hangfire.Redis
             var transaction = Redis.CreateTransaction();
 
             transaction.HashSetAsync(
-                    string.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                    RedisStorage.Prefix + string.Format("job:{0}", jobId),
                     storedParameters.ToHashEntries());
 
             transaction.KeyExpireAsync(
-                string.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}", jobId),
                 expireIn);
 
             // TODO: check return value
@@ -161,11 +161,11 @@ namespace Hangfire.Redis
 
             // The job was fetched by the server. To provide reliability,
             // we should ensure, that the job will be performed and acquired
-            // resources will be disposed even if the server will crash 
+            // resources will be disposed even if the server will crash
             // while executing one of the subsequent lines of code.
 
             // The job's processing is splitted into a couple of checkpoints.
-            // Each checkpoint occurs after successful update of the 
+            // Each checkpoint occurs after successful update of the
             // job information in the storage. And each checkpoint describes
             // the way to perform the job when the server was crashed after
             // reaching it.
@@ -175,7 +175,7 @@ namespace Hangfire.Redis
             // Job's has the implicit 'Fetched' state.
 
             Redis.HashSet(
-                string.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}", jobId),
                 "Fetched",
                 JobHelper.SerializeDateTime(DateTime.UtcNow));
 
@@ -235,7 +235,7 @@ namespace Hangfire.Redis
         }
         public override JobData GetJobData(string id)
         {
-            var storedData = Redis.HashGetAll(string.Format(RedisStorage.Prefix + "job:{0}", id));
+            var storedData = Redis.HashGetAll(RedisStorage.Prefix + string.Format("job:{0}", id));
 
             if (storedData.Length == 0) return null;
 
@@ -292,7 +292,7 @@ namespace Hangfire.Redis
         public override string GetJobParameter(string id, string name)
         {
             return Redis.HashGet(
-                string.Format(RedisStorage.Prefix + "job:{0}", id),
+                RedisStorage.Prefix + string.Format("job:{0}", id),
                 name);
         }
 
@@ -349,7 +349,7 @@ namespace Hangfire.Redis
         public override void Heartbeat(string serverId)
         {
             Redis.HashSet(
-                string.Format(RedisStorage.Prefix + "server:{0}", serverId),
+                RedisStorage.Prefix + string.Format("server:{0}", serverId),
                 "Heartbeat",
                 JobHelper.SerializeDateTime(DateTime.UtcNow));
         }
@@ -370,7 +370,7 @@ namespace Hangfire.Redis
             foreach (var serverName in serverNames)
             {
                 var name = serverName;
-                var srv = Redis.HashGet(string.Format(RedisStorage.Prefix + "server:{0}", name), new RedisValue[] { "StartedAt", "Heartbeat" });
+                var srv = Redis.HashGet(RedisStorage.Prefix + string.Format("server:{0}", name), new RedisValue[] { "StartedAt", "Heartbeat" });
                 heartbeats.Add(name,
                                 new Tuple<DateTime, DateTime?>(
                                 JobHelper.DeserializeDateTime(srv[0]),
@@ -396,7 +396,7 @@ namespace Hangfire.Redis
         public override void SetJobParameter(string id, string name, string value)
         {
             Redis.HashSet(
-                string.Format(RedisStorage.Prefix + "job:{0}", id),
+                RedisStorage.Prefix + string.Format("job:{0}", id),
                 name,
                 value);
         }

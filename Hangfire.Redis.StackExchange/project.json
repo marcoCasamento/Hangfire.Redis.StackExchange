@@ -1,23 +1,26 @@
 ﻿{
-  "dependencies": {
-    "NETStandard.Library": "1.6.0",
-    "Hangfire.Core": "1.6.5",
-    "StackExchange.Redis": "1.1.608"
-  },
+    "version": "2.0.0-*",
 
-  "frameworks": {
-    "netstandard1.6": {
-      "imports": "dnxcore50",
-      "dependencies": {
-        "Newtonsoft.Json": "9.0.1"
-      }
-
+    "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "Hangfire.Core": "1.6.8",
+        "StackExchange.Redis": "1.1.608"
     },
-    "net45": {
-      "frameworkAssemblies": {
-      },
-      "dependencies": { 
-        "Newtonsoft.Json": "5.0.1" }
+
+    "frameworks": {
+        "netstandard1.6": {
+            "imports": "dnxcore50",
+            "dependencies": {
+                "Newtonsoft.Json": "9.0.1"
+            }
+
+        },
+        "net45": {
+            "frameworkAssemblies": {
+            },
+            "dependencies": {
+                "Newtonsoft.Json": "5.0.1"
+            }
+        }
     }
-  }
 }
