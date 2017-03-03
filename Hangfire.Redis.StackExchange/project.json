@@ -1,9 +1,9 @@
 ﻿{
-    "version": "2.0.0-*",
+    "version": "1.7.0-beta",
 
     "dependencies": {
         "NETStandard.Library": "1.6.0",
-        "Hangfire.Core": "1.6.8",
+        "Hangfire.Core": "1.6.9",
         "StackExchange.Redis": "1.1.608"
     },
 

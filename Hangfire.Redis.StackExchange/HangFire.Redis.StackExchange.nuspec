@@ -14,6 +14,8 @@ See http://hangfire.io/ for some more info on the main project</description>
 Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
 It also supports Batches (Pro Feature)</summary>
         <releaseNotes>
+          1.7.0-beta
+            - Redis Cluster support (#42 thanks to gzpbx)
           1.6.7
             - Added support for Redis DB in the ConnectionString (#26 thanks to zivillian)
             - Added constructor to RedisStorage that accepts a ConnectionMultiplexer instance (#23 thanks to sjwoodard)
