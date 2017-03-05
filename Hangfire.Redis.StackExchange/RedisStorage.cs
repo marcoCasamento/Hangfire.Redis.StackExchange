@@ -30,7 +30,7 @@ namespace Hangfire.Redis
 {
     public class RedisStorage : JobStorage
     {
-        // Make sure in Redis Cluster all traction in the same slot !!
+        // Make sure in Redis Cluster all transaction are in the same slot !!
         internal static string Prefix = "{hangfire}:";
         internal static int SucceededListSize = 499;
         internal static int DeletedListSize = 499;

@@ -31,7 +31,7 @@ namespace Hangfire.Redis.Tests
             UseConnections((redis, connection) =>
             {
                 redis.HashSet(
-                    "hangfire:job:my-job:state",
+                    "{hangfire}:job:my-job:state",
                     new Dictionary<string, string>
                     {
                         { "State", "Name" },
@@ -54,7 +54,7 @@ namespace Hangfire.Redis.Tests
             UseConnections((redis, connection) =>
             {
                 redis.HashSet(
-                    "hangfire:job:my-job:state",
+                    "{hangfire}:job:my-job:state",
                     new Dictionary<string, string>
                     {
                         { "State", "Name" }
@@ -92,8 +92,8 @@ namespace Hangfire.Redis.Tests
             UseConnections((redis, connection) =>
             {
                 // Arrange
-                redis.SortedSetAdd("hangfire:some-set", "1", 0);
-				redis.SortedSetAdd("hangfire:some-set", "2", 0);
+                redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
+				redis.SortedSetAdd("{hangfire}:some-set", "2", 0);
 
                 // Act
                 var result = connection.GetAllItemsFromSet("some-set");
@@ -140,7 +140,7 @@ namespace Hangfire.Redis.Tests
                     { "Key2", "Value2" }
                 });
 
-                var hash = redis.HashGetAll("hangfire:some-hash").ToStringDictionary();
+                var hash = redis.HashGetAll("{hangfire}:some-hash").ToStringDictionary();
                 Assert.Equal("Value1", hash["Key1"]);
                 Assert.Equal("Value2", hash["Key2"]);
             });
@@ -169,7 +169,7 @@ namespace Hangfire.Redis.Tests
             UseConnections((redis, connection) =>
             {
                 // Arrange
-                redis.HashSet("hangfire:some-hash", new Dictionary<string, string>
+                redis.HashSet("{hangfire}:some-hash", new Dictionary<string, string>
                 {
                     { "Key1", "Value1" },
                     { "Key2", "Value2" }
