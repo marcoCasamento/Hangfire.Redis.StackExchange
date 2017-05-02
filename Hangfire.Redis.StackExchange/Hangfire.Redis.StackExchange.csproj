@@ -3,15 +3,24 @@
   <PropertyGroup>
     <TargetFrameworks>net45;net46;netstandard1.5</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
-    <Version>1.7.0-beta1</Version>
+    <Version>1.7.0-beta2</Version>
     <Authors>Marco Casamento</Authors>
+    <owners>marcocasamento</owners>
+    <!--
+      https://docs.microsoft.com/en-us/dotnet/articles/core/tools/project-json-to-csproj
+      There is no equivalent for the owners element in MSBuild. 
+    -->
     <Product>Hangfire Redis Storage</Product>
     <PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
-    <Description>Hangfire Redis Storage Based on Redis.StackExchange. 
-
-Enjoy Redis outstanding performance when fetch your jobs! Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library. It also supports Batches (Pro Feature)
-
-See http://hangfire.io/ for some more info on the main project.</Description>
+    <Description>
+      Hangfire Redis Storage Based on Redis.StackExchange
+      See http://hangfire.io/ for some more info on the main project
+    </Description>
+    <Summary>
+      Enjoy Redis outstanding performance when fetch your jobs!
+      Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
+      It also supports Batches (Pro Feature)
+    </Summary>
     <PackageReleaseNotes>1.7.0-beta
     - Redis Cluster support (#42 thanks to gzpbx)
 1.6.7
@@ -37,10 +46,6 @@ See http://hangfire.io/ for some more info on the main project.</Description>
     <PackageReference Include="HangFire.Core" Version="1.6.12" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>
