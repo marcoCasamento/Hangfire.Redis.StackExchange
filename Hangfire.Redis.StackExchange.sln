@@ -1,16 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Hangfire.Redis.StackExchange", "Hangfire.Redis.StackExchange\Hangfire.Redis.StackExchange.xproj", "{9DABE359-48C5-4910-A642-1CD6BBE95423}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.StackExchange", "Hangfire.Redis.StackExchange\Hangfire.Redis.StackExchange.csproj", "{830696FE-FBDF-498C-AF5C-98B1E807AE0D}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Hangfire.Redis.Tests", "Hangfire.Redis.Tests\Hangfire.Redis.Tests.xproj", "{C082AF1C-CE27-4132-9363-19C05BDB7362}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF1C0F15-C4A6-495C-B239-54E072C6C946}"
-	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.Tests", "Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj", "{E8031950-A2BD-48C1-966F-7B9E3DC37631}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9DABE359-48C5-4910-A642-1CD6BBE95423}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DABE359-48C5-4910-A642-1CD6BBE95423}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DABE359-48C5-4910-A642-1CD6BBE95423}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DABE359-48C5-4910-A642-1CD6BBE95423}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C082AF1C-CE27-4132-9363-19C05BDB7362}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C082AF1C-CE27-4132-9363-19C05BDB7362}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C082AF1C-CE27-4132-9363-19C05BDB7362}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C082AF1C-CE27-4132-9363-19C05BDB7362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{830696FE-FBDF-498C-AF5C-98B1E807AE0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{830696FE-FBDF-498C-AF5C-98B1E807AE0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{830696FE-FBDF-498C-AF5C-98B1E807AE0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{830696FE-FBDF-498C-AF5C-98B1E807AE0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8031950-A2BD-48C1-966F-7B9E3DC37631}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8031950-A2BD-48C1-966F-7B9E3DC37631}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8031950-A2BD-48C1-966F-7B9E3DC37631}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8031950-A2BD-48C1-966F-7B9E3DC37631}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
