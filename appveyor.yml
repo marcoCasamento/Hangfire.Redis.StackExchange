@@ -29,8 +29,8 @@ nuget:
   account_feed: false
   project_feed: false
 test_script:
-- dotnet test "Hangfire.Redis.Tests" -f netcoreapp1.0
-- dotnet test "Hangfire.Redis.Tests" -f net451
+- dotnet test ".\Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj" -f netcoreapp1.0
+- dotnet test ".\Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj" -f net451
 #before_package:
 #- ps: nuget pack .\Hangfire.Redis.StackExchange\HangFire.Redis.StackExchange.nuspec -Version $env:APPVEYOR_BUILD_VERSION
 #deploy:
