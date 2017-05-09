@@ -3,11 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.StackExchange", "Hangfire.Redis.StackExchange\Hangfire.Redis.StackExchange.csproj", "{830696FE-FBDF-498C-AF5C-98B1E807AE0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.StackExchange", "Hangfire.Redis.StackExchange\Hangfire.Redis.StackExchange.csproj", "{830696FE-FBDF-498C-AF5C-98B1E807AE0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.Tests", "Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj", "{E8031950-A2BD-48C1-966F-7B9E3DC37631}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.Tests", "Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj", "{E8031950-A2BD-48C1-966F-7B9E3DC37631}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.StackExchange.StrongName", "Hangfire.Redis.StackExchange.StrongName\Hangfire.Redis.StackExchange.StrongName.csproj", "{69988936-D32A-4AAD-841E-E9623E08A8F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project Items", "Project Items", "{EC2121D8-8CDD-4B1E-8BFF-57402A338C4F}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		License.md = License.md
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
