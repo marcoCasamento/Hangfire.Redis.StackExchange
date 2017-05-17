@@ -1,15 +1,21 @@
 # Hangfire.Redis.StackExchange
 
-![Build Status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva/branch/master?svg=true)
-[![Nuget Badge](https://buildstats.info/nuget/Hangfire.Redis.StackExchange)](https://www.nuget.org/packages/Hangfire.Redis.StackExchange/)
+> HangFire Redis storage based on [HangFire.Redis](https://github.com/HangfireIO/Hangfire.Redis/) but using lovely [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) client.
 
-HangFire Redis storage based on [HangFire.Redis](https://github.com/HangfireIO/Hangfire.Redis/) but using lovely [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) client.
+[![Build Status](https://img.shields.io/appveyor/ci/marcoCasamento/Hangfire-Redis-StackExchange.svg)](https://ci.appveyor.com/project/marcoCasamento/Hangfire-Redis-StackExchange)
+
+| Package Name                                  | NuGet.org                                                                                                                                                             |
+|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Hangfire.Redis.StackExchange`                | [![Nuget Badge](https://img.shields.io/nuget/v/Hangfire.Redis.StackExchange.svg)](https://www.nuget.org/packages/Hangfire.Redis.StackExchange/)                       |
+| `Hangfire.Redis.StackExchange.StrongName`     | [![Nuget Badge](https://img.shields.io/nuget/v/Hangfire.Redis.StackExchange.StrongName.svg)](https://www.nuget.org/packages/Hangfire.Redis.StackExchange.StrongName/) |
 
 #### Highlights
 - Support for Hangfire Batches ([feature of Hangfire Pro](http://hangfire.io/blog/2015/04/17/hangfire-pro-1.2.0-released.html))
 - Efficient use of Redis resources thanks to ConnectionMultiplexer
 - Support for Redis Prefix, allow multiple Hangfire Instances against a single Redis DB
 - Allow customization of Succeeded and Failed lists size
+
+> Despite the name, `Hangfire.Redis.StackExchange.StrongName` is **not signed** because `Hangfire.Core` is not yet signed.
 
 ## Tutorial: Hangfire on Redis on ASP.NET Core MVC
 
@@ -45,7 +51,7 @@ public class Startup
 }
 ```
 
-> Warning: If you are using `Microsoft.Extensions.Caching.Redis` package, you will need to use `Hangfire.Redis.StackExchange.StrongName` instead, because the former package requires `StackExchange.Redis.StrongName` instead of `StackExchange.Redis`!!! 
+> **Attention:** If you are using `Microsoft.Extensions.Caching.Redis` package, you will need to use `Hangfire.Redis.StackExchange.StrongName` instead, because the former package requires `StackExchange.Redis.StrongName` instead of `StackExchange.Redis`!
 
 ### Configurations
 

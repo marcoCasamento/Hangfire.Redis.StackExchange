@@ -36,7 +36,8 @@
       - Configurable timeout for FetchNextJob (thanks to WebApelsin)
       1.6.5
       - .Net Core Support (thanks to Stefan Polyanszky)
-      - Aligned dependency to Hangfire.Core</PackageReleaseNotes>
+      - Aligned dependency to Hangfire.Core
+    </PackageReleaseNotes>
     <PackageTags>Hangfire Redis</PackageTags>
     <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
