@@ -51,6 +51,7 @@
     <Compile Include="..\Hangfire.Redis.StackExchange\DeletedStateHandler.cs" Link="DeletedStateHandler.cs" />
     <Compile Include="..\Hangfire.Redis.StackExchange\FailedStateHandler.cs" Link="FailedStateHandler.cs" />
     <Compile Include="..\Hangfire.Redis.StackExchange\FetchedJobsWatcher.cs" Link="FetchedJobsWatcher.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\ExpiredJobsWatcher.cs" Link="ExpiredJobsWatcher.cs" />
     <Compile Include="..\Hangfire.Redis.StackExchange\FetchedJobsWatcherOptions.cs" Link="FetchedJobsWatcherOptions.cs" />
     <Compile Include="..\Hangfire.Redis.StackExchange\HangFireRedisException.cs" Link="HangFireRedisException.cs" />
     <Compile Include="..\Hangfire.Redis.StackExchange\ProcessingStateHandler.cs" Link="ProcessingStateHandler.cs" />
