@@ -28,6 +28,7 @@ namespace Hangfire.Redis
         {
             InvisibilityTimeout = TimeSpan.FromMinutes(30);
             FetchTimeout = TimeSpan.FromMinutes(3);
+            ExpiryCheckInterval = TimeSpan.FromHours(1);
             Db = 0;
             Prefix = DefaultPrefix;
             SucceededListSize = 499;
@@ -36,6 +37,7 @@ namespace Hangfire.Redis
 
         public TimeSpan InvisibilityTimeout { get; set; }
         public TimeSpan FetchTimeout { get; set; }
+        public TimeSpan ExpiryCheckInterval { get; set; }
         public string Prefix { get; set; }
         public int Db { get; set; }
 
