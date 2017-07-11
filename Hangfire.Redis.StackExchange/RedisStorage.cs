@@ -32,8 +32,8 @@ namespace Hangfire.Redis
     {
         // Make sure in Redis Cluster all transaction are in the same slot !!
         internal static string Prefix = "{hangfire}:";
-        internal static int SucceededListSize = 499;
-        internal static int DeletedListSize = 499;
+        internal int SucceededListSize = 499;
+        internal int DeletedListSize = 499;
         private readonly string identity;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly RedisSubscription _subscription;
@@ -81,7 +81,9 @@ namespace Hangfire.Redis
             _invisibilityTimeout = options.InvisibilityTimeout;
             _fetchTimeout = options.FetchTimeout;
             ConnectionString = connectionMultiplexer.Configuration;
-
+            SucceededListSize = options.SucceededListSize;
+            DeletedListSize = options.DeletedListSize;
+            
             Db = options.Db;
 
             if (Prefix != options.Prefix)
