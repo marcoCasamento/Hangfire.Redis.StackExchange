@@ -409,6 +409,9 @@ namespace Hangfire.Redis
 
                 var historyList = redis.ListRange(RedisStorage.Prefix + string.Format("job:{0}:history", jobId))
 					.Select(x=> (string)x).ToList();
+                
+                // history is in wrong order, fix this
+                historyList.Reverse();
 
                 var history = historyList
                     .Select(JobHelper.FromJson<Dictionary<string, string>>)
