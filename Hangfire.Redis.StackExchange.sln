@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.StackExchang
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.Tests", "Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj", "{C082AF1C-CE27-4132-9363-19C05BDB7362}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.StackExchange.ConsoleSample", "Hangfire.Redis.StackExchange.ConsoleSample\Hangfire.Redis.StackExchange.ConsoleSample.csproj", "{42FEDA79-DECB-44DD-B094-A6E05D519777}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Private.Redis.StackExchange.MvcSample", "Hangfire.Private.Redis.StackExchange.MvcSample\Hangfire.Private.Redis.StackExchange.MvcSample.csproj", "{5B00BE66-0CE5-49CE-AD40-828A1EA43710}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{C082AF1C-CE27-4132-9363-19C05BDB7362}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C082AF1C-CE27-4132-9363-19C05BDB7362}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C082AF1C-CE27-4132-9363-19C05BDB7362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42FEDA79-DECB-44DD-B094-A6E05D519777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42FEDA79-DECB-44DD-B094-A6E05D519777}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42FEDA79-DECB-44DD-B094-A6E05D519777}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42FEDA79-DECB-44DD-B094-A6E05D519777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B00BE66-0CE5-49CE-AD40-828A1EA43710}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B00BE66-0CE5-49CE-AD40-828A1EA43710}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B00BE66-0CE5-49CE-AD40-828A1EA43710}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B00BE66-0CE5-49CE-AD40-828A1EA43710}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
