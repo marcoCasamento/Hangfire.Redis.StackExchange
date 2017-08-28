@@ -2,7 +2,7 @@ version: 1.6.7.{build}
 branches:
   only:
   - master
-image: Visual Studio 2015
+image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
 
@@ -29,8 +29,8 @@ nuget:
   account_feed: true
   project_feed: true
 test_script:
-- dotnet test "Hangfire.Redis.Tests" -f netcoreapp1.0
-- dotnet test "Hangfire.Redis.Tests" -f net451
+- dotnet test "Hangfire.Redis.Tests" -f netcoreapp2.0
+- dotnet test "Hangfire.Redis.Tests" -f net452
 before_package:
 - ps: nuget pack .\Hangfire.Redis.StackExchange\HangFire.Redis.StackExchange.nuspec -Version $env:APPVEYOR_BUILD_VERSION
 deploy:
