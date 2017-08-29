@@ -51,7 +51,7 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "job-id");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
 
                 var fetchedJob = new RedisFetchedJob(redis, "job-id", "my-queue");
 
@@ -59,7 +59,7 @@ namespace Hangfire.Redis.Tests
                 fetchedJob.RemoveFromQueue();
 
                 // Assert
-                Assert.Equal(0, redis.ListLength("hangfire:queue:my-queue:dequeued"));
+                Assert.Equal(0, redis.ListLength("{hangfire}:queue:my-queue:dequeued"));
             });
         }
 
@@ -69,8 +69,8 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-				redis.ListRightPush("hangfire:queue:my-queue:dequeued", "job-id");
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "another-job-id");
+				redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "another-job-id");
 
                 var fetchedJob = new RedisFetchedJob(redis, "job-id", "my-queue");
 
@@ -78,8 +78,8 @@ namespace Hangfire.Redis.Tests
                 fetchedJob.RemoveFromQueue();
 
                 // Assert
-                Assert.Equal(1, redis.ListLength("hangfire:queue:my-queue:dequeued"));
-                Assert.Equal("another-job-id", (string)redis.ListRightPop("hangfire:queue:my-queue:dequeued"));
+                Assert.Equal(1, redis.ListLength("{hangfire}:queue:my-queue:dequeued"));
+                Assert.Equal("another-job-id", (string)redis.ListRightPop("{hangfire}:queue:my-queue:dequeued"));
             });
         }
 
@@ -89,8 +89,8 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-				redis.ListRightPush("hangfire:queue:my-queue:dequeued", "job-id");
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "job-id");
+				redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
 
                 var fetchedJob = new RedisFetchedJob(redis, "job-id", "my-queue");
 
@@ -98,7 +98,7 @@ namespace Hangfire.Redis.Tests
                 fetchedJob.RemoveFromQueue();
 
                 // Assert
-                Assert.Equal(1, redis.ListLength("hangfire:queue:my-queue:dequeued"));
+                Assert.Equal(1, redis.ListLength("{hangfire}:queue:my-queue:dequeued"));
             });
         }
 
@@ -108,14 +108,14 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("hangfire:job:my-job", "Fetched", "value");
+                redis.HashSet("{hangfire}:job:my-job", "Fetched", "value");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
                 fetchedJob.RemoveFromQueue();
 
                 // Assert
-                Assert.False(redis.HashExists("hangfire:job:my-job", "Fetched"));
+                Assert.False(redis.HashExists("{hangfire}:job:my-job", "Fetched"));
             });
         }
 
@@ -125,14 +125,14 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("hangfire:job:my-job", "Checked", "value");
+                redis.HashSet("{hangfire}:job:my-job", "Checked", "value");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
                 fetchedJob.RemoveFromQueue();
 
                 // Assert
-                Assert.False(redis.HashExists("hangfire:job:my-job", "Checked"));
+                Assert.False(redis.HashExists("{hangfire}:job:my-job", "Checked"));
             });
         }
 
@@ -142,14 +142,14 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis => 
             {
                 // Arrange
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "my-job");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
                 fetchedJob.Requeue();
 
                 // Assert
-                Assert.Equal("my-job", (string)redis.ListRightPop("hangfire:queue:my-queue"));
+                Assert.Equal("my-job", (string)redis.ListRightPop("{hangfire}:queue:my-queue"));
             });
         }
 
@@ -159,8 +159,8 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-				redis.ListRightPush("hangfire:queue:my-queue", "another-job");
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "my-job");
+				redis.ListRightPush("{hangfire}:queue:my-queue", "another-job");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
 
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
@@ -168,7 +168,7 @@ namespace Hangfire.Redis.Tests
                 fetchedJob.Requeue();
 
                 // Assert - RPOP
-                Assert.Equal("my-job", (string)redis.ListRightPop("hangfire:queue:my-queue")); 
+                Assert.Equal("my-job", (string)redis.ListRightPop("{hangfire}:queue:my-queue")); 
             });
         }
 
@@ -178,14 +178,14 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "my-job");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
                 fetchedJob.Requeue();
 
                 // Assert
-                Assert.Equal(0, redis.ListLength("hangfire:queue:my-queue:dequeued"));
+                Assert.Equal(0, redis.ListLength("{hangfire}:queue:my-queue:dequeued"));
             });
         }
 
@@ -195,14 +195,14 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("hangfire:job:my-job", "Fetched", "value");
+                redis.HashSet("{hangfire}:job:my-job", "Fetched", "value");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
                 fetchedJob.Requeue();
 
                 // Assert
-                Assert.False(redis.HashExists("hangfire:job:my-job", "Fetched"));
+                Assert.False(redis.HashExists("{hangfire}:job:my-job", "Fetched"));
             });
         }
 
@@ -212,14 +212,14 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("hangfire:job:my-job", "Checked", "value");
+                redis.HashSet("{hangfire}:job:my-job", "Checked", "value");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
                 fetchedJob.Requeue();
 
                 // Assert
-                Assert.False(redis.HashExists("hangfire:job:my-job", "Checked"));
+                Assert.False(redis.HashExists("{hangfire}:job:my-job", "Checked"));
             });
         }
 
@@ -229,14 +229,14 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "my-job");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
                 fetchedJob.Dispose();
 
                 // Assert
-                Assert.Equal(1, redis.ListLength("hangfire:queue:my-queue"));
+                Assert.Equal(1, redis.ListLength("{hangfire}:queue:my-queue"));
             });
         }
 
@@ -246,8 +246,8 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-				redis.ListRightPush("hangfire:queue:my-queue:dequeued", "my-job");
-                redis.ListRightPush("hangfire:queue:my-queue:dequeued", "my-job");
+				redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
+                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
                 var fetchedJob = new RedisFetchedJob(redis, "my-job", "my-queue");
 
                 // Act
@@ -255,7 +255,7 @@ namespace Hangfire.Redis.Tests
                 fetchedJob.Dispose();
 
                 // Assert
-                Assert.Equal(0, redis.ListLength("hangfire:queue:my-queue"));
+                Assert.Equal(0, redis.ListLength("{hangfire}:queue:my-queue"));
             });
         }
 

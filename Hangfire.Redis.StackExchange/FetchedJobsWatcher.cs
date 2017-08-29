@@ -1,17 +1,17 @@
-// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
-// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+// Copyright ?2013-2015 Sergey Odinokov, Marco Casamento
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as 
-// published by the Free Software Foundation, either version 3 
+// it under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3
 // of the License, or any later version.
-// 
+//
 // Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public 
+//
+// You should have received a copy of the GNU Lesser General Public
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
@@ -76,13 +76,13 @@ namespace Hangfire.Redis
             Logger.DebugFormat(
                 "Acquiring the lock for the fetched list of the '{0}' queue...", queue);
 
-            using (new RedisLock(connection.Redis, string.Format(RedisStorage.Prefix + "queue:{0}:dequeued:lock", queue), _storage.Identity + Thread.CurrentThread.ManagedThreadId, _options.FetchedLockTimeout))
+            using (new RedisLock(connection.Redis, RedisStorage.Prefix + string.Format("queue:{0}:dequeued:lock", queue), _storage.Identity + Thread.CurrentThread.ManagedThreadId, _options.FetchedLockTimeout))
             {
                 Logger.DebugFormat(
                     "Looking for timed out jobs in the '{0}' queue...", queue);
 
                 var jobIds = connection.Redis.ListRange(
-                    string.Format(RedisStorage.Prefix + "queue:{0}:dequeued", queue));
+                    RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queue));
 
                 var requeued = 0;
 
@@ -111,7 +111,7 @@ namespace Hangfire.Redis
         private bool RequeueJobIfTimedOut(RedisConnection connection, string jobId, string queue)
         {
             var flags = connection.Redis.HashGet(
-                string.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                RedisStorage.Prefix + string.Format("job:{0}", jobId),
                 new RedisValue[]{"Fetched","Checked"});
 
             var fetched = flags[0];
@@ -120,7 +120,7 @@ namespace Hangfire.Redis
             if (string.IsNullOrEmpty(fetched) && string.IsNullOrEmpty(@checked))
             {
                 // If the job does not have these flags set, then it is
-                // in the implicit 'Fetched' state. This state has no 
+                // in the implicit 'Fetched' state. This state has no
                 // information about the time it was fetched. So we
                 // can not do anything with the job in this state, because
                 // there are two options:
@@ -138,7 +138,7 @@ namespace Hangfire.Redis
                 // is dead, and we'll re-queue the job.
 
                 connection.Redis.HashSet(
-                    string.Format(RedisStorage.Prefix + "job:{0}", jobId),
+                    RedisStorage.Prefix + string.Format("job:{0}", jobId),
                     "Checked",
                     JobHelper.SerializeDateTime(DateTime.UtcNow));
 

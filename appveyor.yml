@@ -1,4 +1,4 @@
-version: 1.6.7.{build}
+version: 1.7.0.{build}
 branches:
   only:
   - master
@@ -14,8 +14,8 @@ before_build:
 - dotnet restore
 build:
   project: Hangfire.Redis.StackExchange.sln
-  publish_nuget: true
-  publish_nuget_symbols: true
+  publish_nuget: false
+  publish_nuget_symbols: false
   verbosity: minimal
 artifacts:
 - path: .\**\*.nupkg
@@ -26,15 +26,14 @@ assembly_info:
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
 nuget:
-  account_feed: true
-  project_feed: true
+  account_feed: false
+  project_feed: false
 test_script:
-- dotnet test "Hangfire.Redis.Tests" -f netcoreapp2.0
-- dotnet test "Hangfire.Redis.Tests" -f net452
-before_package:
-- ps: nuget pack .\Hangfire.Redis.StackExchange\HangFire.Redis.StackExchange.nuspec -Version $env:APPVEYOR_BUILD_VERSION
-deploy:
-  provider: NuGet
-  api_key:
-    secure: hiLTKk/ItMBgRI5HCemg6kARhcAGs6/V/eQpymZAdwQOtHgD8waLBtb3VMdgPRYG
-  artifact: /.*\.nupkg/
+- dotnet test ".\Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj"
+#before_package:
+#- ps: nuget pack .\Hangfire.Redis.StackExchange\HangFire.Redis.StackExchange.nuspec -Version $env:APPVEYOR_BUILD_VERSION
+#deploy:
+#  provider: NuGet
+#  api_key:
+#    secure: hiLTKk/ItMBgRI5HCemg6kARhcAGs6/V/eQpymZAdwQOtHgD8waLBtb3VMdgPRYG
+#  artifact: /.*\.nupkg/

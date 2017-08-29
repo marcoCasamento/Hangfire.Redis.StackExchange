@@ -24,7 +24,12 @@ namespace Hangfire.Redis
         public void Apply(ApplyStateContext context, IWriteOnlyTransaction transaction)
         {
             transaction.InsertToList("deleted", context.BackgroundJob.Id);
-            transaction.TrimList("deleted", 0, RedisStorage.DeletedListSize);
+            
+            var storage = context.Storage as RedisStorage;
+            if (storage != null && storage.DeletedListSize > 0)
+            {
+                transaction.TrimList("deleted", 0, storage.DeletedListSize);
+            }
         }
 
         public void Unapply(ApplyStateContext context, IWriteOnlyTransaction transaction)

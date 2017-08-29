@@ -1,0 +1,77 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;net46;netstandard1.5</TargetFrameworks>
+    <PackageId>Hangfire.Redis.StackExchange.StrongName</PackageId>
+    <Version>1.7.0</Version>
+    <Authors>Marco Casamento</Authors>
+    <owners>marcocasamento</owners>
+    <!--
+      https://docs.microsoft.com/en-us/dotnet/articles/core/tools/project-json-to-csproj
+      There is no equivalent for the owners element in MSBuild. 
+    -->
+    <Product>Hangfire Redis Storage (strong name)</Product>
+    <PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
+    <Description>
+      Hangfire Redis Storage Based on Redis.StackExchange
+      See http://hangfire.io/ for some more info on the main project
+    </Description>
+    <Summary>
+      Enjoy Redis outstanding performance when fetch your jobs!
+      Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
+      It also supports Batches (Pro Feature)
+    </Summary>
+    <PackageReleaseNotes>
+      1.7.0
+      - Redis Cluster support (#42 thanks to gzpbx)
+      - Update to VS2017 (#48 thanks to ryanelian)
+      1.6.7
+      - Added support for Redis DB in the ConnectionString (#26 thanks to zivillian)
+      - Added constructor to RedisStorage that accepts a ConnectionMultiplexer instance (#23 thanks to sjwoodard)
+      - Lowered dependencies for net45 framework and aligned to Hangfire.Core (#21 thanks to zlangner)
+      - Fixed dependency casing of Hangfire.Core (#33 thanks to Poly3k)
+      - Fix Dispose of RedisSupscription (#32 thanks to WebApelsin)
+      - Fixed random failure of test NestLockDisposePreservesRoot
+      1.6.6
+      - Configurable timeout for FetchNextJob (thanks to WebApelsin)
+      1.6.5
+      - .Net Core Support (thanks to Stefan Polyanszky)
+      - Aligned dependency to Hangfire.Core
+    </PackageReleaseNotes>
+    <PackageTags>Hangfire Redis</PackageTags>
+    <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseUrl>http://www.gnu.org/licenses/lgpl-3.0.html</PackageLicenseUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <!--<SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Hangfire.Redis.StackExchange\DeletedStateHandler.cs" Link="DeletedStateHandler.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\FailedStateHandler.cs" Link="FailedStateHandler.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\FetchedJobsWatcher.cs" Link="FetchedJobsWatcher.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\FetchedJobsWatcherOptions.cs" Link="FetchedJobsWatcherOptions.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\HangFireRedisException.cs" Link="HangFireRedisException.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\ProcessingStateHandler.cs" Link="ProcessingStateHandler.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisConnection.cs" Link="RedisConnection.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisDatabaseExtensions.cs" Link="RedisDatabaseExtensions.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisFetchedJob.cs" Link="RedisFetchedJob.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisInfoKeys.cs" Link="RedisInfoKeys.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisLock.cs" Link="RedisLock.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisMonitoringApi.cs" Link="RedisMonitoringApi.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisStorage.cs" Link="RedisStorage.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisStorageExtensions.cs" Link="RedisStorageExtensions.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisStorageOptions.cs" Link="RedisStorageOptions.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisSubscription.cs" Link="RedisSubscription.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisWriteOnlyTransaction.cs" Link="RedisWriteOnlyTransaction.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\SucceededStateHandler.cs" Link="SucceededStateHandler.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HangFire.Core" Version="1.6.12" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.1" />
+  </ItemGroup>
+
+</Project>
