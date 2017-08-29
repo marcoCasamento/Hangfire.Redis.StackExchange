@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.Tests", "Han
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.StackExchange.ConsoleSample", "Hangfire.Redis.StackExchange.ConsoleSample\Hangfire.Redis.StackExchange.ConsoleSample.csproj", "{42FEDA79-DECB-44DD-B094-A6E05D519777}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Private.Redis.StackExchange.MvcSample", "Hangfire.Private.Redis.StackExchange.MvcSample\Hangfire.Private.Redis.StackExchange.MvcSample.csproj", "{5B00BE66-0CE5-49CE-AD40-828A1EA43710}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Redis.StackExchange.MvcSample", "Hangfire.Redis.StackExchange.MvcSample\Hangfire.Redis.StackExchange.MvcSample.csproj", "{5B00BE66-0CE5-49CE-AD40-828A1EA43710}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
