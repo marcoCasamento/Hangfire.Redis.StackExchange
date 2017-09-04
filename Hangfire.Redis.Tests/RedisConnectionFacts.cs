@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Moq;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -7,11 +8,19 @@ namespace Hangfire.Redis.Tests
 {
     public class RedisConnectionFacts
     {
+        private readonly RedisStorage _storage;
+
+        public RedisConnectionFacts()
+        {
+            var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
+            _storage = new RedisStorage(RedisUtils.GetHostAndPort(), options);
+        }
+
         [Fact, CleanRedis]
         public void GetStateData_ThrowsAnException_WhenJobIdIsNull()
         {
             UseConnection(
-                connection => Assert.Throws<ArgumentNullException>(
+                connection => Assert.Throws<ArgumentNullException>("jobId",
                     () => connection.GetStateData(null)));
         }
 
@@ -71,7 +80,8 @@ namespace Hangfire.Redis.Tests
         public void GetAllItemsFromSet_ThrowsAnException_WhenKeyIsNull()
         {
             UseConnection(connection =>
-                Assert.Throws<ArgumentNullException>(() => connection.GetAllItemsFromSet(null)));
+                Assert.Throws<ArgumentNullException>("key", 
+                    () => connection.GetAllItemsFromSet(null)));
         }
 
         [Fact, CleanRedis]
@@ -110,10 +120,8 @@ namespace Hangfire.Redis.Tests
         {
             UseConnection(connection =>
             {
-                var exception = Assert.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>("key",
                     () => connection.SetRangeInHash(null, new Dictionary<string, string>()));
-
-                Assert.Equal("key", exception.ParamName);
             });
         }
 
@@ -122,10 +130,8 @@ namespace Hangfire.Redis.Tests
         {
             UseConnection(connection =>
             {
-                var exception = Assert.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>("keyValuePairs",
                     () => connection.SetRangeInHash("some-hash", null));
-
-                Assert.Equal("keyValuePairs", exception.ParamName);
             });
         }
 
@@ -188,9 +194,9 @@ namespace Hangfire.Redis.Tests
         private void UseConnections(Action<IDatabase, RedisConnection> action)
         {
 			var redis = RedisUtils.CreateClient();
-            var subscription = new RedisSubscription(RedisUtils.CreateSubscriber());
+            var subscription = new RedisSubscription(_storage, RedisUtils.CreateSubscriber());
 
-            using (var connection = new RedisConnection(redis, subscription, Guid.NewGuid().ToString(), new RedisStorageOptions().FetchTimeout))
+            using (var connection = new RedisConnection(_storage, redis, subscription, Guid.NewGuid().ToString(), new RedisStorageOptions().FetchTimeout))
             {
 				action(redis, connection);
             }
@@ -199,9 +205,9 @@ namespace Hangfire.Redis.Tests
         private void UseConnection(Action<RedisConnection> action)
         {
             var redis = RedisUtils.CreateClient();
-            var subscription = new RedisSubscription(RedisUtils.CreateSubscriber());
+            var subscription = new RedisSubscription(_storage, RedisUtils.CreateSubscriber());
 
-            using (var connection = new RedisConnection(redis, subscription, Guid.NewGuid().ToString(), new RedisStorageOptions().FetchTimeout))
+            using (var connection = new RedisConnection(_storage, redis, subscription, Guid.NewGuid().ToString(), new RedisStorageOptions().FetchTimeout))
             {
 				action(connection);
             }

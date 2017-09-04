@@ -24,28 +24,22 @@ namespace Hangfire.Redis.Tests
         [Fact]
         public void Ctor_ThrowsAnException_WhenStorageIsNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(
+            Assert.Throws<ArgumentNullException>("storage",
                 () => new FetchedJobsWatcher(null, InvisibilityTimeout));
-
-            Assert.Equal("storage", exception.ParamName);
         }
 
         [Fact]
         public void Ctor_ThrowsAnException_WhenInvisibilityTimeoutIsZero()
         {
-            var exception = Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentOutOfRangeException>("invisibilityTimeout",
                 () => new FetchedJobsWatcher(_storage, TimeSpan.Zero));
-
-            Assert.Equal("invisibilityTimeout", exception.ParamName);
         }
 
         [Fact]
         public void Ctor_ThrowsAnException_WhenInvisibilityTimeoutIsNegative()
         {
-            var exception = Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentOutOfRangeException>("invisibilityTimeout",
                 () => new FetchedJobsWatcher(_storage, TimeSpan.FromSeconds(-1)));
-
-            Assert.Equal("invisibilityTimeout", exception.ParamName);
         }
 
         [Fact]

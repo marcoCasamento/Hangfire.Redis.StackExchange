@@ -10,14 +10,32 @@ namespace Hangfire.Redis.Tests
 {
     public class RedisWriteOnlyTransactionFacts
     {
+        private readonly RedisStorage _storage;
+        private readonly Mock<ITransaction> _transaction;
+
+        public RedisWriteOnlyTransactionFacts()
+        {
+            var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
+            _storage = new RedisStorage(RedisUtils.GetHostAndPort(), options);
+
+            _transaction = new Mock<ITransaction>();
+        }
+
+        [Fact]
+        public void Ctor_ThrowsAnException_WhenStorageIsNull()
+        {
+            Assert.Throws<ArgumentNullException>("storage",
+                () => new RedisWriteOnlyTransaction(null, _transaction.Object));
+        }
+
         [Fact]
         public void Ctor_ThrowsAnException_WhenTransactionIsNull()
         {
-            Assert.Throws<ArgumentNullException>(
-                () => new RedisWriteOnlyTransaction(null));
+            Assert.Throws<ArgumentNullException>("transaction",
+                () => new RedisWriteOnlyTransaction(_storage, null));
         }
 
-		[Fact, CleanRedis]
+        [Fact, CleanRedis]
 		public void ExpireJob_SetsExpirationDateForAllRelatedKeys()
 		{
 			UseConnection(redis =>
@@ -324,10 +342,8 @@ namespace Hangfire.Redis.Tests
         {
             UseConnection(redis =>
             {
-                var exception = Assert.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>("key",
                     () => Commit(redis, x => x.SetRangeInHash(null, new Dictionary<string, string>())));
-
-                Assert.Equal("key", exception.ParamName);
             });
         }
 
@@ -336,10 +352,8 @@ namespace Hangfire.Redis.Tests
         {
             UseConnection(redis =>
             {
-                var exception = Assert.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>("keyValuePairs",
                     () => Commit(redis, x => x.SetRangeInHash("some-hash", null)));
-
-                Assert.Equal("keyValuePairs", exception.ParamName);
             });
         }
 
@@ -384,9 +398,9 @@ namespace Hangfire.Redis.Tests
             });
         }
 
-        private static void Commit(IDatabase redis, Action<RedisWriteOnlyTransaction> action)
+        private void Commit(IDatabase redis, Action<RedisWriteOnlyTransaction> action)
         {
-            using (var transaction = new RedisWriteOnlyTransaction(redis.CreateTransaction()))
+            using (var transaction = new RedisWriteOnlyTransaction(_storage, redis.CreateTransaction()))
             {
                 action(transaction);
                 transaction.Commit();

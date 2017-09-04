@@ -36,7 +36,7 @@ namespace Hangfire
             RedisStorageOptions options = null)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            if (connectionMultiplexer == null) throw new ArgumentNullException("connectionMultiplexer");
+            if (connectionMultiplexer == null) throw new ArgumentNullException(nameof(connectionMultiplexer));
             var storage = new RedisStorage(connectionMultiplexer, options);
             return configuration.UseStorage(storage);
         }

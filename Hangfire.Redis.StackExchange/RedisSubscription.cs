@@ -6,20 +6,27 @@ using Hangfire.Annotations;
 
 namespace Hangfire.Redis
 {
+#pragma warning disable 618
     internal class RedisSubscription : IServerComponent
+#pragma warning restore 618
     {
-        internal static string Channel = string.Format("{0}JobFetchChannel", RedisStorage.Prefix);
-
         private readonly ManualResetEvent _mre = new ManualResetEvent(false);
+        private readonly RedisStorage _storage;
         private readonly ISubscriber _subscriber;
 
-        public RedisSubscription(ISubscriber subscriber)
+        public RedisSubscription([NotNull] RedisStorage storage, [NotNull] ISubscriber subscriber)
         {
-            if (subscriber == null) throw new ArgumentNullException("subscriber");
+            if (storage == null) throw new ArgumentNullException(nameof(storage));
+            if (subscriber == null) throw new ArgumentNullException(nameof(subscriber));
+
+            _storage = storage;
+            Channel = _storage.GetRedisKey("JobFetchChannel");
+
             _subscriber = subscriber;
             _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());
         }
 
+        public string Channel { get; }
 
         public void WaitForJob(TimeSpan timeout, CancellationToken cancellationToken)
         {

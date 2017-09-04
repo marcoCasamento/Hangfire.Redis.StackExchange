@@ -23,7 +23,6 @@ using Hangfire.Storage;
 using Hangfire.Annotations;
 using Hangfire.Logging;
 using StackExchange.Redis;
-using System.Net;
 using Hangfire.Dashboard;
 
 namespace Hangfire.Redis
@@ -31,94 +30,74 @@ namespace Hangfire.Redis
     public class RedisStorage : JobStorage
     {
         // Make sure in Redis Cluster all transaction are in the same slot !!
-        internal static string Prefix = "{hangfire}:";
-        internal int SucceededListSize = 499;
-        internal int DeletedListSize = 499;
-        private readonly string identity;
+        private readonly RedisStorageOptions _options;
+        private readonly string _identity;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly RedisSubscription _subscription;
-        private TimeSpan _invisibilityTimeout;
-        private TimeSpan _fetchTimeout;
-        private TimeSpan _expiryCheckInterval;
 
         public RedisStorage()
             : this("localhost:6379")
         {
         }
+
         public RedisStorage(IConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options = null)
         {
-            if (connectionMultiplexer == null) throw new ArgumentNullException("connectionMultiplexer");
-            if (options == null) options = new RedisStorageOptions();
+            if (connectionMultiplexer == null) throw new ArgumentNullException(nameof(connectionMultiplexer));
+
+            _options = options ?? new RedisStorageOptions();
 
             _connectionMultiplexer = connectionMultiplexer;
 
-            Init(_connectionMultiplexer, options);
-
-            identity = Guid.NewGuid().ToString();
-            _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
-
+            _identity = Guid.NewGuid().ToString();
+            _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
         }
 
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
         {
-            if (connectionString == null) throw new ArgumentNullException("connectionString");
+            if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
+
             var redisOptions = ConfigurationOptions.Parse(connectionString);
-            if (options == null) options = new RedisStorageOptions
+
+            _options = options ?? new RedisStorageOptions
             {
-                Db = redisOptions.DefaultDatabase.GetValueOrDefault(0)
+                Db = redisOptions.DefaultDatabase ?? 0
             };
 
             _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
             _connectionMultiplexer.PreserveAsyncOrder = false;
-
-            Init(_connectionMultiplexer, options);
-
-            identity = Guid.NewGuid().ToString();
-            _subscription = new RedisSubscription(_connectionMultiplexer.GetSubscriber());
-
-        }
-        private void Init(IConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options)
-        {
-            _invisibilityTimeout = options.InvisibilityTimeout;
-            _fetchTimeout = options.FetchTimeout;
-            _expiryCheckInterval = options.ExpiryCheckInterval;
-            ConnectionString = connectionMultiplexer.Configuration;
-            SucceededListSize = options.SucceededListSize;
-            DeletedListSize = options.DeletedListSize;
             
-            Db = options.Db;
-
-            if (Prefix != options.Prefix)
-            {
-                Prefix = options.Prefix;
-            }
+            _identity = Guid.NewGuid().ToString();
+            _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
         }
 
-        public string ConnectionString { get; private set; }
-        public int Db { get; private set; }
+        public string ConnectionString => _connectionMultiplexer.Configuration;
 
-        internal string Identity
-        {
-            get
-            {
-                return identity;
-            }
-        }
+        public int Db => _options.Db;
+        
+        internal int SucceededListSize => _options.SucceededListSize;
+
+        internal int DeletedListSize => _options.DeletedListSize;
+
+        internal string Identity => _identity;
+
+        internal string SubscriptionChannel => _subscription.Channel;
 
         public override IMonitoringApi GetMonitoringApi()
         {
-            return new RedisMonitoringApi(_connectionMultiplexer.GetDatabase(Db));
+            return new RedisMonitoringApi(this, _connectionMultiplexer.GetDatabase(Db));
         }
 
         public override IStorageConnection GetConnection()
         {
-            return new RedisConnection(_connectionMultiplexer.GetDatabase(Db), _subscription, identity, _fetchTimeout);
+            return new RedisConnection(this, _connectionMultiplexer.GetDatabase(Db), _subscription, _identity, _options.FetchTimeout);
         }
 
+#pragma warning disable 618
         public override IEnumerable<IServerComponent> GetComponents()
+#pragma warning restore 618
         {
-            yield return new FetchedJobsWatcher(this, _invisibilityTimeout);
-            yield return new ExpiredJobsWatcher(this, _expiryCheckInterval);
+            yield return new FetchedJobsWatcher(this, _options.InvisibilityTimeout);
+            yield return new ExpiredJobsWatcher(this, _options.ExpiryCheckInterval);
             yield return _subscription;
         }
 
@@ -160,11 +139,11 @@ namespace Hangfire.Redis
             return string.Format("redis://{0}/{1}", ConnectionString, Db);
         }
 
-        internal static string GetRedisKey([NotNull] string key)
+        internal string GetRedisKey([NotNull] string key)
         {
-            if (key == null) throw new ArgumentNullException("key");
+            if (key == null) throw new ArgumentNullException(nameof(key));
 
-            return Prefix + key;
+            return _options.Prefix + key;
         }
     }
 }

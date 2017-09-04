@@ -23,7 +23,9 @@ using StackExchange.Redis;
 
 namespace Hangfire.Redis
 {
+#pragma warning disable 618
     internal class FetchedJobsWatcher : IServerComponent
+#pragma warning restore 618
     {
         private readonly TimeSpan _invisibilityTimeout;
         private static readonly ILog Logger = LogProvider.GetLogger(typeof(FetchedJobsWatcher));
@@ -41,12 +43,10 @@ namespace Hangfire.Redis
             TimeSpan invisibilityTimeout,
             FetchedJobsWatcherOptions options)
         {
-            if (storage == null) throw new ArgumentNullException("storage");
-            if (options == null) throw new ArgumentNullException("options");
+            if (storage == null) throw new ArgumentNullException(nameof(storage));
+            if (options == null) throw new ArgumentNullException(nameof(options));
             if (invisibilityTimeout.Ticks <= 0)
-            {
-                throw new ArgumentOutOfRangeException("invisibilityTimeout", "Invisibility timeout duration should be positive.");
-            }
+                throw new ArgumentOutOfRangeException(nameof(invisibilityTimeout), "Invisibility timeout duration should be positive.");
 
             _storage = storage;
             _invisibilityTimeout = invisibilityTimeout;
@@ -57,8 +57,7 @@ namespace Hangfire.Redis
         {
             using (var connection = (RedisConnection)_storage.GetConnection())
             {
-                var queues = connection.Redis.SetMembers(
-                    RedisStorage.Prefix + "queues");
+                var queues = connection.Redis.SetMembers(_storage.GetRedisKey("queues"));
 
                 foreach (var queue in queues)
                 {
@@ -76,13 +75,12 @@ namespace Hangfire.Redis
             Logger.DebugFormat(
                 "Acquiring the lock for the fetched list of the '{0}' queue...", queue);
 
-            using (new RedisLock(connection.Redis, RedisStorage.Prefix + string.Format("queue:{0}:dequeued:lock", queue), _storage.Identity + Thread.CurrentThread.ManagedThreadId, _options.FetchedLockTimeout))
+            using (new RedisLock(connection.Redis, _storage.GetRedisKey($"queue:{queue}:dequeued:lock"), _storage.Identity + Thread.CurrentThread.ManagedThreadId, _options.FetchedLockTimeout))
             {
                 Logger.DebugFormat(
                     "Looking for timed out jobs in the '{0}' queue...", queue);
 
-                var jobIds = connection.Redis.ListRange(
-                    RedisStorage.Prefix + string.Format("queue:{0}:dequeued", queue));
+                var jobIds = connection.Redis.ListRange(_storage.GetRedisKey($"queue:{queue}:dequeued"));
 
                 var requeued = 0;
 
@@ -111,8 +109,8 @@ namespace Hangfire.Redis
         private bool RequeueJobIfTimedOut(RedisConnection connection, string jobId, string queue)
         {
             var flags = connection.Redis.HashGet(
-                RedisStorage.Prefix + string.Format("job:{0}", jobId),
-                new RedisValue[]{"Fetched","Checked"});
+                _storage.GetRedisKey($"job:{jobId}"),
+                new RedisValue[] { "Fetched", "Checked" });
 
             var fetched = flags[0];
             var @checked = flags[1];
@@ -138,7 +136,7 @@ namespace Hangfire.Redis
                 // is dead, and we'll re-queue the job.
 
                 connection.Redis.HashSet(
-                    RedisStorage.Prefix + string.Format("job:{0}", jobId),
+                    _storage.GetRedisKey($"job:{jobId}"),
                     "Checked",
                     JobHelper.SerializeDateTime(DateTime.UtcNow));
 
@@ -149,7 +147,7 @@ namespace Hangfire.Redis
             {
                 if (TimedOutByFetchedTime(fetched) || TimedOutByCheckedTime(fetched, @checked))
                 {
-                    var fetchedJob = new RedisFetchedJob(connection.Redis, jobId, queue);
+                    var fetchedJob = new RedisFetchedJob(_storage, connection.Redis, jobId, queue);
                     fetchedJob.Dispose();
 
                     return true;
