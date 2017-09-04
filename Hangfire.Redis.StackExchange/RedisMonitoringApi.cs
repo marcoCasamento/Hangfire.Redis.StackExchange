@@ -191,13 +191,12 @@ namespace Hangfire.Redis
 
                 foreach (var serverName in serverNames)
                 {
-                    var name = serverName;
-                    servers.Add(name,
-                        redis.HashGet(_storage.GetRedisKey($"server:{name}"), new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
+                    servers.Add(serverName,
+                        redis.HashGet(_storage.GetRedisKey($"server:{serverName}"), new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
                             .ToStringArray().ToList()
                         );
-                    queues.Add(name,
-                        redis.ListRange(_storage.GetRedisKey($"server:{name}:queues"))
+                    queues.Add(serverName,
+                        redis.ListRange(_storage.GetRedisKey($"server:{serverName}:queues"))
                             .ToStringArray().ToList()
                         );
                 }
@@ -636,8 +635,7 @@ namespace Hangfire.Redis
 				var i = 8;
                 foreach (var queue in queues)
                 {
-                    var queueName = queue;
-                    tasks[i] = pipeline.ListLengthAsync(_storage.GetRedisKey($"queue:{queueName}"), CommandFlags.HighPriority)
+                    tasks[i] = pipeline.ListLengthAsync(_storage.GetRedisKey($"queue:{queue}"), CommandFlags.HighPriority)
 						.ContinueWith(x => { lock (stats) { stats.Enqueued += x.Result; } });
 					i++;
                 }

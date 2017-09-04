@@ -80,10 +80,9 @@ namespace Hangfire.Redis
 
             foreach (var queue in context.Queues)
             {
-                var queue1 = queue;
                 transaction.ListRightPushAsync(
                     _storage.GetRedisKey($"server:{serverId}:queues"),
-                    queue1);
+                    queue);
             }
 
             transaction.Execute();
@@ -384,9 +383,8 @@ namespace Hangfire.Redis
             
             foreach (var serverName in serverNames)
             {
-                var name = serverName;
-                var srv = Redis.HashGet(_storage.GetRedisKey($"server:{name}"), new RedisValue[] { "StartedAt", "Heartbeat" });
-                heartbeats.Add(name,
+                var srv = Redis.HashGet(_storage.GetRedisKey($"server:{serverName}"), new RedisValue[] { "StartedAt", "Heartbeat" });
+                heartbeats.Add(serverName,
                                 new Tuple<DateTime, DateTime?>(
                                 JobHelper.DeserializeDateTime(srv[0]),
                                 JobHelper.DeserializeNullableDateTime(srv[1])));
