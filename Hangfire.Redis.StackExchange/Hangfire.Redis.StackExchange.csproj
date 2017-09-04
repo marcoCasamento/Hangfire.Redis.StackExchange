@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>net45;net46;netstandard1.5</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
-    <Version>1.7.0</Version>
-    <Authors>Marco Casamento</Authors>
+    <Version>1.7.1</Version>
+    <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
       https://docs.microsoft.com/en-us/dotnet/articles/core/tools/project-json-to-csproj
@@ -21,7 +21,8 @@
       Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
       It also supports Batches (Pro Feature)
     </Summary>
-    <PackageReleaseNotes>
+    <PackageReleaseNotes>1.7.1
+      - Add expired jobs watcher to cleanup succeeded/deleted lists /thanks to pieceofsummer 
       1.7.0
       - Redis Cluster support (#42 thanks to gzpbx)
       - Update to VS2017 (#48 thanks to ryanelian)
@@ -37,7 +38,7 @@
       1.6.5
       - .Net Core Support (thanks to Stefan Polyanszky)
       - Aligned dependency to Hangfire.Core
-    </PackageReleaseNotes>
+</PackageReleaseNotes>
     <PackageTags>Hangfire Redis</PackageTags>
     <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
