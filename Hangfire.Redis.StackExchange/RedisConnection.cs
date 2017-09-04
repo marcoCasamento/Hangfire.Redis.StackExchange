@@ -78,15 +78,14 @@ namespace Hangfire.Redis
                         { "StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow) },
                     }.ToHashEntries());
 
-            foreach (var queue in context.Queues)
+            if (context.Queues.Length > 0)
             {
                 transaction.ListRightPushAsync(
                     _storage.GetRedisKey($"server:{serverId}:queues"),
-                    queue);
+                    context.Queues.ToRedisValues());
             }
 
             transaction.Execute();
-
         }
 
         public override string CreateExpiredJob(
@@ -237,27 +236,12 @@ namespace Hangfire.Redis
             var storedData = Redis.HashGetAll(_storage.GetRedisKey($"job:{jobId}"));
             if (storedData.Length == 0) return null;
 
-            string type = null;
-            string method = null;
-            string parameterTypes = null;
-            string arguments = null;
-            string createdAt = null;
-
-            if (storedData.ContainsKey("Type"))
-                type = storedData.First(x => x.Name == "Type").Value;
-
-            if (storedData.ContainsKey("Method"))
-                method = storedData.First(x => x.Name == "Method").Value;
-
-            if (storedData.ContainsKey("ParameterTypes"))
-                parameterTypes = storedData.First(x => x.Name == "ParameterTypes").Value;
-
-            if (storedData.ContainsKey("Arguments"))
-                arguments = storedData.First(x => x.Name == "Arguments").Value;
-
-            if (storedData.ContainsKey("CreatedAt"))
-                createdAt = storedData.First(x => x.Name == "CreatedAt").Value;
-
+            string type = storedData.FirstOrDefault(x => x.Name == "Type").Value;
+            string method = storedData.FirstOrDefault(x => x.Name == "Method").Value;
+            string parameterTypes = storedData.FirstOrDefault(x => x.Name == "ParameterTypes").Value;
+            string arguments = storedData.FirstOrDefault(x => x.Name == "Arguments").Value;
+            string createdAt = storedData.FirstOrDefault(x => x.Name == "CreatedAt").Value;
+            
             Job job = null;
             JobLoadException loadException = null;
 
@@ -275,7 +259,7 @@ namespace Hangfire.Redis
             return new JobData
             {
                 Job = job,
-                State = storedData.ContainsKey("State") ? (string)storedData.First(x => x.Name == "State").Value : null,
+                State = storedData.FirstOrDefault(x => x.Name == "State").Value,
                 CreatedAt = JobHelper.DeserializeNullableDateTime(createdAt) ?? DateTime.MinValue,
                 LoadException = loadException
             };
@@ -334,7 +318,7 @@ namespace Hangfire.Redis
             return new StateData
             {
                 Name = entries.First(x => x.Name == "State").Value,
-                Reason = entries.ContainsKey("Reason") ? (string)entries.First(x => x.Name == "Reason").Value : null,
+                Reason = entries.FirstOrDefault(x => x.Name == "Reason").Value,
                 Data = stateData
             };
         }

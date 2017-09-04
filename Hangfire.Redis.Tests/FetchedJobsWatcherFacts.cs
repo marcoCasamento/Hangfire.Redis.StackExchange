@@ -2,6 +2,7 @@
 using System.Threading;
 using Hangfire.Common;
 using Xunit;
+using System.Linq;
 
 namespace Hangfire.Redis.Tests
 {
@@ -64,7 +65,7 @@ namespace Hangfire.Redis.Tests
             Assert.Equal("my-job", listEntry);
 
             var job = redis.HashGetAll("{hangfire}:job:my-job");
-            Assert.False(job.ContainsKey("Fetched"));
+            Assert.False(job.Any(x => x.Name == "Fetched"));
         }
 
         [Fact, CleanRedis]
@@ -104,7 +105,7 @@ namespace Hangfire.Redis.Tests
             Assert.Equal(1, redis.ListLength("{hangfire}:queue:my-queue"));
 
             var job = redis.HashGetAll("{hangfire}:job:my-job");
-            Assert.False(job.ContainsKey("Checked"));
+            Assert.False(job.Any(x => x.Name == "Checked"));
         }
 
         [Fact, CleanRedis]

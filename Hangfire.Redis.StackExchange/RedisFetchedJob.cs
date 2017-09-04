@@ -65,7 +65,7 @@ namespace Hangfire.Redis
 			var transaction = _redis.CreateTransaction();
 
             transaction.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
-
+            
             RemoveFromFetchedList(transaction);
 
             transaction.Execute();
@@ -88,8 +88,7 @@ namespace Hangfire.Redis
         private void RemoveFromFetchedList(ITransaction transaction)
         {
             transaction.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
-            transaction.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), "Fetched");
-            transaction.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), "Checked");
+            transaction.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
         }
     }
 }

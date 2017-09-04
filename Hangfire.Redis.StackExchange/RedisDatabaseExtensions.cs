@@ -36,6 +36,14 @@ namespace Hangfire.Redis
 			}
 			return hashEntry;
 		}
+
+        public static RedisValue[] ToRedisValues(this IEnumerable<string> values)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            return values.Select(x => (RedisValue)x).ToArray();
+        }
 		
 		//public static Dictionary<string, string> ToStringDictionary(this HashEntry[] entries)
 		//{
@@ -45,11 +53,6 @@ namespace Hangfire.Redis
 		//	return dictionary;
 		//}
 		
-		public static bool ContainsKey(this HashEntry[] hashEntries, RedisValue key)
-		{
-			return hashEntries.Any(x=> x.Name == key);
-		}
-
         public static Dictionary<string, string> GetValuesMap(this IDatabase redis, string[] keys)
 		{
 			var redisKeyArr = keys.Select(x => (RedisKey)x).ToArray();

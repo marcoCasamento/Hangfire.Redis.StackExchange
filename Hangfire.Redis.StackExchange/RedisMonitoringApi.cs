@@ -420,17 +420,14 @@ namespace Hangfire.Redis
 
                 var hiddenProperties = new[] { "Type", "Method", "ParameterTypes", "Arguments", "State", "CreatedAt", "Fetched" };
 
-                var historyList = redis
+                var history = redis
                     .ListRange(_storage.GetRedisKey($"job:{jobId}:history"))
-					.Select(x => (string)x)
-                    .ToList();
-                
-                // history is in wrong order, fix this
-                historyList.Reverse();
-
-                var history = historyList
+					.ToStringArray()
                     .Select(JobHelper.FromJson<Dictionary<string, string>>)
                     .ToList();
+
+                // history is in wrong order, fix this
+                history.Reverse();
 
                 var stateHistory = new List<StateHistoryDto>(history.Count);
                 foreach (var entry in history)
@@ -537,12 +534,11 @@ namespace Hangfire.Redis
         private JobList<T> GetJobsWithProperties<T>(
             [NotNull] IDatabase redis,
             [NotNull] string[] jobIds,
-            [NotNull] string[] properties,
+            string[] properties,
             string[] stateProperties,
-            [NotNull] Func<Job, List<string>, List<string>, T> selector)
+            [NotNull] Func<Job, IReadOnlyList<string>, IReadOnlyList<string>, T> selector)
         {
             if (jobIds == null) throw new ArgumentNullException(nameof(jobIds));
-            if (properties == null) throw new ArgumentNullException(nameof(properties));
             if (selector == null) throw new ArgumentNullException(nameof(selector));
 
             if (jobIds.Length == 0) return new JobList<T>(new List<KeyValuePair<string, T>>());
@@ -552,22 +548,25 @@ namespace Hangfire.Redis
 
             properties = properties ?? new string[0];
 
+            var extendedProperties = properties
+                .Concat(new[] { "Type", "Method", "ParameterTypes", "Arguments" })
+                .ToRedisValues();
+            
             var pipeline = redis.CreateBatch();
 			var tasks = new List<Task>(jobIds.Length * 2);
             foreach (var jobId in jobIds.Distinct())
             {
 				var jobTask = pipeline.HashGetAsync(
                         _storage.GetRedisKey($"job:{jobId}"),
-                        properties.Union(new[] { "Type", "Method", "ParameterTypes", "Arguments" })
-                    .Select(x => (RedisValue)x)
-                    .ToArray());
+                        extendedProperties);
 				tasks.Add(jobTask);
                 jobs.Add(jobId, jobTask);
+
 				if (stateProperties != null)
 				{
                     var taskStateJob = pipeline.HashGetAsync(
                         _storage.GetRedisKey($"job:{jobId}:state"), 
-                        stateProperties.Select(x => (RedisValue)x).ToArray());
+                        stateProperties.ToRedisValues());
 					tasks.Add(taskStateJob);
                     states.Add(jobId, taskStateJob);
 				}
@@ -577,23 +576,22 @@ namespace Hangfire.Redis
 			Task.WaitAll(tasks.ToArray());
 
 			var jobList = new JobList<T>(jobIds
-                .Select(x => new
+                .Select(jobId => new
                 {
-                    JobId = x,
-                    Job = jobs[x].Result.ToStringArray().ToList(),
+                    JobId = jobId,
+                    Job = jobs[jobId].Result.ToStringArray(),
                     Method = TryToGetJob(
-                        jobs[x].Result[properties.Length],
-                        jobs[x].Result[properties.Length + 1],
-                        jobs[x].Result[properties.Length + 2],
-                        jobs[x].Result[properties.Length + 3]),
-                    State = states.ContainsKey(x) ? states[x].Result.ToStringArray().ToList() : null
+                        jobs[jobId].Result[properties.Length],
+                        jobs[jobId].Result[properties.Length + 1],
+                        jobs[jobId].Result[properties.Length + 2],
+                        jobs[jobId].Result[properties.Length + 3]),
+                    State = stateProperties != null ? states[jobId].Result.ToStringArray() : null
                 })
                 .Select(x => new KeyValuePair<string, T>(
                     x.JobId,
-                    x.Job.TrueForAll(y => y == null)
-                        ? default(T)
-                        : selector(x.Method, x.Job, x.State)))
-                .ToList());
+                    x.Job.Any(y => y != null) 
+                        ? selector(x.Method, x.Job, x.State) 
+                        : default(T))));
 			return jobList;
         }
 
