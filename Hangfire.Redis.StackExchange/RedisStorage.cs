@@ -39,6 +39,7 @@ namespace Hangfire.Redis
         private readonly RedisSubscription _subscription;
         private TimeSpan _invisibilityTimeout;
         private TimeSpan _fetchTimeout;
+        private TimeSpan _expiryCheckInterval;
 
         public RedisStorage()
             : this("localhost:6379")
@@ -80,6 +81,7 @@ namespace Hangfire.Redis
         {
             _invisibilityTimeout = options.InvisibilityTimeout;
             _fetchTimeout = options.FetchTimeout;
+            _expiryCheckInterval = options.ExpiryCheckInterval;
             ConnectionString = connectionMultiplexer.Configuration;
             SucceededListSize = options.SucceededListSize;
             DeletedListSize = options.DeletedListSize;
@@ -116,6 +118,7 @@ namespace Hangfire.Redis
         public override IEnumerable<IServerComponent> GetComponents()
         {
             yield return new FetchedJobsWatcher(this, _invisibilityTimeout);
+            yield return new ExpiredJobsWatcher(this, _expiryCheckInterval);
             yield return _subscription;
         }
 
