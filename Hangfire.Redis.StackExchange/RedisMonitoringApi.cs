@@ -554,7 +554,7 @@ namespace Hangfire.Redis
 
             var pipeline = redis.CreateBatch();
 			var tasks = new List<Task>(jobIds.Length * 2);
-            foreach (var jobId in jobIds)
+            foreach (var jobId in jobIds.Distinct())
             {
 				var jobTask = pipeline.HashGetAsync(
                         _storage.GetRedisKey($"job:{jobId}"),
