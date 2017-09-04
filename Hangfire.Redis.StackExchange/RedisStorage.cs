@@ -122,7 +122,7 @@ namespace Hangfire.Redis
             yield return _subscription;
         }
 
-        public DashboardMetric GetDashboardMetricFromRedisInfo(string title, string key)
+        public static DashboardMetric GetDashboardMetricFromRedisInfo(string title, string key)
         {
             return new DashboardMetric("redis:" + key, title, (razorPage) =>
             {
