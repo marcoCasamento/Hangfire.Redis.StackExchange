@@ -25,34 +25,32 @@ namespace Hangfire.Redis.Tests
         [Fact]
         public void Ctor_ThrowsAnException_WhenStorageIsNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(
+            Assert.Throws<ArgumentNullException>("storage",
                 () => new ExpiredJobsWatcher(null, CheckInterval));
-
-            Assert.Equal("storage", exception.ParamName);
         }
 
         [Fact]
         public void Ctor_ThrowsAnException_WhenCheckIntervalIsZero()
         {
-            var exception = Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentOutOfRangeException>("checkInterval",
                 () => new ExpiredJobsWatcher(_storage, TimeSpan.Zero));
-
-            Assert.Equal("checkInterval", exception.ParamName);
         }
 
         [Fact]
         public void Ctor_ThrowsAnException_WhenCheckIntervalIsNegative()
         {
-            var exception = Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentOutOfRangeException>("checkInterval",
                 () => new ExpiredJobsWatcher(_storage, TimeSpan.FromSeconds(-1)));
-
-            Assert.Equal("checkInterval", exception.ParamName);
         }
 
         [Fact, CleanRedis]
         public void Execute_DeletesNonExistingJobs()
         {
             var redis = RedisUtils.CreateClient();
+
+            Assert.Equal(0, redis.ListLength("{hangfire}:succeeded"));
+            Assert.Equal(0, redis.ListLength("{hangfire}:deleted"));
+
             // Arrange
             redis.ListRightPush("{hangfire}:succeded", "my-job");
             redis.ListRightPush("{hangfire}:deleted", "other-job");
@@ -89,8 +87,10 @@ namespace Hangfire.Redis.Tests
             Assert.Equal(1, redis.ListLength("{hangfire}:succeeded"));
             Assert.Equal(1, redis.ListLength("{hangfire}:deleted"));
         }
-        
+
+#pragma warning disable 618
         private IServerComponent CreateWatcher()
+#pragma warning restore 618
         {
             return new ExpiredJobsWatcher(_storage, CheckInterval);
         }

@@ -72,7 +72,7 @@
   <ItemGroup>
     <PackageReference Include="HangFire.Core" Version="1.6.12" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.1" />
+    <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.6" />
   </ItemGroup>
 
 </Project>

@@ -28,9 +28,9 @@ namespace Hangfire.Redis
         public ExpiredJobsWatcher(RedisStorage storage, TimeSpan checkInterval)
         {
             if (storage == null) 
-                throw new ArgumentNullException("storage");
+                throw new ArgumentNullException(nameof(storage));
             if (checkInterval.Ticks <= 0)
-                throw new ArgumentOutOfRangeException("checkInterval", "Check interval should be positive.");
+                throw new ArgumentOutOfRangeException(nameof(checkInterval), "Check interval should be positive.");
             
             _storage = storage;
             _checkInterval = checkInterval;
@@ -49,7 +49,9 @@ namespace Hangfire.Redis
                 
                 foreach (var key in ProcessedKeys)
                 {
-                    var count = redis.ListLength(RedisStorage.Prefix + key);
+                    var redisKey = _storage.GetRedisKey(key);
+
+                    var count = redis.ListLength(redisKey);
                     if (count == 0) continue;
 
                     Logger.InfoFormat("Removing expired records from the '{0}' list...", key);
@@ -61,7 +63,7 @@ namespace Hangfire.Redis
                     {
                         var first = Math.Max(0, last - batchSize + 1);
                         
-                        var jobIds = redis.ListRange(RedisStorage.Prefix + key, first, last).ToStringArray();
+                        var jobIds = redis.ListRange(redisKey, first, last).ToStringArray();
                         if (jobIds.Length == 0) continue;
                         
                         var pipeline = redis.CreateBatch();
@@ -69,8 +71,7 @@ namespace Hangfire.Redis
 
                         for (var i = 0; i < jobIds.Length; i++)
                         {
-                            tasks[i] = pipeline.KeyExistsAsync(
-                                string.Format("{0}job:{1}", RedisStorage.Prefix, jobIds[i]));
+                            tasks[i] = pipeline.KeyExistsAsync(_storage.GetRedisKey($"job:{jobIds[i]}"));
                         }
                         
                         pipeline.Execute();
