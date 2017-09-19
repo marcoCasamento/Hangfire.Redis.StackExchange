@@ -40,7 +40,7 @@ namespace Hangfire.Redis
             DateTime lockExpirationTime = DateTime.UtcNow +timeOut;
             while (DateTime.UtcNow < lockExpirationTime)
             {
-                if (_redis.LockTake(key, owner, timeOut))
+                if (_redis.LockTake(key, owner, TimeSpan.MaxValue))
                     return;
                 //assumes that a second call made by the same owner means an extension request
                 var lockOwner = _redis.LockQuery(key);
