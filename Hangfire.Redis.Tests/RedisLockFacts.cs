@@ -102,24 +102,38 @@ namespace Hangfire.Redis.Tests
         {
             var db = RedisUtils.CreateClient();
 
-            using (var testLock1 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100)))
+            var sync1 = new ManualResetEventSlim();
+            var sync2 = new ManualResetEventSlim();
+
+            var thread1 = new Thread(state =>
             {
-                Assert.NotNull(testLock1);
-
-                Thread.Sleep(250);
-
-                var thread = new Thread(state =>
+                using (var testLock1 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100)))
                 {
-                    Assert.Throws<DistributedLockTimeoutException>(() =>
-                    {
-                        using (var testLock2 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100)))
-                        { }
-                    });
-                });
+                    Assert.NotNull(testLock1);
 
-                thread.Start();
-                thread.Join();
-            }
+                    // sleep a bit more than holdDuration
+                    Thread.Sleep(250);
+                    sync1.Set();
+                    sync2.Wait();
+                }
+            });
+
+            var thread2 = new Thread(state =>
+            {
+                Assert.True(sync1.Wait(1000));
+
+                Assert.Throws<DistributedLockTimeoutException>(() =>
+                {
+                    using (var testLock2 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100)))
+                    { }
+                });
+            });
+
+            thread1.Start();
+            thread2.Start();
+            thread2.Join();
+            sync2.Set();
+            thread1.Join();
         }
     }
 }
