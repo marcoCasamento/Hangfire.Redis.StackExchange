@@ -31,7 +31,6 @@ namespace Hangfire.Redis
     {
         // Make sure in Redis Cluster all transaction are in the same slot !!
         private readonly RedisStorageOptions _options;
-        private readonly string _identity;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly RedisSubscription _subscription;
 
@@ -47,8 +46,7 @@ namespace Hangfire.Redis
             _options = options ?? new RedisStorageOptions();
 
             _connectionMultiplexer = connectionMultiplexer;
-
-            _identity = Guid.NewGuid().ToString();
+            
             _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
         }
 
@@ -66,7 +64,6 @@ namespace Hangfire.Redis
             _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
             _connectionMultiplexer.PreserveAsyncOrder = false;
             
-            _identity = Guid.NewGuid().ToString();
             _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
         }
 
@@ -77,9 +74,7 @@ namespace Hangfire.Redis
         internal int SucceededListSize => _options.SucceededListSize;
 
         internal int DeletedListSize => _options.DeletedListSize;
-
-        internal string Identity => _identity;
-
+        
         internal string SubscriptionChannel => _subscription.Channel;
 
         public override IMonitoringApi GetMonitoringApi()
@@ -89,7 +84,7 @@ namespace Hangfire.Redis
 
         public override IStorageConnection GetConnection()
         {
-            return new RedisConnection(this, _connectionMultiplexer.GetDatabase(Db), _subscription, _identity, _options.FetchTimeout);
+            return new RedisConnection(this, _connectionMultiplexer.GetDatabase(Db), _subscription, _options.FetchTimeout);
         }
 
 #pragma warning disable 618

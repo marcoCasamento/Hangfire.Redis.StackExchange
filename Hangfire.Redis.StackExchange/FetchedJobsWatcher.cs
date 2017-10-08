@@ -72,13 +72,11 @@ namespace Hangfire.Redis
         {
             // Allowing only one server at a time to process the timed out
             // jobs from the specified queue.
-            Logger.DebugFormat(
-                "Acquiring the lock for the fetched list of the '{0}' queue...", queue);
+            Logger.DebugFormat("Acquiring the lock for the fetched list of the '{0}' queue...", queue);
 
-            using (new RedisLock(connection.Redis, _storage.GetRedisKey($"queue:{queue}:dequeued:lock"), _storage.Identity + Thread.CurrentThread.ManagedThreadId, _options.FetchedLockTimeout))
+            using (RedisLock.Acquire(connection.Redis, _storage.GetRedisKey($"queue:{queue}:dequeued:lock"), _options.FetchedLockTimeout))
             {
-                Logger.DebugFormat(
-                    "Looking for timed out jobs in the '{0}' queue...", queue);
+                Logger.DebugFormat("Looking for timed out jobs in the '{0}' queue...", queue);
 
                 var jobIds = connection.Redis.ListRange(_storage.GetRedisKey($"queue:{queue}:dequeued"));
 

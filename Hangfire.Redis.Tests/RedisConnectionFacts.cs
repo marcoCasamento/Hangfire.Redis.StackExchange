@@ -190,13 +190,13 @@ namespace Hangfire.Redis.Tests
                 Assert.Equal("Value2", result["Key2"]);
             });
         }
-
+        
         private void UseConnections(Action<IDatabase, RedisConnection> action)
         {
 			var redis = RedisUtils.CreateClient();
             var subscription = new RedisSubscription(_storage, RedisUtils.CreateSubscriber());
 
-            using (var connection = new RedisConnection(_storage, redis, subscription, Guid.NewGuid().ToString(), new RedisStorageOptions().FetchTimeout))
+            using (var connection = new RedisConnection(_storage, redis, subscription, new RedisStorageOptions().FetchTimeout))
             {
 				action(redis, connection);
             }
@@ -207,7 +207,7 @@ namespace Hangfire.Redis.Tests
             var redis = RedisUtils.CreateClient();
             var subscription = new RedisSubscription(_storage, RedisUtils.CreateSubscriber());
 
-            using (var connection = new RedisConnection(_storage, redis, subscription, Guid.NewGuid().ToString(), new RedisStorageOptions().FetchTimeout))
+            using (var connection = new RedisConnection(_storage, redis, subscription, new RedisStorageOptions().FetchTimeout))
             {
 				action(connection);
             }
