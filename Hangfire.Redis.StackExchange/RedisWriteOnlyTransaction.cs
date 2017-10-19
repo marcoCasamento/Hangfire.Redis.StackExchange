@@ -161,7 +161,13 @@ namespace Hangfire.Redis
             if (jobId == null) throw new ArgumentNullException(nameof(jobId));
             
             _transaction.SetAddAsync(_storage.GetRedisKey("queues"), queue);
-            _transaction.ListLeftPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
+            if (_storage.LifoQueues != null && _storage.LifoQueues.Contains(queue, StringComparer.OrdinalIgnoreCase))
+            {
+                _transaction.ListRightPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
+            } else
+            {
+                _transaction.ListLeftPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
+            }
             _transaction.PublishAsync(_storage.SubscriptionChannel, jobId);
         }
 

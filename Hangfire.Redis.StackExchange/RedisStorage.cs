@@ -82,6 +82,8 @@ namespace Hangfire.Redis
 
         internal string SubscriptionChannel => _subscription.Channel;
 
+        internal string[] LifoQueues => _options.LifoQueues;
+
         public override IMonitoringApi GetMonitoringApi()
         {
             return new RedisMonitoringApi(this, _connectionMultiplexer.GetDatabase(Db));
