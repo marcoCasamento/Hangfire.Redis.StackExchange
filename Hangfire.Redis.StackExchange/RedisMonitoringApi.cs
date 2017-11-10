@@ -28,7 +28,7 @@ using System.Collections.Concurrent;
 
 namespace Hangfire.Redis
 {
-    internal class RedisMonitoringApi : IMonitoringApi
+    public class RedisMonitoringApi : IMonitoringApi
     {
         private readonly RedisStorage _storage;
         private readonly IDatabase _database;
@@ -80,6 +80,11 @@ namespace Hangfire.Redis
         public long DeletedListCount()
         {
             return UseConnection(redis => redis.ListLength(_storage.GetRedisKey("deleted")));
+        }
+
+        public IDatabase GetDataBase()
+        {
+            return _database;
         }
 
         public JobList<ProcessingJobDto> ProcessingJobs(int from, int count)

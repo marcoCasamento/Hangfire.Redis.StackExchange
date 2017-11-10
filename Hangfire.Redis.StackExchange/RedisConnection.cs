@@ -66,26 +66,47 @@ namespace Hangfire.Redis
             if (serverId == null) throw new ArgumentNullException(nameof(serverId));
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var transaction = Redis.CreateTransaction();
+            if (_storage.UseTransactions)
+            {
+                var transaction = Redis.CreateTransaction();
 
-            transaction.SetAddAsync(_storage.GetRedisKey("servers"), serverId);
+                transaction.SetAddAsync(_storage.GetRedisKey("servers"), serverId);
 
-            transaction.HashSetAsync(
-                _storage.GetRedisKey($"server:{serverId}"),
-                new Dictionary<string, string>
-                    {
+                transaction.HashSetAsync(
+                    _storage.GetRedisKey($"server:{serverId}"),
+                    new Dictionary<string, string>
+                        {
                         { "WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture) },
                         { "StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow) },
-                    }.ToHashEntries());
+                        }.ToHashEntries());
 
-            if (context.Queues.Length > 0)
+                if (context.Queues.Length > 0)
+                {
+                    transaction.ListRightPushAsync(
+                        _storage.GetRedisKey($"server:{serverId}:queues"),
+                        context.Queues.ToRedisValues());
+                }
+
+                transaction.Execute();
+            } else
             {
-                transaction.ListRightPushAsync(
-                    _storage.GetRedisKey($"server:{serverId}:queues"),
-                    context.Queues.ToRedisValues());
-            }
+                Redis.SetAddAsync(_storage.GetRedisKey("servers"), serverId);
 
-            transaction.Execute();
+                Redis.HashSetAsync(
+                    _storage.GetRedisKey($"server:{serverId}"),
+                    new Dictionary<string, string>
+                        {
+                        { "WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture) },
+                        { "StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow) },
+                        }.ToHashEntries());
+
+                if (context.Queues.Length > 0)
+                {
+                    Redis.ListRightPushAsync(
+                        _storage.GetRedisKey($"server:{serverId}:queues"),
+                        context.Queues.ToRedisValues());
+                }
+            }
         }
 
         public override string CreateExpiredJob(
@@ -111,20 +132,31 @@ namespace Hangfire.Redis
                 { "CreatedAt", JobHelper.SerializeDateTime(createdAt) }
             };
 
-            var transaction = Redis.CreateTransaction();
+            if (_storage.UseTransactions)
+            {
+                var transaction = Redis.CreateTransaction();
 
-            transaction.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
-            transaction.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
+                transaction.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
+                transaction.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
 
-            // TODO: check return value
-            transaction.Execute();
+                // TODO: check return value
+                transaction.Execute();
+            } else
+            {
+                Redis.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
+                Redis.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
+            }
 
             return jobId;
         }
 
         public override IWriteOnlyTransaction CreateWriteTransaction()
         {
-            return new RedisWriteOnlyTransaction(_storage, Redis.CreateTransaction());
+            if (_storage.UseTransactions)
+            {
+                return new RedisWriteOnlyTransaction(_storage, Redis.CreateTransaction());
+            }
+            return new RedisWriteDirectlyToDatabase(_storage, Redis);
         }
 
         public override void Dispose()
@@ -344,18 +376,30 @@ namespace Hangfire.Redis
         {
             if (serverId == null) throw new ArgumentNullException(nameof(serverId));
 
-            var transaction = Redis.CreateTransaction();
+            if (_storage.UseTransactions)
+            {
+                var transaction = Redis.CreateTransaction();
 
-            transaction.SetRemoveAsync(_storage.GetRedisKey("servers"), serverId);
+                transaction.SetRemoveAsync(_storage.GetRedisKey("servers"), serverId);
 
-            transaction.KeyDeleteAsync(
-                new RedisKey[]
-                {
+                transaction.KeyDeleteAsync(
+                    new RedisKey[]
+                    {
                     _storage.GetRedisKey($"server:{serverId}"),
                     _storage.GetRedisKey($"server:{serverId}:queues")
-                });
+                    });
 
-            transaction.Execute();
+                transaction.Execute();
+            } else
+            {
+                Redis.SetRemoveAsync(_storage.GetRedisKey("servers"), serverId);
+                Redis.KeyDeleteAsync(
+                    new RedisKey[]
+                    {
+                        _storage.GetRedisKey($"server:{serverId}"),
+                        _storage.GetRedisKey($"server:{serverId}:queues")
+                    });
+            }
         }
 
         public override int RemoveTimedOutServers(TimeSpan timeOut)
