@@ -16,8 +16,6 @@
 
 using System;
 
-
-
 namespace Hangfire.Redis
 {
     public class RedisStorageOptions
@@ -33,6 +31,8 @@ namespace Hangfire.Redis
             Prefix = DefaultPrefix;
             SucceededListSize = 499;
             DeletedListSize = 499;
+            LifoQueues = new string[0];
+            UseTransactions = true;
         }
 
         public TimeSpan InvisibilityTimeout { get; set; }
@@ -43,5 +43,7 @@ namespace Hangfire.Redis
 
         public int SucceededListSize { get; set; }
         public int DeletedListSize { get; set; }
+        public string[] LifoQueues { get; set; }
+        public bool UseTransactions { get; set; }
     }
 }

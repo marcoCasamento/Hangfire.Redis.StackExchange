@@ -52,24 +52,31 @@ namespace Hangfire.Redis
 
         public void RemoveFromQueue()
         {
-            var transaction = _redis.CreateTransaction();
-			RemoveFromFetchedList(transaction);
-
-			transaction.Execute();
-
+            if (_storage.UseTransactions)
+            {
+                var transaction = _redis.CreateTransaction();
+                RemoveFromFetchedList(transaction);
+                transaction.Execute();                
+            } else
+            {
+                RemoveFromFetchedList(_redis);
+            }
             _removedFromQueue = true;
         }
 
         public void Requeue()
         {
-			var transaction = _redis.CreateTransaction();
-
-            transaction.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
-            
-            RemoveFromFetchedList(transaction);
-
-            transaction.Execute();
-
+            if (_storage.UseTransactions)
+            {
+                var transaction = _redis.CreateTransaction();
+                transaction.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
+                RemoveFromFetchedList(transaction);
+                transaction.Execute();
+            } else
+            {
+                _redis.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
+                RemoveFromFetchedList(_redis);
+            }
             _requeued = true;
         }
 
@@ -85,10 +92,10 @@ namespace Hangfire.Redis
             _disposed = true;
         }
 
-        private void RemoveFromFetchedList(ITransaction transaction)
+        private void RemoveFromFetchedList(IDatabaseAsync databaseAsync)
         {
-            transaction.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
-            transaction.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
+            databaseAsync.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
+            databaseAsync.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
         }
     }
 }

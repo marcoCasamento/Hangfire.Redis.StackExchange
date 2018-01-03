@@ -67,6 +67,7 @@
     <Compile Include="..\Hangfire.Redis.StackExchange\RedisSubscription.cs" Link="RedisSubscription.cs" />
     <Compile Include="..\Hangfire.Redis.StackExchange\RedisWriteOnlyTransaction.cs" Link="RedisWriteOnlyTransaction.cs" />
     <Compile Include="..\Hangfire.Redis.StackExchange\SucceededStateHandler.cs" Link="SucceededStateHandler.cs" />
+    <Compile Include="..\Hangfire.Redis.StackExchange\RedisWriteDirectlyToDatabase.cs" Link="RedisWriteDirectlyToDatabase.cs" />
   </ItemGroup>
 
   <ItemGroup>
