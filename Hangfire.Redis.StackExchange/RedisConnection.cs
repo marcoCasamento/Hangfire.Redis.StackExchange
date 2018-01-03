@@ -39,15 +39,11 @@ namespace Hangfire.Redis
             [NotNull] RedisSubscription subscription,
             TimeSpan fetchTimeout)
         {
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (redis == null) throw new ArgumentNullException(nameof(redis));
-            if (subscription == null) throw new ArgumentNullException(nameof(subscription));
-
-            _storage = storage;
-            _subscription = subscription;
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _subscription = subscription ?? throw new ArgumentNullException(nameof(subscription));
             _fetchTimeout = fetchTimeout;
 
-            Redis = redis;
+            Redis = redis ?? throw new ArgumentNullException(nameof(redis));
         }
 
         public IDatabase Redis { get; }

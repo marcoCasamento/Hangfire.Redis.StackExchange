@@ -41,11 +41,9 @@ namespace Hangfire.Redis
 
         public RedisStorage(IConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options = null)
         {
-            if (connectionMultiplexer == null) throw new ArgumentNullException(nameof(connectionMultiplexer));
-
             _options = options ?? new RedisStorageOptions();
 
-            _connectionMultiplexer = connectionMultiplexer;
+            _connectionMultiplexer = connectionMultiplexer ?? throw new ArgumentNullException(nameof(connectionMultiplexer));
             
             _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
         }

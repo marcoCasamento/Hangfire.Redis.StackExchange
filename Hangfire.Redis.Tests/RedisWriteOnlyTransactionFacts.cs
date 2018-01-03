@@ -162,7 +162,8 @@ namespace Hangfire.Redis.Tests
 
 				// Assert
 				var serializedEntry = redis.ListGetByIndex("{hangfire}:job:my-job:history", 0);
-				Assert.NotNull(serializedEntry);
+				Assert.NotEqual(RedisValue.Null, serializedEntry);
+                
 
 				var entry = JobHelper.FromJson<Dictionary<string, string>>(serializedEntry);
 				Assert.Equal("my-state", entry["State"]);
@@ -394,7 +395,7 @@ namespace Hangfire.Redis.Tests
                 Commit(redis, x => x.RemoveHash("some-hash"));
 
                 var hash = redis.HashGetAll("{hangfire}:some-hash");
-                Assert.Equal(0, hash.Length);
+                Assert.Empty(hash);
             });
         }
 

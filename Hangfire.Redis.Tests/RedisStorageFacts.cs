@@ -24,7 +24,7 @@ namespace Hangfire.Redis.Tests
         public void DbFromConnectionStringIsUsed()
         {
             var storage = new RedisStorage(String.Format("{0},defaultDatabase=5", RedisUtils.GetHostAndPort()));
-            Assert.Equal(storage.Db, 5);
+            Assert.Equal(5, storage.Db);
         }
 
         private RedisStorage CreateStorage()

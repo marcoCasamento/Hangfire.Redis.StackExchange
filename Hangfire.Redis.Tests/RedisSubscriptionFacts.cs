@@ -40,7 +40,7 @@ namespace Hangfire.Redis.Tests
             Assert.Throws<ArgumentNullException>("subscriber",
                 () => new RedisSubscription(_storage, null));
         }
-
+        [Fact]
         public void WaitForJob_WaitForTheTimeout()
         {
             //Arrange
