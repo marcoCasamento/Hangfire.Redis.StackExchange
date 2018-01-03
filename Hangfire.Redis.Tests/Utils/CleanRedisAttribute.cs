@@ -18,7 +18,8 @@ namespace Hangfire.Redis.Tests
 
         public override void After(MethodInfo methodUnderTest)
         {
-            Monitor.Exit(GlobalLock);
+            if (Monitor.IsEntered(GlobalLock))
+                Monitor.Exit(GlobalLock);
         }
     }
 }

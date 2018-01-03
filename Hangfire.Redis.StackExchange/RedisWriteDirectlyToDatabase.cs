@@ -32,11 +32,8 @@ namespace Hangfire.Redis
 
         public RedisWriteDirectlyToDatabase([NotNull] RedisStorage storage, [NotNull] IDatabase database)
         {
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (database == null) throw new ArgumentNullException(nameof(database));
-
-            _storage = storage;
-            _database = database;
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _database = database ?? throw new ArgumentNullException(nameof(database));
         }
 
         public override void AddRangeToSet([NotNull] string key, [NotNull] IList<string> items)
