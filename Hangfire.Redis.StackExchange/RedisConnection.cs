@@ -31,24 +31,20 @@ namespace Hangfire.Redis
     {
         private readonly RedisStorage _storage;
         private readonly RedisSubscription _subscription;
-        private readonly string _jobStorageIdentity;
         private readonly TimeSpan _fetchTimeout = TimeSpan.FromMinutes(3);
 
         public RedisConnection(
-            [NotNull] RedisStorage storage, 
-            [NotNull] IDatabase redis, 
-            [NotNull] RedisSubscription subscription, 
-            [NotNull] string jobStorageIdentity, 
+            [NotNull] RedisStorage storage,
+            [NotNull] IDatabase redis,
+            [NotNull] RedisSubscription subscription,
             TimeSpan fetchTimeout)
         {
             if (storage == null) throw new ArgumentNullException(nameof(storage));
             if (redis == null) throw new ArgumentNullException(nameof(redis));
             if (subscription == null) throw new ArgumentNullException(nameof(subscription));
-            if (jobStorageIdentity == null) throw new ArgumentNullException(nameof(jobStorageIdentity));
 
             _storage = storage;
             _subscription = subscription;
-            _jobStorageIdentity = jobStorageIdentity;
             _fetchTimeout = fetchTimeout;
 
             Redis = redis;
@@ -58,7 +54,7 @@ namespace Hangfire.Redis
         
         public override IDisposable AcquireDistributedLock([NotNull] string resource, TimeSpan timeout)
         {
-            return new RedisLock(Redis, _storage.GetRedisKey(resource), _jobStorageIdentity + Thread.CurrentThread.ManagedThreadId, timeout);
+            return RedisLock.Acquire(Redis, _storage.GetRedisKey(resource), timeout);
         }
 
         public override void AnnounceServer([NotNull] string serverId, [NotNull] ServerContext context)
