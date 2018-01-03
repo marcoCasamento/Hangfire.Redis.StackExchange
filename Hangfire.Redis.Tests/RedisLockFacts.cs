@@ -107,7 +107,7 @@ namespace Hangfire.Redis.Tests
 
             var thread1 = new Thread(state =>
             {
-                using (var testLock1 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100)))
+                using (var testLock1 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(110)))
                 {
                     Assert.NotNull(testLock1);
 
