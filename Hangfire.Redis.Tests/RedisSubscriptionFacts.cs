@@ -54,7 +54,7 @@ namespace Hangfire.Redis.Tests
 
             //Assert
             sw.Stop();
-            Assert.InRange(sw.ElapsedMilliseconds, 100, 120);
+            Assert.InRange(sw.ElapsedMilliseconds, 99, 120);
         }
     }
     

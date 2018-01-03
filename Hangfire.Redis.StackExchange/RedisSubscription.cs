@@ -16,13 +16,10 @@ namespace Hangfire.Redis
 
         public RedisSubscription([NotNull] RedisStorage storage, [NotNull] ISubscriber subscriber)
         {
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (subscriber == null) throw new ArgumentNullException(nameof(subscriber));
-
-            _storage = storage;
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             Channel = _storage.GetRedisKey("JobFetchChannel");
 
-            _subscriber = subscriber;
+            _subscriber = subscriber ?? throw new ArgumentNullException(nameof(subscriber));
             _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());
         }
 
