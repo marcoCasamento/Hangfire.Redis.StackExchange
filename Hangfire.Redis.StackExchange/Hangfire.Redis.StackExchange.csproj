@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net45;net46;netstandard1.5</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
-    <Version>1.7.1</Version>
+    <Version>1.7.2</Version>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
@@ -21,8 +21,17 @@
       Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
       It also supports Batches (Pro Feature)
     </Summary>
-    <PackageReleaseNotes>1.7.1
-      - Add expired jobs watcher to cleanup succeeded/deleted lists /thanks to pieceofsummer 
+    <PackageReleaseNotes>
+      1.7.2
+      - Added support for Lifo Queues (thanks to AndreSteenbergen)
+      - Added option to not use transaction (thanks to AndreSteenbergen)
+      - Enabled sliding expiration for distributed locks (thanks to pieceofsummer)
+      - Add epired jobs watch to cleanup succeeded/deleted lists (thanks to pieceofsummer)
+      - Make succeeded and deleted lists size configurable (thanks to pieceofsummer)
+      - Fix job state order (thanks to pieceofsummer)
+      - Exclude Fetched property from job parameters (thanks to pieceofsummer)
+      1.7.1
+      - Add expired jobs watcher to cleanup succeeded/deleted lists thanks to pieceofsummer
       1.7.0
       - Redis Cluster support (#42 thanks to gzpbx)
       - Update to VS2017 (#48 thanks to ryanelian)
@@ -38,7 +47,7 @@
       1.6.5
       - .Net Core Support (thanks to Stefan Polyanszky)
       - Aligned dependency to Hangfire.Core
-</PackageReleaseNotes>
+    </PackageReleaseNotes>
     <PackageTags>Hangfire Redis</PackageTags>
     <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
