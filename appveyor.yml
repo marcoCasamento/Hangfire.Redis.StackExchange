@@ -18,7 +18,7 @@ build:
   publish_nuget_symbols: false
   verbosity: minimal
 artifacts:
-- path: .\**\*.nupkg
+- path: .\**\Hangfire.Redis.StackExchange.nupkg
 assembly_info:
   patch: true
   file: '**\AssemblyInfo.*'

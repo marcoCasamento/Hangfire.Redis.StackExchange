@@ -3,7 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>net45;net46;netstandard1.5</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
+    <IsPackable>true</IsPackable>
     <Version>1.7.2</Version>
+    <PackageVersion>1.7.2</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
