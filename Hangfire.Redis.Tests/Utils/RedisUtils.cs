@@ -19,27 +19,14 @@ namespace Hangfire.Redis.Tests
 		{
 			connection = new Lazy<ConnectionMultiplexer>(() =>
 				{
-					ExceptionDispatchInfo lastError = null;
-					ConfigurationOptions options = new ConfigurationOptions();
-					options.EndPoints.Add(GetHostAndPort());
-					options.AllowAdmin = true;
-					for (int i = 0; i < 5; i++)
-					{
-						try
-						{
-							var cnn = ConnectionMultiplexer.Connect(options);
-							if (cnn.IsConnected)
-								return cnn;
-						}
-						catch (Exception ex)
-						{
-							lastError = ExceptionDispatchInfo.Capture(ex);
-							Console.WriteLine(ex.Message);
-							Thread.Sleep(10);
-						}
-					}
-					lastError.Throw();
-					return null;
+                    ConfigurationOptions options = new ConfigurationOptions
+                    {
+                        AllowAdmin = true,
+                        SyncTimeout = 5000,
+                        ConnectRetry = 5
+                    };
+                    options.EndPoints.Add(GetHostAndPort());
+                    return ConnectionMultiplexer.Connect(options);
 				}
 			);
 		}
