@@ -2,12 +2,11 @@ sudo: false
 services:
   - redis-server
 language: csharp
-solution: Hangfire.Redis.StackExchange.sln
-install:
-  - nuget restore Hangfire.Redis.StackExchange.sln -Verbosity detailed
-  - nuget install xunit.runner.console -OutputDirectory testrunner
+dist: trusty
+mono: none
+dotnet: 1.0.1
+before_script:
+  - dotnet restore -v Minimal
 script:
-  - xbuild /p:Configuration=Release Hangfire.Redis.StackExchange.sln
-  - cp -av ./testrunner/xunit.runner.console.2.0.0/tools/* ./Hangfire.Redis.Tests/bin/Release/
-  - cp ./StackExchange.Redis/StackExchange.Redis/bin/Release/StackExchange.Redis.dll ./Hangfire.Redis.Tests/bin/Release/
-  - mono ./Hangfire.Redis.Tests/bin/Release/xunit.console.x86.exe ./Hangfire.Redis.Tests/bin/Release/Hangfire.Redis.Tests.dll -parallel none -maxthreads 1
+  - dotnet build "Hangfire.Redis.Tests" -c Debug -f netcoreapp2.0
+  - dotnet test "Hangfire.Redis.Tests/Hangfire.Redis.Tests.csproj" -c Debug -f netcoreapp2.0
