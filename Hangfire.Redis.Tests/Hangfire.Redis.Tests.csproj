@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;net46;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
     <!--
       https://xunit.github.io/releases/2.2
       The minimum version of .NET required for desktop CLR unit tests is now .NET 4.5.2. 
