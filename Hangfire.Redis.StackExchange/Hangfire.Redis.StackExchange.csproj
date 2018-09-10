@@ -24,6 +24,8 @@
       It also supports Batches (Pro Feature)
     </Summary>
     <PackageReleaseNotes>
+      1.8.0
+      - Updated StackExchange.Redis to 2.0      
       1.7.2
       - Added support for Lifo Queues (thanks to AndreSteenbergen)
       - Added option to not use transaction (thanks to AndreSteenbergen)
