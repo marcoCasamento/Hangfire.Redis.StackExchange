@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.StackExchang
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.Tests", "Hangfire.Redis.Tests\Hangfire.Redis.Tests.csproj", "{E8031950-A2BD-48C1-966F-7B9E3DC37631}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Redis.StackExchange.StrongName", "Hangfire.Redis.StackExchange.StrongName\Hangfire.Redis.StackExchange.StrongName.csproj", "{69988936-D32A-4AAD-841E-E9623E08A8F0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project Items", "Project Items", "{EC2121D8-8CDD-4B1E-8BFF-57402A338C4F}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
@@ -30,12 +28,11 @@ Global
 		{E8031950-A2BD-48C1-966F-7B9E3DC37631}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8031950-A2BD-48C1-966F-7B9E3DC37631}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8031950-A2BD-48C1-966F-7B9E3DC37631}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69988936-D32A-4AAD-841E-E9623E08A8F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{69988936-D32A-4AAD-841E-E9623E08A8F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{69988936-D32A-4AAD-841E-E9623E08A8F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{69988936-D32A-4AAD-841E-E9623E08A8F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FD437583-D2B4-4448-AF6E-F63E10906151}
 	EndGlobalSection
 EndGlobal
