@@ -4,7 +4,7 @@
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
     <IsPackable>true</IsPackable>
-    <Version>1.8.0</Version>
+    <Version>1.8.0-beta</Version>
     <PackageVersion>1.8.0</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
@@ -23,9 +23,8 @@
       Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
       It also supports Batches (Pro Feature)
     </Summary>
-    <PackageReleaseNotes>
-      1.8.0
-      - Updated StackExchange.Redis to 2.0      
+    <PackageReleaseNotes>1.8.0
+      - Updated StackExchange.Redis to 2.0 (thanks to @andrebires)
       1.7.2
       - Added support for Lifo Queues (thanks to AndreSteenbergen)
       - Added option to not use transaction (thanks to AndreSteenbergen)
@@ -51,7 +50,7 @@
       1.6.5
       - .Net Core Support (thanks to Stefan Polyanszky)
       - Aligned dependency to Hangfire.Core
-    </PackageReleaseNotes>
+</PackageReleaseNotes>
     <PackageTags>Hangfire Redis</PackageTags>
     <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -62,7 +61,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HangFire.Core" Version="1.6.12" />
+    <PackageReference Include="HangFire.Core" Version="1.6.21" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.495" />
   </ItemGroup>
