@@ -126,9 +126,9 @@ namespace Hangfire.Redis
 
         public override void WriteOptionsToLog(ILog logger)
         {
-            logger.Info("Using the following options for Redis job storage:");
+            logger.Debug("Using the following options for Redis job storage:");
 
-            logger.InfoFormat("ConnectionString: {0}\nDN: {1}", ConnectionString, Db);
+            logger.DebugFormat("ConnectionString: {0}\nDN: {1}", ConnectionString, Db);
         }
 
         public override string ToString()
