@@ -112,7 +112,7 @@ namespace Hangfire.Redis
 
             var jobId = Guid.NewGuid().ToString();
 
-            var invocationData = InvocationData.Serialize(job);
+            var invocationData = InvocationData.SerializeJob(job);
 
             // Do not modify the original parameters.
             var storedParameters = new Dictionary<string, string>(parameters)
@@ -273,7 +273,7 @@ namespace Hangfire.Redis
 
             try
             {
-                job = invocationData.Deserialize();
+                job = invocationData.DeserializeJob();
             }
             catch (JobLoadException ex)
             {

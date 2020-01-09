@@ -152,7 +152,7 @@ namespace Hangfire.Redis
 
             _transaction.ListRightPushAsync(
                 _storage.GetRedisKey($"job:{jobId}:history"),
-                JobHelper.ToJson(storedData));
+                SerializationHelper.Serialize(storedData));
         }
 
         public override void AddToQueue([NotNull] string queue, [NotNull] string jobId)

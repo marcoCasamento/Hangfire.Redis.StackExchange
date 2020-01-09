@@ -60,8 +60,6 @@ namespace Hangfire.Redis
             };
 
             _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
-            _connectionMultiplexer.PreserveAsyncOrder = false;
-            
             _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
         }
 

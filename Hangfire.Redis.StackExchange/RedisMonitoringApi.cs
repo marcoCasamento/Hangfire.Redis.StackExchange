@@ -428,7 +428,7 @@ namespace Hangfire.Redis
                 var history = redis
                     .ListRange(_storage.GetRedisKey($"job:{jobId}:history"))
 					.ToStringArray()
-                    .Select(JobHelper.FromJson<Dictionary<string, string>>)
+                    .Select(SerializationHelper.Deserialize<Dictionary<string, string>>)
                     .ToList();
 
                 // history is in wrong order, fix this
@@ -664,7 +664,7 @@ namespace Hangfire.Redis
                     type,
                     method,
                     parameterTypes,
-                    arguments).Deserialize();
+                    arguments).DeserializeJob();
             }
             catch (Exception)
             {

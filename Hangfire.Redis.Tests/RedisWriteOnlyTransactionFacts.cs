@@ -165,7 +165,7 @@ namespace Hangfire.Redis.Tests
 				Assert.NotEqual(RedisValue.Null, serializedEntry);
                 
 
-				var entry = JobHelper.FromJson<Dictionary<string, string>>(serializedEntry);
+				var entry = SerializationHelper.Deserialize<Dictionary<string, string>>(serializedEntry);
 				Assert.Equal("my-state", entry["State"]);
 				Assert.Equal("my-reason", entry["Reason"]);
 				Assert.Equal("Value", entry["Name"]);
