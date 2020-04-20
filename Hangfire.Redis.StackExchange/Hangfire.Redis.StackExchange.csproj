@@ -23,8 +23,12 @@
       Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
       It also supports Batches (Pro Feature)
     </Summary>
-    <PackageReleaseNotes>1.8.1
-      - Updated Hangfire to 1.78
+    <PackageReleaseNotes>
+      1.8.2
+      - Updated Hangfire to 1.7.11
+      - Updated StackExchange.Redis to 2.1.30
+      1.8.1
+      - Updated Hangfire to 1.7.8
       - Fixed #82 (thanks to @bcuff)
       1.8.0
       - Updated StackExchange.Redis to 2.0 (thanks to @andrebires)
@@ -67,9 +71,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HangFire.Core" Version="1.7.8" />
+    <PackageReference Include="HangFire.Core" Version="1.7.11" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+    <PackageReference Include="StackExchange.Redis" Version="2.1.30" />
   </ItemGroup>
 
 </Project>
