@@ -4,8 +4,8 @@
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
     <IsPackable>true</IsPackable>
-    <Version>1.8.1</Version>
-    <PackageVersion>1.8.1</PackageVersion>
+    <Version>1.8.2</Version>
+    <PackageVersion>1.8.2</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
@@ -25,8 +25,8 @@
     </Summary>
     <PackageReleaseNotes>
       1.8.2
-      - Updated Hangfire to 1.7.11
-      - Updated StackExchange.Redis to 2.1.30
+      - Updated Hangfire to 1.7.11 (thanks to abarducci)
+      - Updated StackExchange.Redis to 2.1.30 (thanks to abarducci)
       1.8.1
       - Updated Hangfire to 1.7.8
       - Fixed #82 (thanks to @bcuff)
