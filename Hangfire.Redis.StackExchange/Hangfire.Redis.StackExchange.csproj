@@ -4,8 +4,8 @@
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
     <IsPackable>true</IsPackable>
-    <Version>1.8.2</Version>
-    <PackageVersion>1.8.2</PackageVersion>
+    <Version>1.8.3</Version>
+    <PackageVersion>1.8.3</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
@@ -24,6 +24,8 @@
       It also supports Batches (Pro Feature)
     </Summary>
     <PackageReleaseNotes>
+      1.8.3
+      - Removed dependency to NewtonSoft.JSON (thanks to neyromant)
       1.8.2
       - Updated Hangfire to 1.7.11 (thanks to abarducci)
       - Updated StackExchange.Redis to 2.1.30 (thanks to abarducci)
