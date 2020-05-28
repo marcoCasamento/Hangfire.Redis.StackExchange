@@ -18,7 +18,7 @@ using Hangfire.Annotations;
 using Hangfire.Storage;
 using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 
@@ -52,15 +52,15 @@ namespace Hangfire.Redis
         }
 #endif
         
-        private static AsyncLocal<ISet<RedisKey>> _heldLocks = new AsyncLocal<ISet<RedisKey>>();
+        private static AsyncLocal<ConcurrentDictionary<RedisKey, byte>> _heldLocks = new AsyncLocal<ConcurrentDictionary<RedisKey, byte>>();
 
-        private static ISet<RedisKey> HeldLocks
+        private static ConcurrentDictionary<RedisKey, byte> HeldLocks
         {
             get
             {
                 var value = _heldLocks.Value;
                 if (value == null)
-                    _heldLocks.Value = value = new HashSet<RedisKey>();
+                    _heldLocks.Value = value = new ConcurrentDictionary<RedisKey, byte>();
                 return value;
             }
         }
@@ -79,7 +79,7 @@ namespace Hangfire.Redis
 
             if (holdsLock)
             {
-                HeldLocks.Add(_key);
+                HeldLocks.TryAdd(_key, 1);
 
                 // start sliding expiration timer at half timeout intervals
                 var halfLockHoldDuration = TimeSpan.FromTicks(holdDuration.Ticks / 2);
@@ -107,7 +107,7 @@ namespace Hangfire.Redis
                     Debug.WriteLine("Lock {0} already timed out", _key);
                 }
 
-                HeldLocks.Remove(_key);
+                HeldLocks.TryRemove(_key, out _);
             }
         }
 
@@ -121,7 +121,7 @@ namespace Hangfire.Redis
             if (redis == null)
                 throw new ArgumentNullException(nameof(redis));
 
-            if (HeldLocks.Contains(key))
+            if (HeldLocks.ContainsKey(key))
             {
                 // lock is already held
                 return new RedisLock(redis, key, false, holdDuration);
