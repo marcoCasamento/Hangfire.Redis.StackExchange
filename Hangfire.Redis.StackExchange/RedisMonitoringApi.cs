@@ -191,30 +191,32 @@ namespace Hangfire.Redis
                     return new List<ServerDto>();
                 }
 
-                var servers = new Dictionary<string, List<string>>();
-                var queues = new Dictionary<string, List<string>>();
+                var servers = new List<ServerDto>();
 
                 foreach (var serverName in serverNames)
                 {
-                    servers.Add(serverName,
-                        redis.HashGet(_storage.GetRedisKey($"server:{serverName}"), new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
-                            .ToStringArray().ToList()
-                        );
-                    queues.Add(serverName,
-                        redis.ListRange(_storage.GetRedisKey($"server:{serverName}:queues"))
-                            .ToStringArray().ToList()
-                        );
+                    var queue = redis.ListRange(
+                        _storage.GetRedisKey($"server:{serverName}:queues"))
+                        .ToStringArray().ToList();
+
+                    var server = redis.HashGet(
+                        _storage.GetRedisKey($"server:{serverName}"),
+                        new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
+                        .ToStringArray().ToList();
+                    if (server[0] == null)
+                        continue;   // skip removed server
+
+                    servers.Add(new ServerDto
+                    {
+                        Name = serverName,
+                        WorkersCount = int.Parse(server[0]),
+                        Queues = queue,
+                        StartedAt = JobHelper.DeserializeDateTime(server[1]),
+                        Heartbeat = JobHelper.DeserializeNullableDateTime(server[2])
+                    });
                 }
 
-
-                return serverNames.Select(x => new ServerDto
-                {
-                    Name = x,
-                    WorkersCount = int.Parse(servers[x][0]),
-                    Queues = queues[x],
-                    StartedAt = JobHelper.DeserializeDateTime(servers[x][1]),
-                    Heartbeat = JobHelper.DeserializeNullableDateTime(servers[x][2])
-                }).ToList();
+                return servers;
             });
         }
 
