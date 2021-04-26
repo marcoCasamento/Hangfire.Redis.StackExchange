@@ -32,7 +32,7 @@ namespace Hangfire
 
         public static IGlobalConfiguration<RedisStorage> UseRedisStorage(
             [NotNull] this IGlobalConfiguration configuration,
-            [NotNull] ConnectionMultiplexer connectionMultiplexer,
+            [NotNull] IConnectionMultiplexer connectionMultiplexer,
             RedisStorageOptions options = null)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
