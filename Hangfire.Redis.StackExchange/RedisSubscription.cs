@@ -10,7 +10,7 @@ namespace Hangfire.Redis
     internal class RedisSubscription : IServerComponent
 #pragma warning restore 618
     {
-        private readonly ManualResetEvent _mre = new ManualResetEvent(false);
+        private readonly AutoResetEvent _mre = new AutoResetEvent(false);
         private readonly RedisStorage _storage;
         private readonly ISubscriber _subscriber;
 
@@ -20,7 +20,13 @@ namespace Hangfire.Redis
             Channel = _storage.GetRedisKey("JobFetchChannel");
 
             _subscriber = subscriber ?? throw new ArgumentNullException(nameof(subscriber));
-            _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());
+            _subscriber.Subscribe(Channel, (channel, value) =>
+            {
+                if (value.HasValue && LocalCache.Instance.TryAdd(value.ToString()))
+                {
+                    _mre.Set();
+                }
+            });
         }
 
         public string Channel { get; }
