@@ -246,7 +246,8 @@ namespace Hangfire.Redis
         public override List<string> GetFirstByLowestScoreFromSet(string key, double fromScore, double toScore, int count)
         {
             return Redis.SortedSetRangeByScore(_storage.GetRedisKey(key), fromScore, toScore, skip: 0, take: count)
-                .Select(x => x.HasValue ? x.ToString() : null)
+                .Where(x => x.HasValue)
+                .Select(x => x.ToString())
                 .ToList();
         }
 
