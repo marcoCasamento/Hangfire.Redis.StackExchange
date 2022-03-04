@@ -4,8 +4,8 @@
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
     <IsPackable>true</IsPackable>
-    <Version>1.8.4</Version>
-    <PackageVersion>1.8.4</PackageVersion>
+    <Version>1.8.5</Version>
+    <PackageVersion>1.8.5</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
@@ -24,6 +24,8 @@
       It also supports Batches (Pro Feature)
     </Summary>
     <PackageReleaseNotes>
+      1.8.5
+      - Speed up Recurring jobs Fetching (thanks to developingjim)
       1.8.4
       - Fix #90, #91 concurrent access on dictinoary (thanks to luukholleman)
       - Fix #94 occasional error in monitoringApi (thanks to tsu1980)
@@ -77,7 +79,7 @@
 
   <ItemGroup>
     <PackageReference Include="HangFire.Core" Version="1.7.11" />
-    <PackageReference Include="StackExchange.Redis" Version="2.1.30" />
+    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
   </ItemGroup>
 
 </Project>
