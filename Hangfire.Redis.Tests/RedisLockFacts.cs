@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
+    [Collection("Sequential")]
     public class RedisLockFacts
     {
 
@@ -29,7 +30,7 @@ namespace Hangfire.Redis.Tests
             using (var testLock1 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100)))
             {
                 Assert.NotNull(testLock1);
-
+                
                 using (var testLock2 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100)))
                 {
                     Assert.NotNull(testLock2);

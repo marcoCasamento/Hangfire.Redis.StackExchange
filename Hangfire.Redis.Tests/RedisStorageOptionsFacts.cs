@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
+    [Collection("Sequential")]
     public class RedisStorageOptionsFacts
     {
 

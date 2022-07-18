@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Hangfire.Redis.Tests
 {
-    [CleanRedis]
+    [CleanRedis, Collection("Sequential")]
     public class FetchedJobsWatcherFacts
     {
         private static readonly TimeSpan InvisibilityTimeout = TimeSpan.FromSeconds(10);

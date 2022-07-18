@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
-    [CleanRedis]
+    [CleanRedis, Collection("Sequential")]
     public class ExpiredJobsWatcherFacts
     {
         private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(1);
