@@ -4,8 +4,8 @@
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
     <IsPackable>true</IsPackable>
-    <Version>1.8.6-beta</Version>
-    <PackageVersion>1.8.6-beta</PackageVersion>
+    <Version>1.9.0-beta</Version>
+    <PackageVersion>1.9.0-beta</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
