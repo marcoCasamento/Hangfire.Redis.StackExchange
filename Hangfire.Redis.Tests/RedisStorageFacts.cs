@@ -27,6 +27,14 @@ namespace Hangfire.Redis.Tests
             Assert.Equal(5, storage.Db);
         }
 
+        [Fact]
+        public void PasswordFromToStringIsNotShown()
+        {
+            string password = Guid.NewGuid().ToString("N");
+            var storage = new RedisStorage(String.Format("{0},password={1}", RedisUtils.GetHostAndPort(), password));
+            Assert.DoesNotContain(password, storage.ToString());
+        }
+        
         private RedisStorage CreateStorage()
         {
             var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
