@@ -128,7 +128,8 @@ namespace Hangfire.Redis
         {
             logger.Debug("Using the following options for Redis job storage:");
 
-            logger.DebugFormat("ConnectionString: {0}\nDN: {1}", ConnectionString, Db);
+            var connectionString = _redisOptions.ToString(includePassword: false);
+            logger.DebugFormat("ConnectionString: {0}\nDN: {1}", connectionString, Db);
         }
 
         public override string ToString()
