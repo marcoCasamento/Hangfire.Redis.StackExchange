@@ -4,8 +4,8 @@
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
     <IsPackable>true</IsPackable>
-    <Version>1.8.5</Version>
-    <PackageVersion>1.8.5</PackageVersion>
+    <Version>1.8.6</Version>
+    <PackageVersion>1.8.6</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
@@ -24,47 +24,50 @@
       It also supports Batches (Pro Feature)
     </Summary>
     <PackageReleaseNotes>
-      1.8.5
-      - Speed up Recurring jobs Fetching (thanks to developingjim)
-      1.8.4
-      - Fix #90, #91 concurrent access on dictinoary (thanks to luukholleman)
-      - Fix #94 occasional error in monitoringApi (thanks to tsu1980)
-      1.8.3
-      - Removed dependency to NewtonSoft.JSON (thanks to neyromant)
-      1.8.2
-      - Updated Hangfire to 1.7.11 (thanks to abarducci)
-      - Updated StackExchange.Redis to 2.1.30 (thanks to abarducci)
-      1.8.1
-      - Updated Hangfire to 1.7.8
-      - Fixed #82 (thanks to @bcuff)
-      1.8.0
-      - Updated StackExchange.Redis to 2.0 (thanks to @andrebires)
-      1.7.2
-      - Added support for Lifo Queues (thanks to AndreSteenbergen)
-      - Added option to not use transaction (thanks to AndreSteenbergen)
-      - Enabled sliding expiration for distributed locks (thanks to pieceofsummer)
-      - Add epired jobs watch to cleanup succeeded/deleted lists (thanks to pieceofsummer)
-      - Make succeeded and deleted lists size configurable (thanks to pieceofsummer)
-      - Fix job state order (thanks to pieceofsummer)
-      - Exclude Fetched property from job parameters (thanks to pieceofsummer)
-      1.7.1
-      - Add expired jobs watcher to cleanup succeeded/deleted lists thanks to pieceofsummer
-      1.7.0
-      - Redis Cluster support (#42 thanks to gzpbx)
-      - Update to VS2017 (#48 thanks to ryanelian)
-      1.6.7
-      - Added support for Redis DB in the ConnectionString (#26 thanks to zivillian)
-      - Added constructor to RedisStorage that accepts a ConnectionMultiplexer instance (#23 thanks to sjwoodard)
-      - Lowered dependencies for net45 framework and aligned to Hangfire.Core (#21 thanks to zlangner)
-      - Fixed dependency casing of Hangfire.Core (#33 thanks to Poly3k)
-      - Fix Dispose of RedisSupscription (#32 thanks to WebApelsin)
-      - Fixed random failure of test NestLockDisposePreservesRoot
-      1.6.6
-      - Configurable timeout for FetchNextJob (thanks to WebApelsin)
-      1.6.5
-      - .Net Core Support (thanks to Stefan Polyanszky)
-      - Aligned dependency to Hangfire.Core
-    </PackageReleaseNotes>
+			1.8.6
+			- Suppress Password in Connection's ToString (thanks to matheusriboli)
+			- Updated Nuget Packages dependencies
+			1.8.5
+			- Speed up Recurring jobs Fetching (thanks to developingjim)
+			1.8.4
+			- Fix #90, #91 concurrent access on dictinoary (thanks to luukholleman)
+			- Fix #94 occasional error in monitoringApi (thanks to tsu1980)
+			1.8.3
+			- Removed dependency to NewtonSoft.JSON (thanks to neyromant)
+			1.8.2
+			- Updated Hangfire to 1.7.11 (thanks to abarducci)
+			- Updated StackExchange.Redis to 2.1.30 (thanks to abarducci)
+			1.8.1
+			- Updated Hangfire to 1.7.8
+			- Fixed #82 (thanks to @bcuff)
+			1.8.0
+			- Updated StackExchange.Redis to 2.0 (thanks to @andrebires)
+			1.7.2
+			- Added support for Lifo Queues (thanks to AndreSteenbergen)
+			- Added option to not use transaction (thanks to AndreSteenbergen)
+			- Enabled sliding expiration for distributed locks (thanks to pieceofsummer)
+			- Add epired jobs watch to cleanup succeeded/deleted lists (thanks to pieceofsummer)
+			- Make succeeded and deleted lists size configurable (thanks to pieceofsummer)
+			- Fix job state order (thanks to pieceofsummer)
+			- Exclude Fetched property from job parameters (thanks to pieceofsummer)
+			1.7.1
+			- Add expired jobs watcher to cleanup succeeded/deleted lists thanks to pieceofsummer
+			1.7.0
+			- Redis Cluster support (#42 thanks to gzpbx)
+			- Update to VS2017 (#48 thanks to ryanelian)
+			1.6.7
+			- Added support for Redis DB in the ConnectionString (#26 thanks to zivillian)
+			- Added constructor to RedisStorage that accepts a ConnectionMultiplexer instance (#23 thanks to sjwoodard)
+			- Lowered dependencies for net45 framework and aligned to Hangfire.Core (#21 thanks to zlangner)
+			- Fixed dependency casing of Hangfire.Core (#33 thanks to Poly3k)
+			- Fix Dispose of RedisSupscription (#32 thanks to WebApelsin)
+			- Fixed random failure of test NestLockDisposePreservesRoot
+			1.6.6
+			- Configurable timeout for FetchNextJob (thanks to WebApelsin)
+			1.6.5
+			- .Net Core Support (thanks to Stefan Polyanszky)
+			- Aligned dependency to Hangfire.Core
+		</PackageReleaseNotes>
     <PackageTags>Hangfire Redis</PackageTags>
     <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -78,8 +81,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HangFire.Core" Version="1.7.11" />
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="Hangfire.Core" Version="1.7.31" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
   </ItemGroup>
 
 </Project>
