@@ -4,8 +4,8 @@
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <PackageId>Hangfire.Redis.StackExchange</PackageId>
     <IsPackable>true</IsPackable>
-    <Version>1.9.0-beta</Version>
-    <PackageVersion>1.9.0-beta</PackageVersion>
+    <Version>1.9.1-beta</Version>
+    <PackageVersion>1.9.1-beta</PackageVersion>
     <Authors>Marco Casamento and contributors</Authors>
     <owners>marcocasamento</owners>
     <!--
@@ -24,6 +24,8 @@
       It also supports Batches (Pro Feature)
     </Summary>
     <PackageReleaseNotes>
+			1.9.1-beta
+			- Switched AsyncLocal storage of redis lock to ThreadLocal
 			1.9-beta
 			- Drop support for net461
 			- Added compatibility to Hangfire.Core 1.8-rc1
