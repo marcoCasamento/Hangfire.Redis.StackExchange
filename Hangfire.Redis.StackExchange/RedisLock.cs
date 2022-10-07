@@ -29,30 +29,8 @@ namespace Hangfire.Redis
         private static readonly TimeSpan DefaultHoldDuration = TimeSpan.FromSeconds(30);
         private static readonly string OwnerId = Guid.NewGuid().ToString();
 
-#if NET45
-        /// <summary>
-        /// Drop-in implementation of AsyncLocal for NET 4.5
-        /// </summary>
-        private class AsyncLocal<T>
-        {
-            private readonly string __name = Guid.NewGuid().ToString();
 
-            public T Value
-            {
-                get
-                {
-                    var value = System.Runtime.Remoting.Messaging.CallContext.LogicalGetData(__name);
-                    return value == null ? default(T) : (T)value;
-                }
-                set
-                {
-                    System.Runtime.Remoting.Messaging.CallContext.LogicalSetData(__name, value);
-                }
-            }
-        }
-#endif
-        
-        private static AsyncLocal<ConcurrentDictionary<RedisKey, byte>> _heldLocks = new AsyncLocal<ConcurrentDictionary<RedisKey, byte>>();
+        private static ThreadLocal<ConcurrentDictionary<RedisKey, byte>> _heldLocks = new ThreadLocal<ConcurrentDictionary<RedisKey, byte>>();
 
         private static ConcurrentDictionary<RedisKey, byte> HeldLocks
         {
