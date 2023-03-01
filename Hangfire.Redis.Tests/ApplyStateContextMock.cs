@@ -2,7 +2,6 @@
 using Hangfire.States;
 using Moq;
 using Hangfire.Common;
-using System.Reflection;
 
 namespace Hangfire.Redis.Tests
 {
