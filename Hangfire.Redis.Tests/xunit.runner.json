@@ -1,0 +1,4 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/xunit.runner.schema.json",
+  "parallelizeTestCollections": false
+}
