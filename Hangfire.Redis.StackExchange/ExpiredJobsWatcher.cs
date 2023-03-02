@@ -15,6 +15,8 @@ namespace Hangfire.Redis
 #pragma warning restore 618
     {
         private static readonly ILog Logger = LogProvider.For<ExpiredJobsWatcher>();
+        private static readonly string OwnerId = Guid.NewGuid().ToString();
+        private static readonly TimeSpan DefaultHoldDuration = TimeSpan.FromSeconds(30);
         
         private readonly RedisStorage _storage;
         private readonly TimeSpan _checkInterval;
@@ -46,52 +48,63 @@ namespace Hangfire.Redis
             using (var connection = (RedisConnection)_storage.GetConnection())
             {
                 var redis = connection.Redis;
-                
                 foreach (var key in ProcessedKeys)
                 {
                     var redisKey = _storage.GetRedisKey(key);
-
-                    var count = redis.ListLength(redisKey);
-                    if (count == 0) continue;
-
-                    Logger.InfoFormat("Removing expired records from the '{0}' list...", key);
-                    
-                    const int batchSize = 100;
-                    var keysToRemove = new List<string>();
-                    
-                    for (var last = count - 1; last >= 0; last -= batchSize)
+                    var redisKeyLock = $"{redisKey}:execute:lock";
+                    if (!redis.LockTake(redisKeyLock, OwnerId, DefaultHoldDuration))
                     {
-                        var first = Math.Max(0, last - batchSize + 1);
-                        
-                        var jobIds = redis.ListRange(redisKey, first, last).ToStringArray();
-                        if (jobIds.Length == 0) continue;
-                        
-                        var pipeline = redis.CreateBatch();
-                        var tasks = new Task[jobIds.Length];
-
-                        for (var i = 0; i < jobIds.Length; i++)
-                        {
-                            tasks[i] = pipeline.KeyExistsAsync(_storage.GetRedisKey($"job:{jobIds[i]}"));
-                        }
-                        
-                        pipeline.Execute();
-                        Task.WaitAll(tasks);
-
-                        keysToRemove.AddRange(jobIds.Where((t, i) => !((Task<bool>)tasks[i]).Result));
+                        continue;
                     }
-                    
-                    if (keysToRemove.Count == 0) continue;
 
-                    Logger.InfoFormat("Removing {0} expired jobs from '{1}' list...", keysToRemove.Count, key);
-
-                    using (var transaction = connection.CreateWriteTransaction())
+                    try
                     {
-                        foreach (var jobId in keysToRemove)
+                        var count = redis.ListLength(redisKey);
+                        if (count == 0) continue;
+
+                        Logger.InfoFormat("Removing expired records from the '{0}' list...", key);
+                        
+                        const int batchSize = 100;
+                        var keysToRemove = new List<string>();
+                        
+                        for (var last = count - 1; last >= 0; last -= batchSize)
                         {
-                            transaction.RemoveFromList(key, jobId);
+                            var first = Math.Max(0, last - batchSize + 1);
+                            
+                            var jobIds = redis.ListRange(redisKey, first, last).ToStringArray();
+                            if (jobIds.Length == 0) continue;
+                            
+                            var pipeline = redis.CreateBatch();
+                            var tasks = new Task[jobIds.Length];
+
+                            for (var i = 0; i < jobIds.Length; i++)
+                            {
+                                tasks[i] = pipeline.KeyExistsAsync(_storage.GetRedisKey($"job:{jobIds[i]}"));
+                            }
+                            
+                            pipeline.Execute();
+                            Task.WaitAll(tasks);
+
+                            keysToRemove.AddRange(jobIds.Where((t, i) => !((Task<bool>)tasks[i]).Result));
                         }
                         
-                        transaction.Commit();
+                        if (keysToRemove.Count == 0) continue;
+
+                        Logger.InfoFormat("Removing {0} expired jobs from '{1}' list...", keysToRemove.Count, key);
+
+                        using (var transaction = connection.CreateWriteTransaction())
+                        {
+                            foreach (var jobId in keysToRemove)
+                            {
+                                transaction.RemoveFromList(key, jobId);
+                            }
+                            
+                            transaction.Commit();
+                        }
+                    }
+                    finally
+                    {
+                        redis.LockRelease(redisKeyLock, OwnerId);
                     }
                 }
             }
