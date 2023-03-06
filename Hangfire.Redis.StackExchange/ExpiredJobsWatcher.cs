@@ -7,7 +7,6 @@ using Hangfire.Logging;
 using Hangfire.Server;
 using StackExchange.Redis;
 
-// ReSharper disable once CheckNamespace
 namespace Hangfire.Redis
 {
 #pragma warning disable 618
