@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net462;net5.0</TargetFrameworks>
+        <TargetFrameworks>net462;net5.0;net6.0;net7.0</TargetFrameworks>
         <SignAssembly>false</SignAssembly>
         <AssemblyOriginatorKeyFile>Hangfire_Redis_Tests.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
@@ -25,7 +25,7 @@
         <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
     </ItemGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)'=='net5.0'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
