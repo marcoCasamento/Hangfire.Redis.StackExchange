@@ -2,6 +2,7 @@
 using Hangfire.States;
 using Moq;
 using Hangfire.Common;
+using Hangfire.Redis.Tests.Utils;
 
 namespace Hangfire.Redis.Tests
 {

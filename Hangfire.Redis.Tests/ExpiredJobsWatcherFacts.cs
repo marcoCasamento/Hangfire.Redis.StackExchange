@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Hangfire.Common;
+using Hangfire.Redis.Tests.Utils;
 using Hangfire.Server;
 using Xunit;
 

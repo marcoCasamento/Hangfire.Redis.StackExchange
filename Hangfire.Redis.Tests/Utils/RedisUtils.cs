@@ -1,7 +1,7 @@
-﻿using StackExchange.Redis;
-using System;
+﻿using System;
+using StackExchange.Redis;
 
-namespace Hangfire.Redis.Tests
+namespace Hangfire.Redis.Tests.Utils
 {
     public static class RedisUtils
     {

@@ -1,20 +1,4 @@
-﻿// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento
-// This software is based on https://github.com/HangfireIO/Hangfire.Redis
-
-// Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as
-// published by the Free Software Foundation, either version 3
-// of the License, or any later version.
-//
-// Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Hangfire.Common;
@@ -33,13 +17,13 @@ namespace Hangfire.Redis
         private readonly RedisStorage _storage;
         private readonly IDatabase _database;
 
-		public RedisMonitoringApi([NotNull] RedisStorage storage, [NotNull] IDatabase database)
+        public RedisMonitoringApi([NotNull] RedisStorage storage, [NotNull] IDatabase database)
         {
             if (storage == null) throw new ArgumentNullException(nameof(storage));
-			if (database == null) throw new ArgumentNullException(nameof(database));
+            if (database == null) throw new ArgumentNullException(nameof(database));
 
             _storage = storage;
-			_database = database;
+            _database = database;
         }
 
         public long ScheduledCount()
@@ -66,7 +50,7 @@ namespace Hangfire.Redis
         {
             return UseConnection(redis => redis.SortedSetLength(_storage.GetRedisKey("processing")));
         }
-        
+
         public long SucceededListCount()
         {
             return UseConnection(redis => redis.ListLength(_storage.GetRedisKey("succeeded")));
@@ -76,7 +60,7 @@ namespace Hangfire.Redis
         {
             return UseConnection(redis => redis.SortedSetLength(_storage.GetRedisKey("failed")));
         }
-        
+
         public long DeletedListCount()
         {
             return UseConnection(redis => redis.ListLength(_storage.GetRedisKey("deleted")));
@@ -96,19 +80,19 @@ namespace Hangfire.Redis
                     .ToStringArray();
 
                 return new JobList<ProcessingJobDto>(GetJobsWithProperties(redis,
-                    jobIds,
-                    null,
-                    new[] { "StartedAt", "ServerName", "ServerId", "State" },
-                    (job, jobData, state) => new ProcessingJobDto
-                    {
-                        ServerId = state[2] ?? state[1],
-                        Job = job,
-                        StartedAt = JobHelper.DeserializeNullableDateTime(state[0]),
-                        InProcessingState = ProcessingState.StateName.Equals(
-                            state[3], StringComparison.OrdinalIgnoreCase),
-                    })
-					.Where(x=> x.Value?.ServerId != null)
-					.OrderBy(x => x.Value.StartedAt).ToList());
+                        jobIds,
+                        null,
+                        new[] {"StartedAt", "ServerName", "ServerId", "State"},
+                        (job, jobData, state) => new ProcessingJobDto
+                        {
+                            ServerId = state[2] ?? state[1],
+                            Job = job,
+                            StartedAt = JobHelper.DeserializeNullableDateTime(state[0]),
+                            InProcessingState = ProcessingState.StateName.Equals(
+                                state[3], StringComparison.OrdinalIgnoreCase),
+                        })
+                    .Where(x => x.Value?.ServerId != null)
+                    .OrderBy(x => x.Value.StartedAt).ToList());
             });
         }
 
@@ -126,28 +110,28 @@ namespace Hangfire.Redis
                 }
 
                 var jobs = new ConcurrentDictionary<string, List<string>>();
-                var states = new ConcurrentDictionary<string, List<string>>();;
+                var states = new ConcurrentDictionary<string, List<string>>();
 
-				var pipeline = redis.CreateBatch();
-				var tasks = new Task[scheduledJobs.Count * 2];
-				int i = 0;
+                var pipeline = redis.CreateBatch();
+                var tasks = new Task[scheduledJobs.Count * 2];
+                int i = 0;
                 foreach (var scheduledJob in scheduledJobs)
                 {
                     var jobId = scheduledJob.Element;
-					tasks[i] = pipeline.HashGetAsync(
-								_storage.GetRedisKey($"job:{jobId}"),
-								new RedisValue[] { "Type", "Method", "ParameterTypes", "Arguments" })
-						.ContinueWith(x => jobs.TryAdd(jobId, x.Result.ToStringArray().ToList()));
-					i++;
-					tasks[i] = pipeline.HashGetAsync(
-								_storage.GetRedisKey($"job:{jobId}:state"),
-								new RedisValue[] { "State", "ScheduledAt" })
-						.ContinueWith(x => states.TryAdd(jobId, x.Result.ToStringArray().ToList()));
-					i++;
+                    tasks[i] = pipeline.HashGetAsync(
+                            _storage.GetRedisKey($"job:{jobId}"),
+                            new RedisValue[] {"Type", "Method", "ParameterTypes", "Arguments"})
+                        .ContinueWith(x => jobs.TryAdd(jobId, x.Result.ToStringArray().ToList()));
+                    i++;
+                    tasks[i] = pipeline.HashGetAsync(
+                            _storage.GetRedisKey($"job:{jobId}:state"),
+                            new RedisValue[] {"State", "ScheduledAt"})
+                        .ContinueWith(x => states.TryAdd(jobId, x.Result.ToStringArray().ToList()));
+                    i++;
                 }
 
-				pipeline.Execute();
-				Task.WaitAll(tasks);
+                pipeline.Execute();
+                Task.WaitAll(tasks);
 
                 return new JobList<ScheduledJobDto>(scheduledJobs
                     .Select(job => new KeyValuePair<string, ScheduledJobDto>(
@@ -183,7 +167,7 @@ namespace Hangfire.Redis
             {
                 var serverNames = redis
                     .SetMembers(_storage.GetRedisKey("servers"))
-                    .Select(x => (string)x)
+                    .Select(x => (string) x)
                     .ToList();
 
                 if (serverNames.Count == 0)
@@ -196,15 +180,15 @@ namespace Hangfire.Redis
                 foreach (var serverName in serverNames)
                 {
                     var queue = redis.ListRange(
-                        _storage.GetRedisKey($"server:{serverName}:queues"))
+                            _storage.GetRedisKey($"server:{serverName}:queues"))
                         .ToStringArray().ToList();
 
                     var server = redis.HashGet(
-                        _storage.GetRedisKey($"server:{serverName}"),
-                        new RedisValue[] { "WorkerCount", "StartedAt", "Heartbeat" })
+                            _storage.GetRedisKey($"server:{serverName}"),
+                            new RedisValue[] {"WorkerCount", "StartedAt", "Heartbeat"})
                         .ToStringArray().ToList();
                     if (server[0] == null)
-                        continue;   // skip removed server
+                        continue; // skip removed server
 
                     servers.Add(new ServerDto
                     {
@@ -226,13 +210,13 @@ namespace Hangfire.Redis
             {
                 var failedJobIds = redis
                     .SortedSetRangeByRank(_storage.GetRedisKey("failed"), from, from + count - 1)
-					.ToStringArray();
+                    .ToStringArray();
 
                 return GetJobsWithProperties(
                     redis,
                     failedJobIds,
                     null,
-                    new[] { "FailedAt", "ExceptionType", "ExceptionMessage", "ExceptionDetails", "State", "Reason" },
+                    new[] {"FailedAt", "ExceptionType", "ExceptionMessage", "ExceptionDetails", "State", "Reason"},
                     (job, jobData, state) => new FailedJobDto
                     {
                         Job = job,
@@ -252,13 +236,13 @@ namespace Hangfire.Redis
             {
                 var succeededJobIds = redis
                     .ListRange(_storage.GetRedisKey("succeeded"), from, from + count - 1)
-					.ToStringArray();
+                    .ToStringArray();
 
                 return GetJobsWithProperties(
                     redis,
                     succeededJobIds,
                     null,
-                    new[] { "SucceededAt", "PerformanceDuration", "Latency", "State", "Result" },
+                    new[] {"SucceededAt", "PerformanceDuration", "Latency", "State", "Result"},
                     (job, jobData, state) => new SucceededJobDto
                     {
                         Job = job,
@@ -284,7 +268,7 @@ namespace Hangfire.Redis
                     redis,
                     deletedJobIds,
                     null,
-                    new[] { "DeletedAt", "State" },
+                    new[] {"DeletedAt", "State"},
                     (job, jobData, state) => new DeletedJobDto
                     {
                         Job = job,
@@ -300,7 +284,7 @@ namespace Hangfire.Redis
             {
                 var queues = redis
                     .SetMembers(_storage.GetRedisKey("queues"))
-					.Select(x=> (string)x)
+                    .Select(x => (string) x)
                     .ToList();
 
                 var result = new List<QueueWithTopEnqueuedJobsDto>(queues.Count);
@@ -312,26 +296,26 @@ namespace Hangfire.Redis
                     long fetched = 0;
 
 
-					var pipeline = redis.CreateBatch();
-					Task[] tasks = new Task[3];
-					tasks[0] = pipeline.ListRangeAsync(
+                    var pipeline = redis.CreateBatch();
+                    Task[] tasks = new Task[3];
+                    tasks[0] = pipeline.ListRangeAsync(
                             _storage.GetRedisKey($"queue:{queue}"), -5, -1)
-							.ContinueWith(x => firstJobIds = x.Result.ToStringArray());
+                        .ContinueWith(x => firstJobIds = x.Result.ToStringArray());
 
                     tasks[1] = pipeline.ListLengthAsync(_storage.GetRedisKey($"queue:{queue}"))
-						.ContinueWith(x => length = x.Result);
+                        .ContinueWith(x => length = x.Result);
 
                     tasks[2] = pipeline.ListLengthAsync(_storage.GetRedisKey($"queue:{queue}:dequeued"))
-						.ContinueWith(x => fetched = x.Result);
+                        .ContinueWith(x => fetched = x.Result);
 
-					pipeline.Execute();
-					Task.WaitAll(tasks);
+                    pipeline.Execute();
+                    Task.WaitAll(tasks);
 
                     var jobs = GetJobsWithProperties(
                         redis,
                         firstJobIds,
-                        new[] { "State" },
-                        new[] { "EnqueuedAt", "State" },
+                        new[] {"State"},
+                        new[] {"EnqueuedAt", "State"},
                         (job, jobData, state) => new EnqueuedJobDto
                         {
                             Job = job,
@@ -366,8 +350,8 @@ namespace Hangfire.Redis
                 return GetJobsWithProperties(
                     redis,
                     jobIds,
-                    new[] { "State" },
-                    new[] { "EnqueuedAt", "State" },
+                    new[] {"State"},
+                    new[] {"EnqueuedAt", "State"},
                     (job, jobData, state) => new EnqueuedJobDto
                     {
                         Job = job,
@@ -387,12 +371,12 @@ namespace Hangfire.Redis
                 var jobIds = redis
                     .ListRange(_storage.GetRedisKey($"queue:{queue}:dequeued"), from, from + count - 1)
                     .ToStringArray();
-				RedisValue[] rk = new RedisValue[1];
+                RedisValue[] rk = new RedisValue[1];
 
                 return GetJobsWithProperties(
                     redis,
                     jobIds,
-                    new[] { "State", "Fetched" },
+                    new[] {"State", "Fetched"},
                     null,
                     (job, jobData, state) => new FetchedJobDto
                     {
@@ -425,11 +409,11 @@ namespace Hangfire.Redis
 
                 if (job.Count == 0) return null;
 
-                var hiddenProperties = new[] { "Type", "Method", "ParameterTypes", "Arguments", "State", "CreatedAt", "Fetched" };
+                var hiddenProperties = new[] {"Type", "Method", "ParameterTypes", "Arguments", "State", "CreatedAt", "Fetched"};
 
                 var history = redis
                     .ListRange(_storage.GetRedisKey($"job:{jobId}:history"))
-					.ToStringArray()
+                    .ToStringArray()
                     .Select(SerializationHelper.Deserialize<Dictionary<string, string>>)
                     .ToList();
 
@@ -494,8 +478,7 @@ namespace Hangfire.Redis
             var result = new Dictionary<DateTime, long>();
             for (var i = 0; i < dates.Count; i++)
             {
-                long value;
-                if (!long.TryParse(valuesMap[valuesMap.Keys.ElementAt(i)], out value))
+                if (!long.TryParse(valuesMap[valuesMap.Keys.ElementAt(i)], out var value))
                 {
                     value = 0;
                 }
@@ -519,7 +502,7 @@ namespace Hangfire.Redis
                 dates.Add(endDate);
                 endDate = endDate.AddDays(-1);
             }
-            
+
             var keys = dates.Select(x => _storage.GetRedisKey($"stats:{type}:{x:yyyy-MM-dd}")).ToArray();
 
             var valuesMap = redis.GetValuesMap(keys);
@@ -527,11 +510,11 @@ namespace Hangfire.Redis
             var result = new Dictionary<DateTime, long>();
             for (var i = 0; i < dates.Count; i++)
             {
-                long value;
-                if (!long.TryParse(valuesMap[valuesMap.Keys.ElementAt(i)], out value))
+                if (!long.TryParse(valuesMap[valuesMap.Keys.ElementAt(i)], out var value))
                 {
                     value = 0;
                 }
+
                 result.Add(dates[i], value);
             }
 
@@ -556,33 +539,33 @@ namespace Hangfire.Redis
             properties = properties ?? new string[0];
 
             var extendedProperties = properties
-                .Concat(new[] { "Type", "Method", "ParameterTypes", "Arguments" })
+                .Concat(new[] {"Type", "Method", "ParameterTypes", "Arguments"})
                 .ToRedisValues();
-            
+
             var pipeline = redis.CreateBatch();
-			var tasks = new List<Task>(jobIds.Length * 2);
+            var tasks = new List<Task>(jobIds.Length * 2);
             foreach (var jobId in jobIds.Distinct())
             {
-				var jobTask = pipeline.HashGetAsync(
-                        _storage.GetRedisKey($"job:{jobId}"),
-                        extendedProperties);
-				tasks.Add(jobTask);
+                var jobTask = pipeline.HashGetAsync(
+                    _storage.GetRedisKey($"job:{jobId}"),
+                    extendedProperties);
+                tasks.Add(jobTask);
                 jobs.Add(jobId, jobTask);
 
-				if (stateProperties != null)
-				{
+                if (stateProperties != null)
+                {
                     var taskStateJob = pipeline.HashGetAsync(
-                        _storage.GetRedisKey($"job:{jobId}:state"), 
+                        _storage.GetRedisKey($"job:{jobId}:state"),
                         stateProperties.ToRedisValues());
-					tasks.Add(taskStateJob);
+                    tasks.Add(taskStateJob);
                     states.Add(jobId, taskStateJob);
-				}
+                }
             }
 
             pipeline.Execute();
-			Task.WaitAll(tasks.ToArray());
+            Task.WaitAll(tasks.ToArray());
 
-			var jobList = new JobList<T>(jobIds
+            var jobList = new JobList<T>(jobIds
                 .Select(jobId => new
                 {
                     JobId = jobId,
@@ -596,10 +579,10 @@ namespace Hangfire.Redis
                 })
                 .Select(x => new KeyValuePair<string, T>(
                     x.JobId,
-                    x.Job.Any(y => y != null) 
-                        ? selector(x.Method, x.Job, x.State) 
+                    x.Job.Any(y => y != null)
+                        ? selector(x.Method, x.Job, x.State)
                         : default(T))));
-			return jobList;
+            return jobList;
         }
 
         public StatisticsDto GetStatistics()
@@ -610,43 +593,49 @@ namespace Hangfire.Redis
 
                 var queues = redis.SetMembers(_storage.GetRedisKey("queues"));
 
-				var pipeline = redis.CreateBatch();
-				var tasks = new Task[queues.Length + 8];
+                var pipeline = redis.CreateBatch();
+                var tasks = new Task[queues.Length + 8];
 
                 tasks[0] = pipeline.SetLengthAsync(_storage.GetRedisKey("servers"))
-					.ContinueWith(x=> stats.Servers = x.Result);
+                    .ContinueWith(x => stats.Servers = x.Result);
 
                 tasks[1] = pipeline.SetLengthAsync(_storage.GetRedisKey("queues"))
                     .ContinueWith(x => stats.Queues = x.Result);
 
                 tasks[2] = pipeline.SortedSetLengthAsync(_storage.GetRedisKey("schedule"))
-					.ContinueWith(x => stats.Scheduled = x.Result);
+                    .ContinueWith(x => stats.Scheduled = x.Result);
 
                 tasks[3] = pipeline.SortedSetLengthAsync(_storage.GetRedisKey("processing"))
-					.ContinueWith(x => stats.Processing = x.Result);
+                    .ContinueWith(x => stats.Processing = x.Result);
 
                 tasks[4] = pipeline.StringGetAsync(_storage.GetRedisKey("stats:succeeded"))
-                    .ContinueWith(x => stats.Succeeded = long.Parse(x.Result.HasValue ?  (string)x.Result: "0"));
+                    .ContinueWith(x => stats.Succeeded = long.Parse(x.Result.HasValue ? (string) x.Result : "0"));
 
                 tasks[5] = pipeline.SortedSetLengthAsync(_storage.GetRedisKey("failed"))
-					.ContinueWith(x => stats.Failed = x.Result);
+                    .ContinueWith(x => stats.Failed = x.Result);
 
                 tasks[6] = pipeline.StringGetAsync(_storage.GetRedisKey("stats:deleted"))
-					.ContinueWith(x => stats.Deleted = long.Parse(x.Result.HasValue ?  (string)x.Result : "0"));
+                    .ContinueWith(x => stats.Deleted = long.Parse(x.Result.HasValue ? (string) x.Result : "0"));
 
                 tasks[7] = pipeline.SortedSetLengthAsync(_storage.GetRedisKey("recurring-jobs"))
                     .ContinueWith(x => stats.Recurring = x.Result);
 
-				var i = 8;
+                var i = 8;
                 foreach (var queue in queues)
                 {
                     tasks[i] = pipeline.ListLengthAsync(_storage.GetRedisKey($"queue:{queue}"))
-						.ContinueWith(x => { lock (stats) { stats.Enqueued += x.Result; } });
-					i++;
+                        .ContinueWith(x =>
+                        {
+                            lock (stats)
+                            {
+                                stats.Enqueued += x.Result;
+                            }
+                        });
+                    i++;
                 }
 
-				pipeline.Execute();
-				Task.WaitAll(tasks);
+                pipeline.Execute();
+                Task.WaitAll(tasks);
 
                 return stats;
             });
@@ -654,7 +643,7 @@ namespace Hangfire.Redis
 
         private T UseConnection<T>(Func<IDatabase, T> action)
         {
-			return action(_database);
+            return action(_database);
         }
 
         private static Job TryToGetJob(

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Hangfire.Logging;
+using Hangfire.Redis.Tests.Utils;
 using Moq;
 using Xunit;
 

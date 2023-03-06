@@ -11,13 +11,12 @@ namespace Hangfire.Redis
 #pragma warning restore 618
     {
         private readonly ManualResetEvent _mre = new ManualResetEvent(false);
-        private readonly RedisStorage _storage;
         private readonly ISubscriber _subscriber;
 
         public RedisSubscription([NotNull] RedisStorage storage, [NotNull] ISubscriber subscriber)
         {
-            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-            Channel = _storage.GetRedisKey("JobFetchChannel");
+            var storage1 = storage ?? throw new ArgumentNullException(nameof(storage));
+            Channel = storage1.GetRedisKey("JobFetchChannel");
 
             _subscriber = subscriber ?? throw new ArgumentNullException(nameof(subscriber));
             _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());

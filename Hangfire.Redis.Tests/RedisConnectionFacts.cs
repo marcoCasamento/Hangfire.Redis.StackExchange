@@ -1,6 +1,7 @@
 ﻿using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using Hangfire.Redis.Tests.Utils;
 using Xunit;
 
 namespace Hangfire.Redis.Tests

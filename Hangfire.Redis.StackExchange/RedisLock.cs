@@ -1,20 +1,4 @@
-﻿// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
-// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
-
-// Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as 
-// published by the Free Software Foundation, either version 3 
-// of the License, or any later version.
-// 
-// Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public 
-// License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
-
-using Hangfire.Annotations;
+﻿using Hangfire.Annotations;
 using Hangfire.Storage;
 using StackExchange.Redis;
 using System;
@@ -29,29 +13,6 @@ namespace Hangfire.Redis
         private static readonly TimeSpan DefaultHoldDuration = TimeSpan.FromSeconds(30);
         private static readonly string OwnerId = Guid.NewGuid().ToString();
 
-#if NET45
-        /// <summary>
-        /// Drop-in implementation of AsyncLocal for NET 4.5
-        /// </summary>
-        private class AsyncLocal<T>
-        {
-            private readonly string __name = Guid.NewGuid().ToString();
-
-            public T Value
-            {
-                get
-                {
-                    var value = System.Runtime.Remoting.Messaging.CallContext.LogicalGetData(__name);
-                    return value == null ? default(T) : (T)value;
-                }
-                set
-                {
-                    System.Runtime.Remoting.Messaging.CallContext.LogicalSetData(__name, value);
-                }
-            }
-        }
-#endif
-        
         private static AsyncLocal<ConcurrentDictionary<RedisKey, byte>> _heldLocks = new AsyncLocal<ConcurrentDictionary<RedisKey, byte>>();
 
         private static ConcurrentDictionary<RedisKey, byte> HeldLocks
