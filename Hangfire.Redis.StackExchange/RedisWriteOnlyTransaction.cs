@@ -1,23 +1,42 @@
-﻿using System;
-using System.Linq;
+﻿// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento 
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis 
+
+// Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as 
+// published by the Free Software Foundation, either version 3 
+// of the License, or any later version.
+// 
+// Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public 
+// License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
+
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Hangfire.Annotations;
 using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
 using StackExchange.Redis;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class RedisWriteOnlyTransaction : JobStorageTransaction
     {
         private readonly RedisStorage _storage;
         private readonly ITransaction _transaction;
 
-        public RedisWriteOnlyTransaction(RedisStorage storage, ITransaction transaction)
+        public RedisWriteOnlyTransaction([NotNull] RedisStorage storage, [NotNull] ITransaction transaction)
         {
-            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-            _transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
+            if (storage == null) throw new ArgumentNullException(nameof(storage));
+            if (transaction == null) throw new ArgumentNullException(nameof(transaction));
+
+            _storage = storage;
+            _transaction = transaction;
         }
 
         public override void AddRangeToSet([NotNull] string key, [NotNull] IList<string> items)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Hangfire.Common;
+using Hangfire.Redis.StackExchange;
 using Hangfire.Redis.Tests.Utils;
 using Hangfire.States;
 using Moq;

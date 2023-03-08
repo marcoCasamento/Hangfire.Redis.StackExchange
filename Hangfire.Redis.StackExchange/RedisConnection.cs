@@ -1,15 +1,31 @@
+// Copyright � 2013-2015 Sergey Odinokov, Marco Casamento
+// This software is based on https://github.com/HangfireIO/Hangfire.Redis
+
+// Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3
+// of the License, or any later version.
+//
+// Hangfire.Redis.StackExchange is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Hangfire.Annotations;
 using Hangfire.Common;
 using Hangfire.Server;
 using Hangfire.Storage;
 using StackExchange.Redis;
-using Hangfire.Annotations;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class RedisConnection : JobStorageConnection
     {
@@ -31,7 +47,7 @@ namespace Hangfire.Redis
         }
 
         public IDatabase Redis { get; }
-
+        
         public override IDisposable AcquireDistributedLock([NotNull] string resource, TimeSpan timeout)
         {
             return RedisLock.Acquire(Redis, _storage.GetRedisKey(resource), timeout);
@@ -51,10 +67,10 @@ namespace Hangfire.Redis
                 transaction.HashSetAsync(
                     _storage.GetRedisKey($"server:{serverId}"),
                     new Dictionary<string, string>
-                    {
-                        {"WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture)},
-                        {"StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow)},
-                    }.ToHashEntries());
+                        {
+                        { "WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture) },
+                        { "StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow) },
+                        }.ToHashEntries());
 
                 if (context.Queues.Length > 0)
                 {
@@ -64,18 +80,17 @@ namespace Hangfire.Redis
                 }
 
                 transaction.Execute();
-            }
-            else
+            } else
             {
                 Redis.SetAddAsync(_storage.GetRedisKey("servers"), serverId);
 
                 Redis.HashSetAsync(
                     _storage.GetRedisKey($"server:{serverId}"),
                     new Dictionary<string, string>
-                    {
-                        {"WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture)},
-                        {"StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow)},
-                    }.ToHashEntries());
+                        {
+                        { "WorkerCount", context.WorkerCount.ToString(CultureInfo.InvariantCulture) },
+                        { "StartedAt", JobHelper.SerializeDateTime(DateTime.UtcNow) },
+                        }.ToHashEntries());
 
                 if (context.Queues.Length > 0)
                 {
@@ -102,11 +117,11 @@ namespace Hangfire.Redis
             // Do not modify the original parameters.
             var storedParameters = new Dictionary<string, string>(parameters)
             {
-                {"Type", invocationData.Type},
-                {"Method", invocationData.Method},
-                {"ParameterTypes", invocationData.ParameterTypes},
-                {"Arguments", invocationData.Arguments},
-                {"CreatedAt", JobHelper.SerializeDateTime(createdAt)}
+                { "Type", invocationData.Type },
+                { "Method", invocationData.Method },
+                { "ParameterTypes", invocationData.ParameterTypes },
+                { "Arguments", invocationData.Arguments },
+                { "CreatedAt", JobHelper.SerializeDateTime(createdAt) }
             };
 
             if (_storage.UseTransactions)
@@ -118,8 +133,7 @@ namespace Hangfire.Redis
 
                 // TODO: check return value
                 transaction.Execute();
-            }
-            else
+            } else
             {
                 Redis.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
                 Redis.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
@@ -134,7 +148,6 @@ namespace Hangfire.Redis
             {
                 return new RedisWriteOnlyTransaction(_storage, Redis.CreateTransaction());
             }
-
             return new RedisWriteDirectlyToDatabase(_storage, Redis);
         }
 
@@ -166,7 +179,8 @@ namespace Hangfire.Redis
                 {
                     _subscription.WaitForJob(_fetchTimeout, cancellationToken);
                 }
-            } while (jobId == null);
+            }
+            while (jobId == null);
 
             // The job was fetched by the server. To provide reliability,
             // we should ensure, that the job will be performed and acquired
@@ -259,7 +273,7 @@ namespace Hangfire.Redis
             string parameterTypes = storedData.FirstOrDefault(x => x.Name == "ParameterTypes").Value;
             string arguments = storedData.FirstOrDefault(x => x.Name == "Arguments").Value;
             string createdAt = storedData.FirstOrDefault(x => x.Name == "CreatedAt").Value;
-
+            
             Job job = null;
             JobLoadException loadException = null;
 
@@ -371,13 +385,12 @@ namespace Hangfire.Redis
                 transaction.KeyDeleteAsync(
                     new RedisKey[]
                     {
-                        _storage.GetRedisKey($"server:{serverId}"),
-                        _storage.GetRedisKey($"server:{serverId}:queues")
+                    _storage.GetRedisKey($"server:{serverId}"),
+                    _storage.GetRedisKey($"server:{serverId}:queues")
                     });
 
                 transaction.Execute();
-            }
-            else
+            } else
             {
                 Redis.SetRemoveAsync(_storage.GetRedisKey("servers"), serverId);
                 Redis.KeyDeleteAsync(
@@ -395,14 +408,14 @@ namespace Hangfire.Redis
             var heartbeats = new Dictionary<string, Tuple<DateTime, DateTime?>>();
 
             var utcNow = DateTime.UtcNow;
-
+            
             foreach (var serverName in serverNames)
             {
-                var srv = Redis.HashGet(_storage.GetRedisKey($"server:{serverName}"), new RedisValue[] {"StartedAt", "Heartbeat"});
+                var srv = Redis.HashGet(_storage.GetRedisKey($"server:{serverName}"), new RedisValue[] { "StartedAt", "Heartbeat" });
                 heartbeats.Add(serverName,
-                    new Tuple<DateTime, DateTime?>(
-                        JobHelper.DeserializeDateTime(srv[0]),
-                        JobHelper.DeserializeNullableDateTime(srv[1])));
+                                new Tuple<DateTime, DateTime?>(
+                                JobHelper.DeserializeDateTime(srv[0]),
+                                JobHelper.DeserializeNullableDateTime(srv[1])));
             }
 
             var removedServerCount = 0;

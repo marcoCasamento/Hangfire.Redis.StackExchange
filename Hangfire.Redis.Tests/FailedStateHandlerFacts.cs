@@ -1,4 +1,5 @@
 ﻿using System;
+using Hangfire.Redis.StackExchange;
 using Hangfire.Redis.Tests.Utils;
 using Hangfire.States;
 using Hangfire.Storage;

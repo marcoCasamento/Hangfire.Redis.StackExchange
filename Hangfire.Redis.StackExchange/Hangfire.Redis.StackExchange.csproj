@@ -8,6 +8,7 @@
         <PackageVersion>1.8.7</PackageVersion>
         <Authors>Marco Casamento and contributors</Authors>
         <owners>marcocasamento</owners>
+        <Platforms>AnyCPU</Platforms>
         <!--
       https://docs.microsoft.com/en-us/dotnet/articles/core/tools/project-json-to-csproj
       There is no equivalent for the owners element in MSBuild. 
@@ -26,7 +27,8 @@
             1.8.7
             - Updated Nuget packages
             - Removed .NET 4.6.1 support (no longer supported by Microsoft)
-            - Miscellaneous cleanup
+            - Adds netstandard 2.1 as a target framework
+            - Miscellaneous cleanup, namespace adjustment
             1.8.6
             - Suppress Password in Connection's ToString (thanks to matheusriboli)
             - Updated Nuget Packages dependencies
@@ -73,12 +75,19 @@
         </PackageReleaseNotes>
         <PackageTags>Hangfire Redis</PackageTags>
         <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
+        <IncludeSymbols>true</IncludeSymbols>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <SignAssembly>false</SignAssembly>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <AssemblyOriginatorKeyFile>Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>
         <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
         <DelaySign>false</DelaySign>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <!--<SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>../Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>-->
     </PropertyGroup>
@@ -88,7 +97,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Hangfire.Core" Version="1.7.33" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="StackExchange.Redis" Version="2.6.96" />
     </ItemGroup>
 

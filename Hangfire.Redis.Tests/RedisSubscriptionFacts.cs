@@ -3,6 +3,7 @@ using StackExchange.Redis;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Hangfire.Redis.StackExchange;
 using Hangfire.Redis.Tests.Utils;
 using Xunit;
 

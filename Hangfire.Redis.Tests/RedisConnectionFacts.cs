@@ -1,6 +1,7 @@
 ﻿using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using Hangfire.Redis.StackExchange;
 using Hangfire.Redis.Tests.Utils;
 using Xunit;
 
@@ -12,7 +13,7 @@ namespace Hangfire.Redis.Tests
 
         public RedisConnectionFacts()
         {
-            var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
+            var options = new RedisStorageOptions() {Db = RedisUtils.GetDb()};
             _storage = new RedisStorage(RedisUtils.GetHostAndPort(), options);
         }
 
@@ -43,9 +44,9 @@ namespace Hangfire.Redis.Tests
                     "{hangfire}:job:my-job:state",
                     new Dictionary<string, string>
                     {
-                        { "State", "Name" },
-                        { "Reason", "Reason" },
-                        { "Key", "Value" }
+                        {"State", "Name"},
+                        {"Reason", "Reason"},
+                        {"Key", "Value"}
                     }.ToHashEntries());
 
                 var result = connection.GetStateData("my-job");
@@ -66,7 +67,7 @@ namespace Hangfire.Redis.Tests
                     "{hangfire}:job:my-job:state",
                     new Dictionary<string, string>
                     {
-                        { "State", "Name" }
+                        {"State", "Name"}
                     }.ToHashEntries());
 
                 var result = connection.GetStateData("my-job");
@@ -80,7 +81,7 @@ namespace Hangfire.Redis.Tests
         public void GetAllItemsFromSet_ThrowsAnException_WhenKeyIsNull()
         {
             UseConnection(connection =>
-                Assert.Throws<ArgumentNullException>("key", 
+                Assert.Throws<ArgumentNullException>("key",
                     () => connection.GetAllItemsFromSet(null)));
         }
 
@@ -103,7 +104,7 @@ namespace Hangfire.Redis.Tests
             {
                 // Arrange
                 redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
-				redis.SortedSetAdd("{hangfire}:some-set", "2", 0);
+                redis.SortedSetAdd("{hangfire}:some-set", "2", 0);
 
                 // Act
                 var result = connection.GetAllItemsFromSet("some-set");
@@ -142,8 +143,8 @@ namespace Hangfire.Redis.Tests
             {
                 connection.SetRangeInHash("some-hash", new Dictionary<string, string>
                 {
-                    { "Key1", "Value1" },
-                    { "Key2", "Value2" }
+                    {"Key1", "Value1"},
+                    {"Key2", "Value2"}
                 });
 
                 var hash = redis.HashGetAll("{hangfire}:some-hash").ToStringDictionary();
@@ -177,8 +178,8 @@ namespace Hangfire.Redis.Tests
                 // Arrange
                 redis.HashSet("{hangfire}:some-hash", new Dictionary<string, string>
                 {
-                    { "Key1", "Value1" },
-                    { "Key2", "Value2" }
+                    {"Key1", "Value1"},
+                    {"Key2", "Value2"}
                 }.ToHashEntries());
 
                 // Act
@@ -190,15 +191,15 @@ namespace Hangfire.Redis.Tests
                 Assert.Equal("Value2", result["Key2"]);
             });
         }
-        
+
         private void UseConnections(Action<IDatabase, RedisConnection> action)
         {
-			var redis = RedisUtils.CreateClient();
+            var redis = RedisUtils.CreateClient();
             var subscription = new RedisSubscription(_storage, RedisUtils.CreateSubscriber());
 
             using (var connection = new RedisConnection(_storage, redis, subscription, new RedisStorageOptions().FetchTimeout))
             {
-				action(redis, connection);
+                action(redis, connection);
             }
         }
 
@@ -209,7 +210,7 @@ namespace Hangfire.Redis.Tests
 
             using (var connection = new RedisConnection(_storage, redis, subscription, new RedisStorageOptions().FetchTimeout))
             {
-				action(connection);
+                action(connection);
             }
         }
     }

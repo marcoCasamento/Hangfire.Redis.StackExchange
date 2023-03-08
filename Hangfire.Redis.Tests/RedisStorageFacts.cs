@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Hangfire.Logging;
+using Hangfire.Redis.StackExchange;
 using Hangfire.Redis.Tests.Utils;
 using Moq;
 using Xunit;
@@ -63,7 +64,7 @@ namespace Hangfire.Redis.Tests
             Assert.DoesNotContain(password, loggedMessage);
         }
 
-        private RedisStorage CreateStorage()
+        private static RedisStorage CreateStorage()
         {
             var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
             return new RedisStorage(RedisUtils.GetHostAndPort(), options);
