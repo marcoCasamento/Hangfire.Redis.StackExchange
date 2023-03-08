@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU Lesser General Public 
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
-using Hangfire.Annotations;
-using Hangfire.Storage;
-using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
+using Hangfire.Annotations;
+using Hangfire.Storage;
+using StackExchange.Redis;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class RedisLock : IDisposable
     {

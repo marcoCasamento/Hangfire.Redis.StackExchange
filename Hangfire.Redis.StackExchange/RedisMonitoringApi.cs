@@ -15,18 +15,18 @@
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Hangfire.Annotations;
 using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
-using Hangfire.Annotations;
 using StackExchange.Redis;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     public class RedisMonitoringApi : IMonitoringApi
     {

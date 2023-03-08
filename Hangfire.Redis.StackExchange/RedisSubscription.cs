@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
+using Hangfire.Annotations;
 using Hangfire.Server;
 using StackExchange.Redis;
-using Hangfire.Annotations;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
 #pragma warning disable 618
     internal class RedisSubscription : IServerComponent
@@ -28,7 +28,7 @@ namespace Hangfire.Redis
         public void WaitForJob(TimeSpan timeout, CancellationToken cancellationToken)
         {
             _mre.Reset();
-            WaitHandle.WaitAny(new[] { _mre, cancellationToken.WaitHandle }, timeout);
+            WaitHandle.WaitAny(new[] {_mre, cancellationToken.WaitHandle}, timeout);
         }
 
         void IServerComponent.Execute(CancellationToken cancellationToken)

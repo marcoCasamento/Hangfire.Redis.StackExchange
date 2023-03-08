@@ -1,4 +1,4 @@
-// Copyright ?2013-2015 Sergey Odinokov, Marco Casamento
+// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento
 // This software is based on https://github.com/HangfireIO/Hangfire.Redis
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
 using System;
 using System.Threading;
 using Hangfire.Common;
-using Hangfire.Server;
 using Hangfire.Logging;
+using Hangfire.Server;
 using StackExchange.Redis;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
 #pragma warning disable 618
     internal class FetchedJobsWatcher : IServerComponent
@@ -55,7 +55,7 @@ namespace Hangfire.Redis
 
         public void Execute(CancellationToken cancellationToken)
         {
-            using (var connection = (RedisConnection)_storage.GetConnection())
+            using (var connection = (RedisConnection) _storage.GetConnection())
             {
                 var queues = connection.Redis.SetMembers(_storage.GetRedisKey("queues"));
 
@@ -108,7 +108,7 @@ namespace Hangfire.Redis
         {
             var flags = connection.Redis.HashGet(
                 _storage.GetRedisKey($"job:{jobId}"),
-                new RedisValue[] { "Fetched", "Checked" });
+                new RedisValue[] {"Fetched", "Checked"});
 
             var fetched = flags[0];
             var @checked = flags[1];

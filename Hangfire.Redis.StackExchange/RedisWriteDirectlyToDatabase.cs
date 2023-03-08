@@ -15,15 +15,15 @@
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Hangfire.Annotations;
 using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
 using StackExchange.Redis;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class RedisWriteDirectlyToDatabase : JobStorageTransaction
     {
@@ -109,7 +109,7 @@ namespace Hangfire.Redis
 
             var storedData = new Dictionary<string, string>(state.SerializeData())
             {
-                { "State", state.Name }
+                {"State", state.Name}
             };
 
             if (state.Reason != null)
@@ -127,9 +127,9 @@ namespace Hangfire.Redis
 
             var storedData = new Dictionary<string, string>(state.SerializeData())
             {
-                { "State", state.Name },
-                { "Reason", state.Reason },
-                { "CreatedAt", JobHelper.SerializeDateTime(DateTime.UtcNow) }
+                {"State", state.Name},
+                {"Reason", state.Reason},
+                {"CreatedAt", JobHelper.SerializeDateTime(DateTime.UtcNow)}
             };
 
             _database.ListRightPushAsync(
@@ -151,6 +151,7 @@ namespace Hangfire.Redis
             {
                 _database.ListLeftPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
             }
+
             _database.PublishAsync(_storage.SubscriptionChannel, jobId);
         }
 

@@ -15,17 +15,17 @@
 // License along with Hangfire.Redis.StackExchange. If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Hangfire.Annotations;
+using Hangfire.Dashboard;
+using Hangfire.Logging;
 using Hangfire.Server;
 using Hangfire.States;
 using Hangfire.Storage;
-using Hangfire.Annotations;
-using Hangfire.Logging;
 using StackExchange.Redis;
-using Hangfire.Dashboard;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     public class RedisStorage : JobStorage
     {

@@ -16,9 +16,9 @@
 
 using System;
 using Hangfire.Annotations;
-using Hangfire.Redis;
 using StackExchange.Redis;
-namespace Hangfire
+
+namespace Hangfire.Redis.StackExchange
 {
     public static class RedisStorageExtensions
     {

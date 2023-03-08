@@ -1,4 +1,6 @@
 ﻿using System;
+using Hangfire.Redis.StackExchange;
+using Hangfire.Redis.Tests.Utils;
 using Hangfire.States;
 using Hangfire.Storage;
 using Moq;
@@ -16,8 +18,10 @@ namespace Hangfire.Redis.Tests
 
         public FailedStateHandlerFacts()
         {
-            _context = new ApplyStateContextMock(JobId);
-            _context.NewStateValue = new FailedState(new InvalidOperationException());
+            _context = new ApplyStateContextMock(JobId)
+            {
+                NewStateValue = new FailedState(new InvalidOperationException())
+            };
 
             _transaction = new Mock<IWriteOnlyTransaction>();
         }

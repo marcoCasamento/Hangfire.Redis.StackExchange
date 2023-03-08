@@ -16,7 +16,7 @@
 
 using System;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class FetchedJobsWatcherOptions
     {

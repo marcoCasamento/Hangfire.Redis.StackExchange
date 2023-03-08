@@ -17,7 +17,7 @@
 using Hangfire.States;
 using Hangfire.Storage;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class DeletedStateHandler : IStateHandler
     {
