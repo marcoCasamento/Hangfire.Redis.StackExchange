@@ -211,7 +211,7 @@ namespace Hangfire.Redis.Tests
             {
                 redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
 
-                var result = connection.SetContains("{hangfire}:some-set", "1");
+                var result = connection.GetSetContains("{hangfire}:some-set", "1");
 
                 Assert.True(result);
             });
@@ -223,7 +223,7 @@ namespace Hangfire.Redis.Tests
             {
                 redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
 
-                var result = connection.SetContains("{hangfire}:some-set", "0");
+                var result = connection.GetSetContains("{hangfire}:some-set", "0");
 
                 Assert.False(result);
             });

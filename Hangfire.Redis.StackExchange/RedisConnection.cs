@@ -111,10 +111,9 @@ namespace Hangfire.Redis.StackExchange
             //the returned time is the time on the first server of the cluster
             return redisServer.Time();
         }
-
-        public override KeyValuePair<string, long>[] GetSetCount([NotNull] string[] keys, int limit)
+        public override long GetSetCount([NotNull] IEnumerable<string> keys, int limit)
         {
-            Task[] tasks = new Task[keys.Length];
+            Task[] tasks = new Task[keys.Count()];
             int i = 0;
             IBatch batch = Redis.CreateBatch();
             ConcurrentDictionary<string, long> results = new ConcurrentDictionary<string, long>();
@@ -125,10 +124,10 @@ namespace Hangfire.Redis.StackExchange
             }
             batch.Execute();
             Task.WaitAll(tasks);
-            return results.ToArray();
+            return results.Sum(x=> x.Value);
         }
 
-        public override bool SetContains([NotNull] string key, [NotNull] string value)
+        public override bool GetSetContains([NotNull] string key, [NotNull] string value)
         {
             var sortedSetEntries = Redis.SortedSetScan(key, value);
             return sortedSetEntries.Any();

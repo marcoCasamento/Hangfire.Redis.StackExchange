@@ -1,29 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
-    <PackageId>Hangfire.Redis.StackExchange</PackageId>
-    <IsPackable>true</IsPackable>
-    <Version>1.9</Version>
-    <PackageVersion>1.9</PackageVersion>
-    <Authors>Marco Casamento and contributors</Authors>
-    <owners>marcocasamento</owners>
-    <!--
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1</TargetFrameworks>
+		<PackageId>Hangfire.Redis.StackExchange</PackageId>
+		<IsPackable>true</IsPackable>
+		<Version>1.9</Version>
+		<PackageVersion>1.9</PackageVersion>
+		<Authors>Marco Casamento and contributors</Authors>
+		<owners>marcocasamento</owners>
+		<!--
       https://docs.microsoft.com/en-us/dotnet/articles/core/tools/project-json-to-csproj
       There is no equivalent for the owners element in MSBuild. 
     -->
-    <Product>Hangfire Redis Storage</Product>
-    <PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
-    <Description>
-      Hangfire Redis Storage Based on Redis.StackExchange
-      See http://hangfire.io/ for some more info on the main project
-    </Description>
-    <Summary>
-      Enjoy Redis outstanding performance when fetching your jobs!
-      Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
-      It also supports Batches (Pro Feature)
-    </Summary>
-    <PackageReleaseNotes>
+		<Product>Hangfire Redis Storage</Product>
+		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
+		<Description>
+			Hangfire Redis Storage Based on Redis.StackExchange
+			See http://hangfire.io/ for some more info on the main project
+		</Description>
+		<Summary>
+			Enjoy Redis outstanding performance when fetching your jobs!
+			Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
+			It also supports Batches (Pro Feature)
+		</Summary>
+		<PackageReleaseNotes>
 			1.9.1-beta
 			- Switched AsyncLocal storage of redis lock to ThreadLocal
 			1.9-beta
@@ -70,15 +70,15 @@
 			- .Net Core Support (thanks to Stefan Polyanszky)
 			- Aligned dependency to Hangfire.Core
 		</PackageReleaseNotes>
-    <PackageTags>Hangfire Redis</PackageTags>
-    <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>
-    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
-    <DelaySign>false</DelaySign>    
-    <!--<SignAssembly>True</SignAssembly>
+		<PackageTags>Hangfire Redis</PackageTags>
+		<RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<SignAssembly>false</SignAssembly>
+		<AssemblyOriginatorKeyFile>Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>
+		<PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+		<DelaySign>false</DelaySign>
+		<!--<SignAssembly>True</SignAssembly>
         <Product>Hangfire Redis Storage</Product>
         <PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
         <Description>
@@ -154,12 +154,12 @@
         <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
         <DelaySign>false</DelaySign>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <!--<SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>../Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>-->
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
-        <Nullable>enable</Nullable>
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>../Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>-->
+	</PropertyGroup>
+		<PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
+			<Nullable>enable</Nullable>
+		</PropertyGroup>
     <ItemGroup>
         <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
