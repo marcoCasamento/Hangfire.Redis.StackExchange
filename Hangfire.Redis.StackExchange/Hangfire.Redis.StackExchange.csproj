@@ -5,7 +5,7 @@
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
 		<Version>1.9</Version>
-		<PackageVersion>1.9</PackageVersion>
+		<PackageVersion>1.9.3-beta</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<owners>marcocasamento</owners>
 		<!--
