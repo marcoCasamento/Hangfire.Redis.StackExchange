@@ -17,7 +17,7 @@
 using Hangfire.States;
 using Hangfire.Storage;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class SucceededStateHandler : IStateHandler
     {
@@ -37,9 +37,6 @@ namespace Hangfire.Redis
             transaction.RemoveFromList("succeeded", context.BackgroundJob.Id);
         }
 
-        public string StateName
-        {
-            get { return SucceededState.StateName; }
-        }
+        public string StateName => SucceededState.StateName;
     }
 }

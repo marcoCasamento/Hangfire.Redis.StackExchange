@@ -1,4 +1,5 @@
 ﻿using System;
+using Hangfire.Redis.StackExchange;
 using Xunit;
 
 namespace Hangfire.Redis.Tests

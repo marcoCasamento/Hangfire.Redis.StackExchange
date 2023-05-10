@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Linq;
+using Hangfire.Logging;
+using Hangfire.Redis.StackExchange;
+using Hangfire.Redis.Tests.Utils;
+using Moq;
 using Xunit;
 
 namespace Hangfire.Redis.Tests
@@ -28,7 +32,40 @@ namespace Hangfire.Redis.Tests
             Assert.Equal(5, storage.Db);
         }
 
-        private RedisStorage CreateStorage()
+        [Fact]
+        public void PasswordFromToStringIsNotShown()
+        {
+            string password = Guid.NewGuid().ToString("N");
+            var storage = new RedisStorage(String.Format("{0},password={1}", RedisUtils.GetHostAndPort(), password));
+            Assert.DoesNotContain(password, storage.ToString());
+        }
+
+        [Fact]
+        public void PasswordFromWriteOptionsToLogIsNotShown()
+        {
+            string password = Guid.NewGuid().ToString("N");
+            var storage = new RedisStorage(String.Format("{0},password={1}", RedisUtils.GetHostAndPort(), password));
+
+            string loggedMessage = null;
+
+            var logMock = new Mock<ILog>();
+
+            logMock.Setup(p => p.Log(LogLevel.Debug, null, null)).Returns(true); // logger.IsDebugEnabled()
+            logMock.Setup(p => p.Log(
+                    LogLevel.Debug,
+                    It.Is<Func<string>>(f => f != null && f.Invoke().StartsWith("ConnectionString: ")),
+                    null))
+                .Callback((LogLevel lvl, Func<string> msg, Exception ex) => { loggedMessage = msg.Invoke(); })
+                .Returns(true)
+                .Verifiable();
+
+            storage.WriteOptionsToLog(logMock.Object);
+
+            logMock.Verify();
+            Assert.DoesNotContain(password, loggedMessage);
+        }
+
+        private static RedisStorage CreateStorage()
         {
             var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
             return new RedisStorage(RedisUtils.GetHostAndPort(), options);

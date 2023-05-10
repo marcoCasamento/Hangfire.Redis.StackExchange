@@ -1,5 +1,5 @@
-﻿using StackExchange.Redis;
-using System;
+﻿using Hangfire.Redis.Tests.Utils;
+using StackExchange.Redis;
 using Xunit;
 
 namespace Hangfire.Redis.Tests
@@ -14,7 +14,7 @@ namespace Hangfire.Redis.Tests
             _redis = RedisUtils.CreateClient();
         }
 
-        
+
         [Fact, CleanRedis]
         public void RedisSampleTest()
         {

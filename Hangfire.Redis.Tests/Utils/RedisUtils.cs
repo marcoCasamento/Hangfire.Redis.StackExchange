@@ -1,9 +1,7 @@
-﻿using StackExchange.Redis;
-using System;
-using System.Runtime.ExceptionServices;
-using System.Threading;
+﻿using System;
+using StackExchange.Redis;
 
-namespace Hangfire.Redis.Tests
+namespace Hangfire.Redis.Tests.Utils
 {
     public static class RedisUtils
     {
@@ -14,11 +12,12 @@ namespace Hangfire.Redis.Tests
         private const string DefaultHost = "127.0.0.1";
         private const int DefaultPort = 6379;
         private const int DefaultDb = 1;
-		static Lazy<ConnectionMultiplexer> connection = null;
-		static RedisUtils()
-		{
-			connection = new Lazy<ConnectionMultiplexer>(() =>
-				{
+        static Lazy<ConnectionMultiplexer> connection = null;
+
+        static RedisUtils()
+        {
+            connection = new Lazy<ConnectionMultiplexer>(() =>
+                {
                     ConfigurationOptions options = new ConfigurationOptions
                     {
                         AllowAdmin = true,
@@ -36,12 +35,14 @@ namespace Hangfire.Redis.Tests
         }
         public static IDatabase CreateClient()
         {
-			return connection.Value.GetDatabase(DefaultDb);
+            return connection.Value.GetDatabase(DefaultDb);
         }
-		public static ISubscriber CreateSubscriber()
-		{
-			return connection.Value.GetSubscriber();
-		}
+
+        public static ISubscriber CreateSubscriber()
+        {
+            return connection.Value.GetSubscriber();
+        }
+
         public static string GetHostAndPort()
         {
             return String.Format("{0}:{1}", GetHost(), GetPort());

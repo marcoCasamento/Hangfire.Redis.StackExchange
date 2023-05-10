@@ -2,7 +2,8 @@
 using Hangfire.States;
 using Moq;
 using Hangfire.Common;
-using System.Reflection;
+using Hangfire.Redis.StackExchange;
+using Hangfire.Redis.Tests.Utils;
 
 namespace Hangfire.Redis.Tests
 {
@@ -31,10 +32,8 @@ namespace Hangfire.Redis.Tests
         public IState NewStateValue { get; set; }
         public string OldStateValue { get; set; }
 
-        public ApplyStateContext Object
-        {
-            get { return _context.Value; }
-        }
+        public ApplyStateContext Object => _context.Value;
+
         private RedisStorage CreateStorage()
         {
             var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };

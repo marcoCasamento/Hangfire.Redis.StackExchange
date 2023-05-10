@@ -3,6 +3,8 @@ using StackExchange.Redis;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire.Redis.StackExchange;
+using Hangfire.Redis.Tests.Utils;
 using Xunit;
 
 namespace Hangfire.Redis.Tests
@@ -10,12 +12,11 @@ namespace Hangfire.Redis.Tests
     [Collection("Sequential")]
     public class RedisLockFacts
     {
-
         [Fact, CleanRedis]
         public void AcquireInSequence()
         {
             var db = RedisUtils.CreateClient();
-            
+
             using (var testLock = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(1)))
                 Assert.NotNull(testLock);
             using (var testLock = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(1)))
@@ -51,7 +52,8 @@ namespace Hangfire.Redis.Tests
                 {
                     // ensure nested lock release doesn't release parent lock
                     using (var testLock2 = RedisLock.Acquire(db, "test", TimeSpan.FromMilliseconds(50)))
-                    { }
+                    {
+                    }
 
                     sync.Set();
                     Thread.Sleep(200);
@@ -65,7 +67,8 @@ namespace Hangfire.Redis.Tests
                 Assert.Throws<DistributedLockTimeoutException>(() =>
                 {
                     using (var testLock2 = RedisLock.Acquire(db, "test", TimeSpan.FromMilliseconds(50)))
-                    { }
+                    {
+                    }
                 });
             });
 
@@ -74,7 +77,7 @@ namespace Hangfire.Redis.Tests
             thread1.Join();
             thread2.Join();
         }
-        
+
         private async Task NestedTask(IDatabase db)
         {
             await Task.Yield();
@@ -126,7 +129,8 @@ namespace Hangfire.Redis.Tests
                 Assert.Throws<DistributedLockTimeoutException>(() =>
                 {
                     using (var testLock2 = RedisLock.Acquire(db, "testLock", TimeSpan.FromMilliseconds(100)))
-                    { }
+                    {
+                    }
                 });
             });
 

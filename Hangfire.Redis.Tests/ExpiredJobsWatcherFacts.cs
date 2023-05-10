@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using Hangfire.Common;
+using Hangfire.Redis.StackExchange;
+using Hangfire.Redis.Tests.Utils;
 using Hangfire.Server;
 using Xunit;
 
@@ -12,14 +14,14 @@ namespace Hangfire.Redis.Tests
         private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(1);
 
         private readonly RedisStorage _storage;
-		private readonly CancellationTokenSource _cts;
+        private readonly CancellationTokenSource _cts;
 
         public ExpiredJobsWatcherFacts()
         {
-            var options = new RedisStorageOptions() { Db = RedisUtils.GetDb() };
+            var options = new RedisStorageOptions() {Db = RedisUtils.GetDb()};
             _storage = new RedisStorage(RedisUtils.GetHostAndPort(), options);
-			_cts = new CancellationTokenSource();
-			_cts.Cancel();
+            _cts = new CancellationTokenSource();
+            _cts.Cancel();
         }
 
         [Fact]
@@ -56,15 +58,15 @@ namespace Hangfire.Redis.Tests
             redis.ListRightPush("{hangfire}:deleted", "other-job");
 
             var watcher = CreateWatcher();
-            
+
             // Act
             watcher.Execute(_cts.Token);
-            
+
             // Assert
             Assert.Equal(0, redis.ListLength("{hangfire}:succeeded"));
             Assert.Equal(0, redis.ListLength("{hangfire}:deleted"));
         }
-        
+
         [Fact, CleanRedis]
         public void Execute_DoesNotDeleteExistingJobs()
         {
@@ -73,16 +75,16 @@ namespace Hangfire.Redis.Tests
             redis.ListRightPush("{hangfire}:succeeded", "my-job");
             redis.HashSet("{hangfire}:job:my-job", "Fetched",
                 JobHelper.SerializeDateTime(DateTime.UtcNow.AddDays(-1)));
-            
+
             redis.ListRightPush("{hangfire}:deleted", "other-job");
             redis.HashSet("{hangfire}:job:other-job", "Fetched",
                 JobHelper.SerializeDateTime(DateTime.UtcNow.AddDays(-1)));
 
             var watcher = CreateWatcher();
-            
+
             // Act
             watcher.Execute(_cts.Token);
-            
+
             // Assert
             Assert.Equal(1, redis.ListLength("{hangfire}:succeeded"));
             Assert.Equal(1, redis.ListLength("{hangfire}:deleted"));

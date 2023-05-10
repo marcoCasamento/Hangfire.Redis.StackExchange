@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Hangfire.Annotations;
 using Hangfire.Common;
 using Hangfire.Server;
 using Hangfire.Storage;
@@ -27,7 +28,7 @@ using Hangfire.Annotations;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     internal class RedisConnection : JobStorageConnection
     {

@@ -1,5 +1,6 @@
 ﻿using System;
-using Microsoft.Win32;
+using Hangfire.Redis.StackExchange;
+using Hangfire.Redis.Tests.Utils;
 using Moq;
 using Xunit;
 using StackExchange.Redis;

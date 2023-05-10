@@ -1,8 +1,8 @@
-version: 1.8.1.{build}
+version: 1.8.7.{build}
 branches:
   only:
   - master
-image: Visual Studio 2017
+image: Visual Studio 2022
 configuration: Release
 platform: Any CPU
 

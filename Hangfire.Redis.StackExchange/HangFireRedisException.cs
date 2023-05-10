@@ -16,13 +16,12 @@
 
 using System;
 
-namespace Hangfire.Redis
+namespace Hangfire.Redis.StackExchange
 {
     public class HangFireRedisException : Exception
-	{
-		public HangFireRedisException(string message) : base (message)
-		{
-
-		}
-	}
+    {
+        public HangFireRedisException(string message) : base(message)
+        {
+        }
+    }
 }
