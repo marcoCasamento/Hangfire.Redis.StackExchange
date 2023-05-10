@@ -7,6 +7,7 @@ using StackExchange.Redis;
 
 namespace Hangfire.Redis.Tests
 {
+    [Collection("Sequential")]
     public class RedisFetchedJobFacts
     {
         private const string JobId = "id";

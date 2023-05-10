@@ -83,10 +83,42 @@ namespace Hangfire.Redis.StackExchange
         {
             return new RedisMonitoringApi(this, _connectionMultiplexer.GetDatabase(Db));
         }
+        public override bool HasFeature([NotNull] string featureId)
+        {
+            if (featureId == null) throw new ArgumentNullException(nameof(featureId));
 
+            //TODO: Understand this feature. Is it SqlServeronly ? Does it somehow relates to redis {prefix} ? (think of clustered environments and keys that must go only on one server)
+
+            //if (_options.UseTransactionalAcknowledge &&
+            //    featureId.StartsWith(Worker.TransactionalAcknowledgePrefix, StringComparison.OrdinalIgnoreCase))
+            //{
+            //    return featureId.Equals(
+            //        Worker.TransactionalAcknowledgePrefix + nameof(SqlServerTimeoutJob),
+            //        StringComparison.OrdinalIgnoreCase);
+            //}
+
+            if ("BatchedGetFirstByLowestScoreFromSet".Equals(featureId, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if ("Connection.GetUtcDateTime".Equals(featureId, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if ("Job.Queue".Equals(featureId, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return base.HasFeature(featureId);
+        }
         public override IStorageConnection GetConnection()
         {
-            return new RedisConnection(this, _connectionMultiplexer.GetDatabase(Db), _subscription, _options.FetchTimeout);
+            var endPoints = _connectionMultiplexer.GetEndPoints(false);
+            IServer server = _connectionMultiplexer.GetServer(endPoints[0]);
+            return new RedisConnection(this, server, _connectionMultiplexer.GetDatabase(Db), _subscription, _options.FetchTimeout);
         }
 
 #pragma warning disable 618

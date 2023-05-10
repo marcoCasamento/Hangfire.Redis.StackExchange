@@ -24,6 +24,9 @@ using Hangfire.Common;
 using Hangfire.Server;
 using Hangfire.Storage;
 using StackExchange.Redis;
+using Hangfire.Annotations;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Hangfire.Redis.StackExchange
 {
@@ -32,14 +35,16 @@ namespace Hangfire.Redis.StackExchange
         private readonly RedisStorage _storage;
         private readonly RedisSubscription _subscription;
         private readonly TimeSpan _fetchTimeout = TimeSpan.FromMinutes(3);
-
+        private readonly IServer redisServer;
         public RedisConnection(
             [NotNull] RedisStorage storage,
+            [NotNull] IServer redisServer,
             [NotNull] IDatabase redis,
             [NotNull] RedisSubscription subscription,
             TimeSpan fetchTimeout)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            this.redisServer = redisServer;
             _subscription = subscription ?? throw new ArgumentNullException(nameof(subscription));
             _fetchTimeout = fetchTimeout;
 
@@ -101,6 +106,32 @@ namespace Hangfire.Redis.StackExchange
             }
         }
 
+        public override DateTime GetUtcDateTime()
+        {
+            //the returned time is the time on the first server of the cluster
+            return redisServer.Time();
+        }
+        public override long GetSetCount([NotNull] IEnumerable<string> keys, int limit)
+        {
+            Task[] tasks = new Task[keys.Count()];
+            int i = 0;
+            IBatch batch = Redis.CreateBatch();
+            ConcurrentDictionary<string, long> results = new ConcurrentDictionary<string, long>();
+            foreach (string key in keys)
+            {
+                tasks[i] = batch.SortedSetLengthAsync(key, max:limit)
+                    .ContinueWith((Task<long> x) => results.TryAdd(key, x.Result));
+            }
+            batch.Execute();
+            Task.WaitAll(tasks);
+            return results.Sum(x=> x.Value);
+        }
+
+        public override bool GetSetContains([NotNull] string key, [NotNull] string value)
+        {
+            var sortedSetEntries = Redis.SortedSetScan(key, value);
+            return sortedSetEntries.Any();
+        }
         public override string CreateExpiredJob(
             [NotNull] Job job,
             [NotNull] IDictionary<string, string> parameters,

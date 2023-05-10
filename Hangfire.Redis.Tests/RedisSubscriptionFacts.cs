@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
-    [CleanRedis]
+    [CleanRedis, Collection("Sequential")]
     public class RedisSubscriptionFacts
     {
         private readonly CancellationTokenSource _cts;

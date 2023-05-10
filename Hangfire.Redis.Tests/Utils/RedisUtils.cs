@@ -21,15 +21,18 @@ namespace Hangfire.Redis.Tests.Utils
                     ConfigurationOptions options = new ConfigurationOptions
                     {
                         AllowAdmin = true,
-                        SyncTimeout = 5000,
+                        SyncTimeout = 15000,
                         ConnectRetry = 5
                     };
                     options.EndPoints.Add(GetHostAndPort());
                     return ConnectionMultiplexer.Connect(options);
-                }
-            );
+				}
+			);
+		}
+        public static IServer GetFirstServer()
+        {
+            return connection.Value.GetServer(connection.Value.GetEndPoints()[0]);
         }
-
         public static IDatabase CreateClient()
         {
             return connection.Value.GetDatabase(DefaultDb);

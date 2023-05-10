@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
+    [Collection("Sequential")]
     public class RedisConnectionFacts
     {
         private readonly RedisStorage _storage;
@@ -191,13 +192,48 @@ namespace Hangfire.Redis.Tests
                 Assert.Equal("Value2", result["Key2"]);
             });
         }
+        
+        [Fact]
+        public void GetUtcDateTime_ReturnsValidDateTime()
+        {
+            UseConnections((redis, connection) =>
+            {
+                var result = connection.GetUtcDateTime();
 
+                Assert.NotEqual(default, result);
+            });
+        }
+
+        [Fact, CleanRedis]
+        public void SetContains_ReturnTrueIfContained()
+        {
+            UseConnections((redis, connection) =>
+            {
+                redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
+
+                var result = connection.GetSetContains("{hangfire}:some-set", "1");
+
+                Assert.True(result);
+            });
+        }
+        [Fact, CleanRedis]
+        public void SetContains_ReturnFalseIfNotContained()
+        {
+            UseConnections((redis, connection) =>
+            {
+                redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
+
+                var result = connection.GetSetContains("{hangfire}:some-set", "0");
+
+                Assert.False(result);
+            });
+        }
         private void UseConnections(Action<IDatabase, RedisConnection> action)
         {
             var redis = RedisUtils.CreateClient();
             var subscription = new RedisSubscription(_storage, RedisUtils.CreateSubscriber());
-
-            using (var connection = new RedisConnection(_storage, redis, subscription, new RedisStorageOptions().FetchTimeout))
+            var server = RedisUtils.GetFirstServer();
+            using (var connection = new RedisConnection(_storage, server, redis, subscription, new RedisStorageOptions().FetchTimeout))
             {
                 action(redis, connection);
             }
@@ -207,11 +243,13 @@ namespace Hangfire.Redis.Tests
         {
             var redis = RedisUtils.CreateClient();
             var subscription = new RedisSubscription(_storage, RedisUtils.CreateSubscriber());
+            var server = RedisUtils.GetFirstServer();
 
-            using (var connection = new RedisConnection(_storage, redis, subscription, new RedisStorageOptions().FetchTimeout))
+            using (var connection = new RedisConnection(_storage, server, redis, subscription, new RedisStorageOptions().FetchTimeout))
             {
                 action(connection);
             }
         }
+        
     }
 }

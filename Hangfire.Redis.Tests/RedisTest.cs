@@ -4,7 +4,8 @@ using Xunit;
 
 namespace Hangfire.Redis.Tests
 {
-    public class RedisTest
+    [Collection("Sequential")]
+    public class RedisTest 
     {
         private readonly IDatabase _redis;
 

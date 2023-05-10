@@ -10,7 +10,8 @@ using StackExchange.Redis;
 
 namespace Hangfire.Redis.Tests
 {
-    public class RedisWriteOnlyTransactionFacts
+	[Collection("Sequential")]
+	public class RedisWriteOnlyTransactionFacts
     {
         private readonly RedisStorage _storage;
         private readonly Mock<ITransaction> _transaction;
