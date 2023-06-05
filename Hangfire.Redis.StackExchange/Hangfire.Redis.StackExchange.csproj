@@ -5,30 +5,26 @@
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
 		<Version>1.9</Version>
-		<PackageVersion>1.9.3-beta</PackageVersion>
+		<PackageVersion>1.9</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
-		<owners>marcocasamento</owners>
-		<!--
-      https://docs.microsoft.com/en-us/dotnet/articles/core/tools/project-json-to-csproj
-      There is no equivalent for the owners element in MSBuild. 
-    -->
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
 		<Description>
 			Hangfire Redis Storage Based on Redis.StackExchange
-			See http://hangfire.io/ for some more info on the main project
+			See http://hangfire.io/ for some more info on the main project and https://github.com/marcoCasamento/Hangfire.Redis.StackExchange for info on this
 		</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Summary>
 			Enjoy Redis outstanding performance when fetching your jobs!
 			Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
-			1.9.1-beta
+			1.9
 			- Switched AsyncLocal storage of redis lock to ThreadLocal
-			1.9-beta
-			- Drop support for net461
-			- Added compatibility to Hangfire.Core 1.8-rc1
+			- BREAKING CHANGE: Drop support for net461
+			- Added compatibility to Hangfire.Core 1.8
+			- BREAKING CHANGE: Namespace changes to uniform with folders (It wrongly appeared in previous ver)
 			1.8.5
 			- Speed up Recurring jobs Fetching (thanks to developingjim)
 			1.8.4
@@ -57,18 +53,6 @@
 			1.7.0
 			- Redis Cluster support (#42 thanks to gzpbx)
 			- Update to VS2017 (#48 thanks to ryanelian)
-			1.6.7
-			- Added support for Redis DB in the ConnectionString (#26 thanks to zivillian)
-			- Added constructor to RedisStorage that accepts a ConnectionMultiplexer instance (#23 thanks to sjwoodard)
-			- Lowered dependencies for net45 framework and aligned to Hangfire.Core (#21 thanks to zlangner)
-			- Fixed dependency casing of Hangfire.Core (#33 thanks to Poly3k)
-			- Fix Dispose of RedisSupscription (#32 thanks to WebApelsin)
-			- Fixed random failure of test NestLockDisposePreservesRoot
-			1.6.6
-			- Configurable timeout for FetchNextJob (thanks to WebApelsin)
-			1.6.5
-			- .Net Core Support (thanks to Stefan Polyanszky)
-			- Aligned dependency to Hangfire.Core
 		</PackageReleaseNotes>
 		<PackageTags>Hangfire Redis</PackageTags>
 		<RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
@@ -78,99 +62,20 @@
 		<AssemblyOriginatorKeyFile>Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>
 		<PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
 		<DelaySign>false</DelaySign>
-		<!--<SignAssembly>True</SignAssembly>
-        <Product>Hangfire Redis Storage</Product>
-        <PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
-        <Description>
-            Hangfire Redis Storage Based on Redis.StackExchange
-        </Description>
-        <Summary>
-            Enjoy Redis outstanding performance when fetch your jobs!
-            Hangfire Redis storage use Redis to persists Job information, through Redis.StackExchange library.
-            It also supports Batches (Pro Feature)
-        </Summary>
-        <PackageReleaseNotes>
-            1.8.7
-            - Updated Nuget packages
-            - Removed .NET 4.6.1 support (no longer supported by Microsoft)
-            - Adds netstandard 2.1 as a target framework
-            - Miscellaneous cleanup, namespace adjustment
-            1.8.6
-            - Suppress Password in Connection's ToString (thanks to matheusriboli)
-            - Updated Nuget Packages dependencies
-            1.8.5
-            - Speed up Recurring jobs Fetching (thanks to developingjim)
-            1.8.4
-            - Fix #90, #91 concurrent access on dictinoary (thanks to luukholleman)
-            - Fix #94 occasional error in monitoringApi (thanks to tsu1980)
-            1.8.3
-            - Removed dependency to NewtonSoft.JSON (thanks to neyromant)
-            1.8.2
-            - Updated Hangfire to 1.7.11 (thanks to abarducci)
-            - Updated StackExchange.Redis to 2.1.30 (thanks to abarducci)
-            1.8.1
-            - Updated Hangfire to 1.7.8
-            - Fixed #82 (thanks to @bcuff)
-            1.8.0
-            - Updated StackExchange.Redis to 2.0 (thanks to @andrebires)
-            1.7.2
-            - Added support for Lifo Queues (thanks to AndreSteenbergen)
-            - Added option to not use transaction (thanks to AndreSteenbergen)
-            - Enabled sliding expiration for distributed locks (thanks to pieceofsummer)
-            - Add epired jobs watch to cleanup succeeded/deleted lists (thanks to pieceofsummer)
-            - Make succeeded and deleted lists size configurable (thanks to pieceofsummer)
-            - Fix job state order (thanks to pieceofsummer)
-            - Exclude Fetched property from job parameters (thanks to pieceofsummer)
-            1.7.1
-            - Add expired jobs watcher to cleanup succeeded/deleted lists thanks to pieceofsummer
-            1.7.0
-            - Redis Cluster support (#42 thanks to gzpbx)
-            - Update to VS2017 (#48 thanks to ryanelian)
-            1.6.7
-            - Added support for Redis DB in the ConnectionString (#26 thanks to zivillian)
-            - Added constructor to RedisStorage that accepts a ConnectionMultiplexer instance (#23 thanks to sjwoodard)
-            - Lowered dependencies for net45 framework and aligned to Hangfire.Core (#21 thanks to zlangner)
-            - Fixed dependency casing of Hangfire.Core (#33 thanks to Poly3k)
-            - Fix Dispose of RedisSupscription (#32 thanks to WebApelsin)
-            - Fixed random failure of test NestLockDisposePreservesRoot
-            1.6.6
-            - Configurable timeout for FetchNextJob (thanks to WebApelsin)
-            1.6.5
-            - .Net Core Support (thanks to Stefan Polyanszky)
-            - Aligned dependency to Hangfire.Core
-        </PackageReleaseNotes>
-        <PackageTags>Hangfire Redis</PackageTags>
-        <RepositoryUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</RepositoryUrl>
-        <PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
-        <RepositoryType>git</RepositoryType>
-        <IncludeSymbols>true</IncludeSymbols>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <SignAssembly>false</SignAssembly>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <AssemblyOriginatorKeyFile>Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>
-        <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
-        <DelaySign>false</DelaySign>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <SignAssembly>True</SignAssembly>
-        <AssemblyOriginatorKeyFile>../Hangfire_Redis_StackExchange.snk</AssemblyOriginatorKeyFile>-->
+		<Nullable>disable</Nullable>
 	</PropertyGroup>
-		<PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
-			<Nullable>enable</Nullable>
-		</PropertyGroup>
+		
     <ItemGroup>
         <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Hangfire.Core" Version="1.8.0" />
+      <PackageReference Include="Hangfire.Core" Version="1.8.2" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="StackExchange.Redis" Version="2.6.96" />    
+      <PackageReference Include="StackExchange.Redis" Version="2.6.111" />    
     </ItemGroup>
 
 </Project>

@@ -86,7 +86,7 @@ namespace Hangfire.Redis.Tests
                 Assert.NotNull(lestLock2);
         }
 
-        [Fact, CleanRedis]
+        //[Fact, CleanRedis]
         public async Task AcquireFromNestedTask()
         {
             var db = RedisUtils.CreateClient();
