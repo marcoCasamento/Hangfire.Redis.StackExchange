@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1</TargetFrameworks>
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
 		<Version>1.9</Version>
-		<PackageVersion>1.9.4-beta</PackageVersion>
+		<PackageVersion>1.9</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -20,8 +20,6 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
-			1.9.1
-			- Downgrade to netStandard 2.0 for broader compatibility
 			1.9
 			- Switched AsyncLocal storage of redis lock to ThreadLocal
 			- BREAKING CHANGE: Drop support for net461
