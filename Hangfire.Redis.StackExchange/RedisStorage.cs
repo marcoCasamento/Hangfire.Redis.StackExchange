@@ -107,6 +107,11 @@ namespace Hangfire.Redis.StackExchange
                 return true;
             }
 
+            if (string.Equals(JobStorageFeatures.Connection.GetSetContains, featureId, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
             if (string.Equals(JobStorageFeatures.JobQueueProperty, featureId, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
