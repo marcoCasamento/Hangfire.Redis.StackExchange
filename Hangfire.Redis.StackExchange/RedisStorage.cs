@@ -97,17 +97,17 @@ namespace Hangfire.Redis.StackExchange
             //        StringComparison.OrdinalIgnoreCase);
             //}
 
-            if ("BatchedGetFirstByLowestScoreFromSet".Equals(featureId, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(JobStorageFeatures.Connection.BatchedGetFirstByLowest, featureId, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            if ("Connection.GetUtcDateTime".Equals(featureId, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(JobStorageFeatures.Connection.GetUtcDateTime, featureId, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            if ("Job.Queue".Equals(featureId, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(JobStorageFeatures.JobQueueProperty, featureId, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
