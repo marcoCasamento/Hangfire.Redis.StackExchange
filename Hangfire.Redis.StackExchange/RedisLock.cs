@@ -19,6 +19,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using Hangfire.Annotations;
+using Hangfire.Server;
+using Hangfire.States;
 using Hangfire.Storage;
 using StackExchange.Redis;
 
@@ -31,6 +33,12 @@ namespace Hangfire.Redis.StackExchange
 
 
         private static ThreadLocal<ConcurrentDictionary<RedisKey, byte>> _heldLocks = new ThreadLocal<ConcurrentDictionary<RedisKey, byte>>();
+
+        class StateBag
+        {
+            public PerformingContext PerformingContext { get; set; }
+            public TimeSpan TimeSpan { get; set; }
+        }
 
         private static ConcurrentDictionary<RedisKey, byte> HeldLocks
         {
@@ -61,7 +69,8 @@ namespace Hangfire.Redis.StackExchange
 
                 // start sliding expiration timer at half timeout intervals
                 var halfLockHoldDuration = TimeSpan.FromTicks(holdDuration.Ticks / 2);
-                _slidingExpirationTimer = new Timer(ExpirationTimerTick, holdDuration, halfLockHoldDuration, halfLockHoldDuration);
+                var state = new StateBag() { PerformingContext = HangfireSubscriber.Value, TimeSpan = holdDuration };
+                _slidingExpirationTimer = new Timer(ExpirationTimerTick, state, halfLockHoldDuration, halfLockHoldDuration);
             }
         }
 
@@ -69,7 +78,32 @@ namespace Hangfire.Redis.StackExchange
         {
             if (!_isDisposed)
             {
-                _redis.LockExtend(_key, OwnerId, (TimeSpan)state);
+                var stateBag = state as StateBag;
+                Exception redisEx = null;
+                bool lockSuccesfullyExtended = false;
+                int retryCount = 10;
+                while (!lockSuccesfullyExtended && retryCount >= 0)
+                {
+                    try
+                    {
+                        lockSuccesfullyExtended = _redis.LockExtend(_key, OwnerId, stateBag.TimeSpan);
+                    }
+                    catch (Exception ex)
+                    {
+                        redisEx = ex;
+                        Thread.Sleep(3000);
+                        retryCount--;
+                    }
+                }
+                
+                if (!lockSuccesfullyExtended)
+                {
+                    new BackgroundJobClient(stateBag.PerformingContext.Storage)
+                        .ChangeState(
+                            stateBag.PerformingContext.BackgroundJob.Id, 
+                            new FailedState(new Exception($"Unable to extend a distributed lock with Key {_key} and OwnerId {OwnerId}", redisEx))
+                        );
+                }
             }
         }
 

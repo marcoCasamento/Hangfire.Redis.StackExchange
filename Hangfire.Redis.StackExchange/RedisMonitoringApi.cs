@@ -28,7 +28,7 @@ using StackExchange.Redis;
 
 namespace Hangfire.Redis.StackExchange
 {
-    public class RedisMonitoringApi : IMonitoringApi
+    public class RedisMonitoringApi : JobStorageMonitor
     {
         private readonly RedisStorage _storage;
         private readonly IDatabase _database;
@@ -42,42 +42,49 @@ namespace Hangfire.Redis.StackExchange
 			_database = database;
         }
 
-        public long ScheduledCount()
+        public override long ScheduledCount()
         {
             return UseConnection(redis =>
                 redis.SortedSetLength(_storage.GetRedisKey("schedule")));
         }
-
-        public long EnqueuedCount([NotNull] string queue)
+        public override IDictionary<DateTime, long> DeletedByDatesCount()
+        {
+            return UseConnection(redis => GetHourlyTimelineStats(redis, "deleted"));
+        }
+        public override IDictionary<DateTime, long> HourlyDeletedJobs()
+        {
+            return UseConnection(redis => GetHourlyTimelineStats(redis, "deleted"));
+        }
+        public override long EnqueuedCount([NotNull] string queue)
         {
             if (queue == null) throw new ArgumentNullException(nameof(queue));
 
             return UseConnection(redis => redis.ListLength(_storage.GetRedisKey($"queue:{queue}")));
         }
 
-        public long FetchedCount([NotNull] string queue)
+        public override long FetchedCount([NotNull] string queue)
         {
             if (queue == null) throw new ArgumentNullException(nameof(queue));
 
             return UseConnection(redis => redis.ListLength(_storage.GetRedisKey($"queue:{queue}:dequeued")));
         }
 
-        public long ProcessingCount()
+        public override long ProcessingCount()
         {
             return UseConnection(redis => redis.SortedSetLength(_storage.GetRedisKey("processing")));
         }
         
-        public long SucceededListCount()
+        public override long SucceededListCount()
         {
             return UseConnection(redis => redis.ListLength(_storage.GetRedisKey("succeeded")));
         }
 
-        public long FailedCount()
+        public override long FailedCount()
         {
             return UseConnection(redis => redis.SortedSetLength(_storage.GetRedisKey("failed")));
         }
         
-        public long DeletedListCount()
+        public override long DeletedListCount()
         {
             return UseConnection(redis => redis.ListLength(_storage.GetRedisKey("deleted")));
         }
@@ -87,7 +94,7 @@ namespace Hangfire.Redis.StackExchange
             return _database;
         }
 
-        public JobList<ProcessingJobDto> ProcessingJobs(int from, int count)
+        public override JobList<ProcessingJobDto> ProcessingJobs(int from, int count)
         {
             return UseConnection(redis =>
             {
@@ -99,7 +106,8 @@ namespace Hangfire.Redis.StackExchange
                     jobIds,
                     null,
                     new[] { "StartedAt", "ServerName", "ServerId", "State" },
-                    (job, jobData, state) => new ProcessingJobDto
+                    false,
+                    (job, jobData, state, historyData, loadException) => new ProcessingJobDto
                     {
                         ServerId = state[2] ?? state[1],
                         Job = job,
@@ -112,7 +120,7 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public JobList<ScheduledJobDto> ScheduledJobs(int from, int count)
+        public override JobList<ScheduledJobDto> ScheduledJobs(int from, int count)
         {
             return UseConnection(redis =>
             {
@@ -155,7 +163,7 @@ namespace Hangfire.Redis.StackExchange
                         new ScheduledJobDto
                         {
                             EnqueueAt = JobHelper.FromTimestamp((long) job.Score),
-                            Job = TryToGetJob(jobs[job.Element][0], jobs[job.Element][1], jobs[job.Element][2], jobs[job.Element][3]),
+                            Job = TryToGetJob(jobs[job.Element][0], jobs[job.Element][1], jobs[job.Element][2], jobs[job.Element][3], out var loadException),
                             ScheduledAt =
                                 states[job.Element].Count > 1
                                     ? JobHelper.DeserializeNullableDateTime(states[job.Element][1])
@@ -167,17 +175,17 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public IDictionary<DateTime, long> SucceededByDatesCount()
+        public override IDictionary<DateTime, long> SucceededByDatesCount()
         {
             return UseConnection(redis => GetTimelineStats(redis, "succeeded"));
         }
 
-        public IDictionary<DateTime, long> FailedByDatesCount()
+        public override IDictionary<DateTime, long> FailedByDatesCount()
         {
             return UseConnection(redis => GetTimelineStats(redis, "failed"));
         }
 
-        public IList<ServerDto> Servers()
+        public override IList<ServerDto> Servers()
         {
             return UseConnection(redis =>
             {
@@ -220,7 +228,7 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public JobList<FailedJobDto> FailedJobs(int from, int count)
+        public override JobList<FailedJobDto> FailedJobs(int from, int count)
         {
             return UseConnection(redis =>
             {
@@ -233,7 +241,8 @@ namespace Hangfire.Redis.StackExchange
                     failedJobIds,
                     null,
                     new[] { "FailedAt", "ExceptionType", "ExceptionMessage", "ExceptionDetails", "State", "Reason" },
-                    (job, jobData, state) => new FailedJobDto
+                    false,
+                    (job, jobData, state, historyData, loadException) => new FailedJobDto
                     {
                         Job = job,
                         Reason = state[5],
@@ -246,7 +255,7 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public JobList<SucceededJobDto> SucceededJobs(int from, int count)
+        public override JobList<SucceededJobDto> SucceededJobs(int from, int count)
         {
             return UseConnection(redis =>
             {
@@ -259,7 +268,8 @@ namespace Hangfire.Redis.StackExchange
                     succeededJobIds,
                     null,
                     new[] { "SucceededAt", "PerformanceDuration", "Latency", "State", "Result" },
-                    (job, jobData, state) => new SucceededJobDto
+                    false,
+                    (job, jobData, state, historyData, loadException) => new SucceededJobDto
                     {
                         Job = job,
                         Result = state[4],
@@ -272,7 +282,7 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public JobList<DeletedJobDto> DeletedJobs(int from, int count)
+        public override JobList<DeletedJobDto> DeletedJobs(int from, int count)
         {
             return UseConnection(redis =>
             {
@@ -285,7 +295,8 @@ namespace Hangfire.Redis.StackExchange
                     deletedJobIds,
                     null,
                     new[] { "DeletedAt", "State" },
-                    (job, jobData, state) => new DeletedJobDto
+                    false,
+                    (job, jobData, state, historyData, loadException) => new DeletedJobDto
                     {
                         Job = job,
                         DeletedAt = JobHelper.DeserializeNullableDateTime(state[0]),
@@ -294,7 +305,7 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public IList<QueueWithTopEnqueuedJobsDto> Queues()
+        public override IList<QueueWithTopEnqueuedJobsDto> Queues()
         {
             return UseConnection(redis =>
             {
@@ -332,7 +343,8 @@ namespace Hangfire.Redis.StackExchange
                         firstJobIds,
                         new[] { "State" },
                         new[] { "EnqueuedAt", "State" },
-                        (job, jobData, state) => new EnqueuedJobDto
+                        false,
+                        (job, jobData, state, historyData, loadException) => new EnqueuedJobDto
                         {
                             Job = job,
                             State = jobData[0],
@@ -353,7 +365,7 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public JobList<EnqueuedJobDto> EnqueuedJobs([NotNull] string queue, int from, int count)
+        public override JobList<EnqueuedJobDto> EnqueuedJobs([NotNull] string queue, int from, int count)
         {
             if (queue == null) throw new ArgumentNullException(nameof(queue));
 
@@ -368,7 +380,8 @@ namespace Hangfire.Redis.StackExchange
                     jobIds,
                     new[] { "State" },
                     new[] { "EnqueuedAt", "State" },
-                    (job, jobData, state) => new EnqueuedJobDto
+                    false,
+                    (job, jobData, state, historyData, loadException) => new EnqueuedJobDto
                     {
                         Job = job,
                         State = jobData[0],
@@ -378,7 +391,7 @@ namespace Hangfire.Redis.StackExchange
             });
         }
 
-        public JobList<FetchedJobDto> FetchedJobs([NotNull] string queue, int from, int count)
+        public override JobList<FetchedJobDto> FetchedJobs([NotNull] string queue, int from, int count)
         {
             if (queue == null) throw new ArgumentNullException(nameof(queue));
 
@@ -393,8 +406,9 @@ namespace Hangfire.Redis.StackExchange
                     redis,
                     jobIds,
                     new[] { "State", "Fetched" },
-                    null,
-                    (job, jobData, state) => new FetchedJobDto
+                    null, 
+                    false,
+                    (job, jobData, state, historyData, loadException) => new FetchedJobDto
                     {
                         Job = job,
                         State = jobData[0],
@@ -402,18 +416,50 @@ namespace Hangfire.Redis.StackExchange
                     });
             });
         }
-
-        public IDictionary<DateTime, long> HourlySucceededJobs()
+        public override JobList<AwaitingJobDto> AwaitingJobs(int from, int count)
+        {
+            return UseConnection(redis =>
+            {
+                var awaitingJobIds = redis
+                    .ListRange(_storage.GetRedisKey("awaiting"), from, from + count - 1)
+                    .ToStringArray();
+                
+                return GetJobsWithProperties(
+                    redis,
+                    awaitingJobIds,
+                    null,
+                    new[] { "Expiration", "Options", "State", "NextState", "ParentId"}, 
+                    true,
+                    (job, jobData, stateData, historyData, loadException) => new AwaitingJobDto
+                    {
+                        Job = job,
+                        AwaitingAt = historyData.ContainsKey("CreatedAt") ? JobHelper.DeserializeNullableDateTime(historyData["CreatedAt"]) : null, 
+                        InAwaitingState = AwaitingState.StateName.Equals(stateData[2], StringComparison.OrdinalIgnoreCase),
+                        InvocationData = new InvocationData(jobData[0], jobData[1], jobData[2], jobData[3]), //should the third argument of GetJobsWithProperties pass something, add the number of elements to the index of the array of jobData in this line
+                        StateData = new Dictionary<string, string>
+                        {
+                            { "Expiration", stateData[0] },
+                            { "Options", stateData[1] },
+                            { "State", stateData[2] },
+                            { "NextState", stateData[3] },
+                            { "ParentId", stateData[4] }
+                        },
+                        LoadException = new JobLoadException($"Error deserializing job", loadException),
+                        ParentStateName = _storage.GetConnection().GetStateData(stateData[4]).Name
+                    });
+            });
+        }
+        public override IDictionary<DateTime, long> HourlySucceededJobs()
         {
             return UseConnection(redis => GetHourlyTimelineStats(redis, "succeeded"));
         }
 
-        public IDictionary<DateTime, long> HourlyFailedJobs()
+        public override IDictionary<DateTime, long> HourlyFailedJobs()
         {
             return UseConnection(redis => GetHourlyTimelineStats(redis, "failed"));
         }
 
-        public JobDetailsDto JobDetails([NotNull] string jobId)
+        public override JobDetailsDto JobDetails([NotNull] string jobId)
         {
             if (jobId == null) throw new ArgumentNullException(nameof(jobId));
 
@@ -464,7 +510,7 @@ namespace Hangfire.Redis.StackExchange
 
                 return new JobDetailsDto
                 {
-                    Job = TryToGetJob(job["Type"], job["Method"], job["ParameterTypes"], job["Arguments"]),
+                    Job = TryToGetJob(job["Type"], job["Method"], job["ParameterTypes"], job["Arguments"], out var loadException),
                     CreatedAt =
                         job.ContainsKey("CreatedAt")
                             ? JobHelper.DeserializeDateTime(job["CreatedAt"])
@@ -543,7 +589,8 @@ namespace Hangfire.Redis.StackExchange
             [NotNull] string[] jobIds,
             string[] properties,
             string[] stateProperties,
-            [NotNull] Func<Job, IReadOnlyList<string>, IReadOnlyList<string>, T> selector)
+            bool loadHistory,
+            [NotNull] Func<Job, IReadOnlyList<string>, IReadOnlyList<string>, Dictionary<string, string>, Exception, T> selector)
         {
             if (jobIds == null) throw new ArgumentNullException(nameof(jobIds));
             if (selector == null) throw new ArgumentNullException(nameof(selector));
@@ -552,8 +599,9 @@ namespace Hangfire.Redis.StackExchange
 
             var jobs = new Dictionary<string, Task<RedisValue[]>>(jobIds.Length, StringComparer.OrdinalIgnoreCase);
             var states = new Dictionary<string, Task<RedisValue[]>>(jobIds.Length, StringComparer.OrdinalIgnoreCase);
+            var histories = new Dictionary<string, Task<RedisValue>>(jobIds.Length, StringComparer.OrdinalIgnoreCase);
 
-            properties = properties ?? new string[0];
+            properties ??= new string[0];
 
             var extendedProperties = properties
                 .Concat(new[] { "Type", "Method", "ParameterTypes", "Arguments" })
@@ -577,6 +625,13 @@ namespace Hangfire.Redis.StackExchange
 					tasks.Add(taskStateJob);
                     states.Add(jobId, taskStateJob);
 				}
+
+                if (loadHistory)
+                {
+                    var taskHistoryJob = pipeline.ListGetByIndexAsync(_storage.GetRedisKey($"job:{jobId}:history"), -1); 
+                    tasks.Add(taskHistoryJob);
+                    histories.Add(jobId, taskHistoryJob);
+                }
             }
 
             pipeline.Execute();
@@ -586,23 +641,26 @@ namespace Hangfire.Redis.StackExchange
                 .Select(jobId => new
                 {
                     JobId = jobId,
-                    Job = jobs[jobId].Result.ToStringArray(),
-                    Method = TryToGetJob(
+                    JobData = jobs[jobId].Result.ToStringArray(),
+                    Job = TryToGetJob(
                         jobs[jobId].Result[properties.Length],
                         jobs[jobId].Result[properties.Length + 1],
                         jobs[jobId].Result[properties.Length + 2],
-                        jobs[jobId].Result[properties.Length + 3]),
+                        jobs[jobId].Result[properties.Length + 3],
+                        out Exception loadException),
+                    LastHistoryEntry = !histories.ContainsKey(jobId) ? null : SerializationHelper.Deserialize<Dictionary<string, string>>(histories[jobId].ToString()),
+                    LoadException = loadException,
                     State = stateProperties != null ? states[jobId].Result.ToStringArray() : null
                 })
                 .Select(x => new KeyValuePair<string, T>(
                     x.JobId,
-                    x.Job.Any(y => y != null) 
-                        ? selector(x.Method, x.Job, x.State) 
-                        : default(T))));
+                    x.JobData.Any(y => y != null) 
+                        ? selector(x.Job, x.JobData, x.State, x.LastHistoryEntry, x.LoadException) 
+                        : default)));
 			return jobList;
         }
 
-        public StatisticsDto GetStatistics()
+        public override StatisticsDto GetStatistics()
         {
             return UseConnection(redis =>
             {
@@ -658,20 +716,29 @@ namespace Hangfire.Redis.StackExchange
         }
 
         private static Job TryToGetJob(
-            string type, string method, string parameterTypes, string arguments)
+            string type, string method, string parameterTypes, string arguments, out Exception loadException)
         {
             try
             {
+                loadException = null;
                 return new InvocationData(
-                    type,
-                    method,
-                    parameterTypes,
-                    arguments).DeserializeJob();
+                type,
+                method,
+                parameterTypes,
+                arguments).DeserializeJob();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                loadException = e;
                 return null;
             }
         }
+
+        public override long AwaitingCount()
+        {
+            return UseConnection(redis => redis.SortedSetLength(_storage.GetRedisKey("awaiting")));
+        }
+
+        
     }
 }

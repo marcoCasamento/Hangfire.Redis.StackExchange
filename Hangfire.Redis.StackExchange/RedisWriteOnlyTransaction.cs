@@ -29,7 +29,7 @@ namespace Hangfire.Redis.StackExchange
     {
         private readonly RedisStorage _storage;
         private readonly ITransaction _transaction;
-
+        private readonly List<IDisposable> _lockToDispose = new List<IDisposable>();
         public RedisWriteOnlyTransaction([NotNull] RedisStorage storage, [NotNull] ITransaction transaction)
         {
             if (storage == null) throw new ArgumentNullException(nameof(storage));
@@ -43,7 +43,11 @@ namespace Hangfire.Redis.StackExchange
         {
             _transaction.SortedSetAddAsync(_storage.GetRedisKey(key), items.Select(x => new SortedSetEntry(x, 0)).ToArray());
         }
-
+        public override void AcquireDistributedLock([NotNull] string resource, TimeSpan timeout)
+        {
+            var distributedLock = _storage.GetConnection().AcquireDistributedLock(resource, timeout);
+            _lockToDispose.Add(distributedLock);
+        }
         public override void ExpireHash([NotNull] string key, TimeSpan expireIn)
         {
             _transaction.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
@@ -206,7 +210,31 @@ namespace Hangfire.Redis.StackExchange
 
             _transaction.SortedSetAddAsync(_storage.GetRedisKey(key), value, score);
         }
+        public override string CreateJob([NotNull] Job job, [NotNull] IDictionary<string, string> parameters, DateTime createdAt, TimeSpan expireIn)
+        {
+            if (job == null) throw new ArgumentNullException(nameof(job));
+            if (parameters == null) throw new ArgumentNullException(nameof(parameters));
 
+            var jobId = Guid.NewGuid().ToString();
+
+            var invocationData = InvocationData.SerializeJob(job);
+
+            // Do not modify the original parameters.
+            var storedParameters = new Dictionary<string, string>(parameters)
+            {
+                { "Type", invocationData.Type },
+                { "Method", invocationData.Method },
+                { "ParameterTypes", invocationData.ParameterTypes },
+                { "Arguments", invocationData.Arguments },
+                { "CreatedAt", JobHelper.SerializeDateTime(createdAt) }
+            };
+            _ = _transaction.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
+            _ = _transaction.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
+
+            if (! _transaction.Execute())
+                throw new HangfireRedisTransactionException("Transaction Execution failure");
+            return jobId;
+        }
         public override void RemoveFromSet([NotNull] string key, [NotNull] string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -236,7 +264,10 @@ namespace Hangfire.Redis.StackExchange
 
             _transaction.HashSetAsync(_storage.GetRedisKey(key), keyValuePairs.ToHashEntries());
         }
-
+        public override void SetJobParameter([NotNull] string jobId, [NotNull] string name, [CanBeNull] string value)
+        {
+            _storage.GetConnection().SetJobParameter(jobId, name, value);
+        }
         public override void RemoveHash([NotNull] string key)
         {
             _transaction.KeyDeleteAsync(_storage.GetRedisKey(key));
@@ -245,6 +276,10 @@ namespace Hangfire.Redis.StackExchange
         public override void Dispose()
         {
             //Don't have to dispose anything
+            foreach (var lokc in _lockToDispose)
+            {
+                lokc.Dispose();
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ namespace Hangfire.Redis.StackExchange
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             var storage = new RedisStorage();
+            GlobalJobFilters.Filters.Add(new HangfireSubscriber());
             return configuration.UseStorage(storage);
         }
 
@@ -38,6 +39,7 @@ namespace Hangfire.Redis.StackExchange
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             if (connectionMultiplexer == null) throw new ArgumentNullException(nameof(connectionMultiplexer));
             var storage = new RedisStorage(connectionMultiplexer, options);
+            GlobalJobFilters.Filters.Add(new HangfireSubscriber());
             return configuration.UseStorage(storage);
         }
 
@@ -50,6 +52,7 @@ namespace Hangfire.Redis.StackExchange
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             if (nameOrConnectionString == null) throw new ArgumentNullException(nameof(nameOrConnectionString));
             var storage = new RedisStorage(nameOrConnectionString, options);
+            GlobalJobFilters.Filters.Add(new HangfireSubscriber());
             return configuration.UseStorage(storage);
         }
     }

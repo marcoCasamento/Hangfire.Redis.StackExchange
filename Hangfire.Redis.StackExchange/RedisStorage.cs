@@ -35,6 +35,22 @@ namespace Hangfire.Redis.StackExchange
         private readonly RedisSubscription _subscription;
         private readonly ConfigurationOptions _redisOptions;
 
+        private readonly Dictionary<string, bool> _features =
+            new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase)
+            {
+                { JobStorageFeatures.ExtendedApi, true }, 
+                { JobStorageFeatures.JobQueueProperty, true }, 
+                { JobStorageFeatures.Connection.BatchedGetFirstByLowest, true }, 
+                { JobStorageFeatures.Connection.GetUtcDateTime, true }, 
+                { JobStorageFeatures.Connection.GetSetContains, true }, 
+                { JobStorageFeatures.Connection.LimitedGetSetCount, true }, 
+                { JobStorageFeatures.Transaction.AcquireDistributedLock, true }, 
+                { JobStorageFeatures.Transaction.CreateJob, true }, 
+                { JobStorageFeatures.Transaction.SetJobParameter, true}, 
+                { JobStorageFeatures.Monitoring.DeletedStateGraphs, false }, //FLASE
+                { JobStorageFeatures.Monitoring.AwaitingJobs, true }
+            };
+
         public RedisStorage()
             : this("localhost:6379")
         {
@@ -87,15 +103,14 @@ namespace Hangfire.Redis.StackExchange
         {
             if (featureId == null) throw new ArgumentNullException(nameof(featureId));
 
-            //TODO: Understand this feature. Is it SqlServeronly ? Does it somehow relates to redis {prefix} ? (think of clustered environments and keys that must go only on one server)
+            return _features.TryGetValue(featureId, out var isSupported)
+                ? isSupported
+                : base.HasFeature(featureId);
 
-            //if (_options.UseTransactionalAcknowledge &&
-            //    featureId.StartsWith(Worker.TransactionalAcknowledgePrefix, StringComparison.OrdinalIgnoreCase))
-            //{
-            //    return featureId.Equals(
-            //        Worker.TransactionalAcknowledgePrefix + nameof(SqlServerTimeoutJob),
-            //        StringComparison.OrdinalIgnoreCase);
-            //}
+            if ("BatchedGetFirstByLowestScoreFromSet".Equals(featureId, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
 
             if ("BatchedGetFirstByLowestScoreFromSet".Equals(featureId, StringComparison.OrdinalIgnoreCase))
             {
@@ -111,7 +126,7 @@ namespace Hangfire.Redis.StackExchange
             {
                 return true;
             }
-
+            
             return base.HasFeature(featureId);
         }
         public override IStorageConnection GetConnection()

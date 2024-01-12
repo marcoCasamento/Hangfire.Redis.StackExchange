@@ -126,7 +126,7 @@ namespace Hangfire.Redis.StackExchange
             Task.WaitAll(tasks);
             return results.Sum(x => x.Value);
         }
-
+        
         public override bool GetSetContains([NotNull] string key, [NotNull] string value)
         {
             var sortedSetEntries = Redis.SortedSetScan(key, value);
@@ -162,8 +162,8 @@ namespace Hangfire.Redis.StackExchange
                 _ = transaction.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
                 _ = transaction.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
 
-                // TODO: check return value
-                _ = transaction.Execute();
+                if (!transaction.Execute())
+                    throw new HangfireRedisTransactionException("Transaction Execution failure");
             }
             else
             {
