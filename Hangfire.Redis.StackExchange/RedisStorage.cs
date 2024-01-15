@@ -89,7 +89,7 @@ namespace Hangfire.Redis.StackExchange
 
         internal int DeletedListSize => _options.DeletedListSize;
         
-        internal string SubscriptionChannel => _subscription.Channel;
+        internal RedisChannel SubscriptionChannel => _subscription.Channel;
 
         internal string[] LifoQueues => _options.LifoQueues;
 

@@ -17,13 +17,12 @@ namespace Hangfire.Redis.StackExchange
         public RedisSubscription([NotNull] RedisStorage storage, [NotNull] ISubscriber subscriber)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-            Channel = _storage.GetRedisKey("JobFetchChannel");
-
+            Channel = new RedisChannel(_storage.GetRedisKey("JobFetchChannel"), RedisChannel.PatternMode.Literal);
             _subscriber = subscriber ?? throw new ArgumentNullException(nameof(subscriber));
             _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());
         }
 
-        public string Channel { get; }
+        public RedisChannel Channel { get; }
 
         public void WaitForJob(TimeSpan timeout, CancellationToken cancellationToken)
         {
