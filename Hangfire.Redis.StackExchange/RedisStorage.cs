@@ -47,7 +47,7 @@ namespace Hangfire.Redis.StackExchange
                 { JobStorageFeatures.Transaction.AcquireDistributedLock, true }, 
                 { JobStorageFeatures.Transaction.CreateJob, true }, 
                 { JobStorageFeatures.Transaction.SetJobParameter, true}, 
-                { JobStorageFeatures.Monitoring.DeletedStateGraphs, false }, //FLASE
+                { JobStorageFeatures.Monitoring.DeletedStateGraphs, true }, 
                 { JobStorageFeatures.Monitoring.AwaitingJobs, true }
             };
 
@@ -107,27 +107,6 @@ namespace Hangfire.Redis.StackExchange
                 ? isSupported
                 : base.HasFeature(featureId);
 
-            if ("BatchedGetFirstByLowestScoreFromSet".Equals(featureId, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if ("BatchedGetFirstByLowestScoreFromSet".Equals(featureId, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if ("Connection.GetUtcDateTime".Equals(featureId, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if ("Job.Queue".Equals(featureId, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-            
-            return base.HasFeature(featureId);
         }
         public override IStorageConnection GetConnection()
         {

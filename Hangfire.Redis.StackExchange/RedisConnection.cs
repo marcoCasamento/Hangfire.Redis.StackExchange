@@ -111,6 +111,7 @@ namespace Hangfire.Redis.StackExchange
             //the returned time is the time on the first server of the cluster
             return redisServer.Time();
         }
+        
         public override long GetSetCount([NotNull] IEnumerable<string> keys, int limit)
         {
             Task[] tasks = new Task[keys.Count()];
@@ -119,8 +120,8 @@ namespace Hangfire.Redis.StackExchange
             ConcurrentDictionary<string, long> results = new ConcurrentDictionary<string, long>();
             foreach (string key in keys)
             {
-                tasks[i] = batch.SortedSetLengthAsync(key, max: limit)
-                    .ContinueWith((Task<long> x) => results.TryAdd(key, x.Result));
+                tasks[i] = batch.SortedSetLengthAsync(_storage.GetRedisKey(key), max: limit)
+                    .ContinueWith((Task<long> x) => results.TryAdd(_storage.GetRedisKey(key), x.Result));
             }
             batch.Execute();
             Task.WaitAll(tasks);
@@ -129,9 +130,10 @@ namespace Hangfire.Redis.StackExchange
         
         public override bool GetSetContains([NotNull] string key, [NotNull] string value)
         {
-            var sortedSetEntries = Redis.SortedSetScan(key, value);
+            var sortedSetEntries = Redis.SortedSetScan(_storage.GetRedisKey(key), value);
             return sortedSetEntries.Any();
         }
+        
         public override string CreateExpiredJob(
             [NotNull] Job job,
             [NotNull] IDictionary<string, string> parameters,

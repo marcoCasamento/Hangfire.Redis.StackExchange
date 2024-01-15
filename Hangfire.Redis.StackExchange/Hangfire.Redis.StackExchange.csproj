@@ -5,7 +5,7 @@
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
 		<Version>1.9</Version>
-		<PackageVersion>1.9</PackageVersion>
+		<PackageVersion>1.9.4-beta.1</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -20,6 +20,15 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
+			1.9.4
+			- Update to Hangfire 1.8.7
+			- Add Support for all features defined for the storage in Hangfire 1.8.7
+			1.9.3
+			- Fix the missing key prefixing ({hangfire}:) for GetSetCount and GetSetContains (thanks to BobSilent)
+			1.9.2
+			- Failed jobs page lists new items first (thanks to toddlucas)
+			1.9.1
+			- Downgrade to netStandard 2.0 for broader compatibility
 			1.9
 			- Switched AsyncLocal storage of redis lock to ThreadLocal
 			- BREAKING CHANGE: Drop support for net461
@@ -70,12 +79,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Hangfire.Core" Version="1.8.2" />
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PackageReference Include="Hangfire.Core" Version="1.8.7" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="StackExchange.Redis" Version="2.6.111" />    
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="StackExchange.Redis" Version="2.7.10" />    
     </ItemGroup>
 
 </Project>

@@ -204,6 +204,31 @@ namespace Hangfire.Redis.Tests
             });
         }
 
+        [Fact]
+        public void SetCount_ReturnZeroIfSetDoesNotExists()
+        {
+            UseConnections((redis, connection) =>
+            {
+                var result = connection.GetSetCount("some-set");
+
+                Assert.Equal(0, result);
+            });
+        }
+
+        [Fact, CleanRedis]
+        public void SetCount_ReturnNumberOfItems()
+        {
+            UseConnections((redis, connection) =>
+            {
+                redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
+                redis.SortedSetAdd("{hangfire}:some-set", "2", 0);
+
+                var result = connection.GetSetCount("some-set");
+
+                Assert.Equal(2, result);
+            });
+        }
+
         [Fact, CleanRedis]
         public void SetContains_ReturnTrueIfContained()
         {
@@ -211,11 +236,12 @@ namespace Hangfire.Redis.Tests
             {
                 redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
 
-                var result = connection.GetSetContains("{hangfire}:some-set", "1");
+                var result = connection.GetSetContains("some-set", "1");
 
                 Assert.True(result);
             });
         }
+
         [Fact, CleanRedis]
         public void SetContains_ReturnFalseIfNotContained()
         {
@@ -223,11 +249,12 @@ namespace Hangfire.Redis.Tests
             {
                 redis.SortedSetAdd("{hangfire}:some-set", "1", 0);
 
-                var result = connection.GetSetContains("{hangfire}:some-set", "0");
+                var result = connection.GetSetContains("some-set", "0");
 
                 Assert.False(result);
             });
         }
+
         private void UseConnections(Action<IDatabase, RedisConnection> action)
         {
             var redis = RedisUtils.CreateClient();

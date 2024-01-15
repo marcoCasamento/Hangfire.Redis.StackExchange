@@ -233,7 +233,7 @@ namespace Hangfire.Redis.StackExchange
             return UseConnection(redis =>
             {
                 var failedJobIds = redis
-                    .SortedSetRangeByRank(_storage.GetRedisKey("failed"), from, from + count - 1)
+                    .SortedSetRangeByRank(_storage.GetRedisKey("failed"), from, from + count - 1, Order.Descending)
 					.ToStringArray();
 
                 return GetJobsWithProperties(
