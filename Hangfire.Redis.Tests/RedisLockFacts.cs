@@ -78,28 +78,32 @@ namespace Hangfire.Redis.Tests
             thread2.Join();
         }
 
-        private async Task NestedTask(IDatabase db)
-        {
-            await Task.Yield();
+        //private async Task NestedTask(IDatabase db)
+        //{
 
-            using (var lestLock2 = RedisLock.Acquire(db, "test", TimeSpan.FromMilliseconds(10)))
-                Assert.NotNull(lestLock2);
-        }
+        //    await Task.Yield();
+        //    using var lestLock2 = RedisLock.Acquire(db, "test", TimeSpan.FromMilliseconds(10));
+        //    Assert.NotNull(lestLock2);
+        //}
+
+        //Test below will fail due to the changed storage model of HeldLocks in RedisLock (it should be AsyncLocal instead of ThreadLocal)
+        //It seems that something is wrong when run in hangfire but I don't have a repro. 
+        //Giving that Hangfire as of 1.8.7 still doesn't use Tasks (milestone set for 2.0) I'm leaving HeldLocks in a ThreadLocal
+        //and commenting out the failing test
 
         //[Fact, CleanRedis]
-        public async Task AcquireFromNestedTask()
-        {
-            var db = RedisUtils.CreateClient();
+        //public async Task AcquireFromNestedTask()
+        //{
+        //    var db = RedisUtils.CreateClient();
 
-            using (var lock1 = RedisLock.Acquire(db, "test", TimeSpan.FromMilliseconds(50)))
-            {
-                Assert.NotNull(lock1);
+        //    using var lock1 = RedisLock.Acquire(db, "test", TimeSpan.FromMilliseconds(50));
+        //    Assert.NotNull(lock1);
 
-                await Task.Delay(100);
+        //    await Task.Delay(100);
 
-                await Task.Run(() => NestedTask(db));
-            }
-        }
+        //    await Task.Run(() => NestedTask(db));
+            
+        //}
 
         [Fact, CleanRedis]
         public void SlidingExpirationTest()
