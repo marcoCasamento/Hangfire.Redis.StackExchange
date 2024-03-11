@@ -134,23 +134,26 @@ namespace Hangfire.Redis.StackExchange
                 }
 
                 var jobs = new ConcurrentDictionary<string, List<string>>();
-                var states = new ConcurrentDictionary<string, List<string>>();;
+                var states = new ConcurrentDictionary<string, List<string>>();
+                var jobIds = new Dictionary<string, string>();
 
 				var pipeline = redis.CreateBatch();
 				var tasks = new Task[scheduledJobs.Count * 2];
 				int i = 0;
                 foreach (var scheduledJob in scheduledJobs)
                 {
-                    var jobId = scheduledJob.Element;
+                    var jobInfo = scheduledJob.Element.ToString().Split(':');
+                    var jobId = jobInfo[jobInfo.Length-1];
+                    jobIds.Add(scheduledJob.Element, jobId);
 					tasks[i] = pipeline.HashGetAsync(
 								_storage.GetRedisKey($"job:{jobId}"),
 								new RedisValue[] { "Type", "Method", "ParameterTypes", "Arguments" })
-						.ContinueWith(x => jobs.TryAdd(jobId, x.Result.ToStringArray().ToList()));
+						.ContinueWith(x => jobs.TryAdd(scheduledJob.Element, x.Result.ToStringArray().ToList()));
 					i++;
 					tasks[i] = pipeline.HashGetAsync(
 								_storage.GetRedisKey($"job:{jobId}:state"),
 								new RedisValue[] { "State", "ScheduledAt" })
-						.ContinueWith(x => states.TryAdd(jobId, x.Result.ToStringArray().ToList()));
+						.ContinueWith(x => states.TryAdd(scheduledJob.Element, x.Result.ToStringArray().ToList()));
 					i++;
                 }
 
@@ -159,7 +162,7 @@ namespace Hangfire.Redis.StackExchange
 
                 return new JobList<ScheduledJobDto>(scheduledJobs
                     .Select(job => new KeyValuePair<string, ScheduledJobDto>(
-                        job.Element,
+                        jobIds[job.Element],
                         new ScheduledJobDto
                         {
                             EnqueueAt = JobHelper.FromTimestamp((long) job.Score),
