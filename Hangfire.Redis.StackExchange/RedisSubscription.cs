@@ -19,7 +19,7 @@ namespace Hangfire.Redis.StackExchange
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             Channel = new RedisChannel(_storage.GetRedisKey("JobFetchChannel"), RedisChannel.PatternMode.Literal);
             _subscriber = subscriber ?? throw new ArgumentNullException(nameof(subscriber));
-            _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());
+            
         }
 
         public RedisChannel Channel { get; }
@@ -32,13 +32,19 @@ namespace Hangfire.Redis.StackExchange
 
         void IServerComponent.Execute(CancellationToken cancellationToken)
         {
+            _subscriber.Subscribe(Channel, (channel, value) => _mre.Set());
             cancellationToken.WaitHandle.WaitOne();
 
             if (cancellationToken.IsCancellationRequested)
             {
                 _subscriber.Unsubscribe(Channel);
-                _mre.Dispose();
+                _mre.Reset();
             }
+        }
+
+        ~RedisSubscription()
+        {
+            _mre.Dispose();
         }
     }
 }
