@@ -222,6 +222,7 @@ namespace Hangfire.Redis.StackExchange
             // Do not modify the original parameters.
             var storedParameters = new Dictionary<string, string>(parameters)
             {
+                { "Queue", invocationData.Queue },
                 { "Type", invocationData.Type },
                 { "Method", invocationData.Method },
                 { "ParameterTypes", invocationData.ParameterTypes },

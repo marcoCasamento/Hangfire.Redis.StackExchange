@@ -302,6 +302,7 @@ namespace Hangfire.Redis.StackExchange
             var storedData = Redis.HashGetAll(_storage.GetRedisKey($"job:{jobId}"));
             if (storedData.Length == 0) return null;
 
+            string queue = storedData.FirstOrDefault(x => x.Name == "Queue").Value;
             string type = storedData.FirstOrDefault(x => x.Name == "Type").Value;
             string method = storedData.FirstOrDefault(x => x.Name == "Method").Value;
             string parameterTypes = storedData.FirstOrDefault(x => x.Name == "ParameterTypes").Value;
@@ -311,7 +312,7 @@ namespace Hangfire.Redis.StackExchange
             Job job = null;
             JobLoadException loadException = null;
 
-            var invocationData = new InvocationData(type, method, parameterTypes, arguments);
+            var invocationData = new InvocationData(type, method, parameterTypes, arguments, queue);
 
             try
             {
