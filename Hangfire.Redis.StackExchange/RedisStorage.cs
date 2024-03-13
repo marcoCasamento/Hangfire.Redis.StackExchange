@@ -112,7 +112,11 @@ namespace Hangfire.Redis.StackExchange
         {
             var endPoints = _connectionMultiplexer.GetEndPoints(false);
             IServer server = endPoints.Select(endPoint => _connectionMultiplexer.GetServer(endPoint))
-                .First(s => s.IsConnected && !s.IsReplica);
+                .FirstOrDefault(s => s.IsConnected && !s.IsReplica);
+
+            if (server == null)
+                throw new RedisConnectionException(ConnectionFailureType.UnableToConnect, "No redis server available");
+                
             return new RedisConnection(this, server, _connectionMultiplexer.GetDatabase(Db), _subscription, _options.FetchTimeout);
         }
 
@@ -173,3 +177,4 @@ namespace Hangfire.Redis.StackExchange
         }
     }
 }
+
