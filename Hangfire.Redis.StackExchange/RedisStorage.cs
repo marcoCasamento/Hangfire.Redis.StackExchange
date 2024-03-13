@@ -111,7 +111,12 @@ namespace Hangfire.Redis.StackExchange
         public override IStorageConnection GetConnection()
         {
             var endPoints = _connectionMultiplexer.GetEndPoints(false);
-            IServer server = _connectionMultiplexer.GetServer(endPoints[0]);
+            IServer server = endPoints.Select(endPoint => _connectionMultiplexer.GetServer(endPoint))
+                .FirstOrDefault(s => s.IsConnected && !s.IsReplica);
+
+            if (server == null)
+                throw new RedisConnectionException(ConnectionFailureType.UnableToConnect, "No redis server available");
+                
             return new RedisConnection(this, server, _connectionMultiplexer.GetDatabase(Db), _subscription, _options.FetchTimeout);
         }
 
@@ -172,3 +177,4 @@ namespace Hangfire.Redis.StackExchange
         }
     }
 }
+
