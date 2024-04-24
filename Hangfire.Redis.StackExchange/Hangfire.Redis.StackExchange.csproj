@@ -5,8 +5,8 @@
 		<LangVersion>12</LangVersion>
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
-		<Version>1.9.4</Version>
-		<PackageVersion>1.9.4-beta.1</PackageVersion>
+		<Version>1.9.5</Version>
+		<PackageVersion>1.9.5</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -21,6 +21,11 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
+			1.9.5
+			- Address #139 support for netstandard2.0
+			- Fix #145 Added Job Queue parameter to the job information
+			- Update to Hangfire 1.8.12 and StackExchange.Redis 2.7.33
+			Big thanks to @Lexy2 for all the work on this release
 			1.9.4
 			- Update to Hangfire 1.8.7
 			- Add Support for all features defined for the storage in Hangfire 1.8.7
@@ -81,13 +86,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Hangfire.Core" Version="1.8.7" />
+      <PackageReference Include="Hangfire.Core" Version="1.8.12" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="StackExchange.Redis" Version="2.7.10" />    
+      <PackageReference Include="StackExchange.Redis" Version="2.7.33" />    
     </ItemGroup>
 
 </Project>
