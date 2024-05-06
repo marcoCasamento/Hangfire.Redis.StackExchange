@@ -74,7 +74,7 @@ namespace Hangfire.Redis.StackExchange
                 transaction.Execute();
             } else
             {
-                _redis.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
+                _redis.ListRightPush(_storage.GetRedisKey($"queue:{Queue}"), JobId);
                 RemoveFromFetchedList(_redis);
             }
             _requeued = true;

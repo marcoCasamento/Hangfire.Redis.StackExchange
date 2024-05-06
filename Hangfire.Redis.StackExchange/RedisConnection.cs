@@ -87,9 +87,10 @@ namespace Hangfire.Redis.StackExchange
             }
             else
             {
-                _ = Redis.SetAddAsync(_storage.GetRedisKey("servers"), serverId);
+                var tasks = new Task[3];
+                tasks[0] = Redis.SetAddAsync(_storage.GetRedisKey("servers"), serverId);
 
-                _ = Redis.HashSetAsync(
+                tasks[1] = Redis.HashSetAsync(
                     _storage.GetRedisKey($"server:{serverId}"),
                     new Dictionary<string, string>
                         {
@@ -99,10 +100,16 @@ namespace Hangfire.Redis.StackExchange
 
                 if (context.Queues.Length > 0)
                 {
-                    _ = Redis.ListRightPushAsync(
+                    tasks[2] = Redis.ListRightPushAsync(
                         _storage.GetRedisKey($"server:{serverId}:queues"),
                         context.Queues.ToRedisValues());
                 }
+                else
+                {
+                    tasks[2] = Task.CompletedTask;;
+                }
+
+                Task.WaitAll(tasks);
             }
         }
 
@@ -174,8 +181,10 @@ namespace Hangfire.Redis.StackExchange
             }
             else
             {
-                _ = Redis.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
-                _ = Redis.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
+                var tasks = new Task[2];
+                tasks[0] = Redis.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), storedParameters.ToHashEntries());
+                tasks[1] = Redis.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
+                Task.WaitAll(tasks);
             }
 
             return jobId;
@@ -433,13 +442,15 @@ namespace Hangfire.Redis.StackExchange
             }
             else
             {
-                _ = Redis.SetRemoveAsync(_storage.GetRedisKey("servers"), serverId);
-                _ = Redis.KeyDeleteAsync(
+                var tasks = new Task[2];
+                tasks[0] = Redis.SetRemoveAsync(_storage.GetRedisKey("servers"), serverId);
+                tasks[1] = Redis.KeyDeleteAsync(
                     new RedisKey[]
                     {
                         _storage.GetRedisKey($"server:{serverId}"),
                         _storage.GetRedisKey($"server:{serverId}:queues")
                     });
+                Task.WaitAll(tasks);
             }
         }
 
