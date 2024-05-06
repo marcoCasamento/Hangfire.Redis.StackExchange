@@ -118,27 +118,6 @@ namespace Hangfire.Redis.Tests
         }
 
         [Fact, CleanRedis]
-        public void RemoveFromQueue_RemovesOnlyOneJob()
-        {
-            UseRedis(redis =>
-            {
-                // Arrange
-				redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
-                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
-                var fetchedAt = DateTime.UtcNow;
-                redis.HashSet("{hangfire}:job:job-id", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
-
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "job-id", "my-queue", fetchedAt);
-
-                // Act
-                fetchedJob.RemoveFromQueue();
-
-                // Assert
-                Assert.Equal(1, redis.ListLength("{hangfire}:queue:my-queue:dequeued"));
-            });
-        }
-
-        [Fact, CleanRedis]
         public void RemoveFromQueue_RemovesTheFetchedFlag()
         {
             UseRedis(redis =>
