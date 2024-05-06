@@ -16,6 +16,7 @@
 
 using System;
 using Hangfire.Annotations;
+using Hangfire.Common;
 using Hangfire.Storage;
 using StackExchange.Redis;
 
@@ -33,50 +34,79 @@ namespace Hangfire.Redis.StackExchange
             [NotNull] RedisStorage storage, 
             [NotNull] IDatabase redis,
             [NotNull] string jobId, 
-            [NotNull] string queue)
+            [NotNull] string queue,
+            [CanBeNull] DateTime? fetchedAt)
         {
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (redis == null) throw new ArgumentNullException(nameof(redis));
-            if (jobId == null) throw new ArgumentNullException(nameof(jobId));
-            if (queue == null) throw new ArgumentNullException(nameof(queue));
-
-            _storage = storage;
-            _redis = redis;
-
-            JobId = jobId;
-            Queue = queue;
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _redis = redis ?? throw new ArgumentNullException(nameof(redis));
+            JobId = jobId ?? throw new ArgumentNullException(nameof(jobId));
+            Queue = queue ?? throw new ArgumentNullException(nameof(queue));
+            FetchedAt = fetchedAt;
         }
 
         public string JobId { get; }
         public string Queue { get; }
+        public DateTime? FetchedAt { get; }
 
+        private DateTime? GetFetchedValue()
+        {
+            return JobHelper.DeserializeNullableDateTime(_redis.HashGet(_storage.GetRedisKey($"job:{JobId}"), "Fetched"));
+        }
+        
         public void RemoveFromQueue()
         {
+            var fetchedAt = GetFetchedValue();
             if (_storage.UseTransactions)
             {
                 var transaction = _redis.CreateTransaction();
-                RemoveFromFetchedList(transaction);
+
+                if (fetchedAt == FetchedAt)
+                {
+                    transaction.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
+                    transaction.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
+                }
+
+                _redis.PublishAsync(_storage.SubscriptionChannel, JobId);
                 transaction.Execute();                
             } else
             {
-                RemoveFromFetchedList(_redis);
+                _redis.ListRightPush(_storage.GetRedisKey($"queue:{Queue}"), JobId);
+                if (fetchedAt == FetchedAt)
+                {
+                    _redis.ListRemove(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
+                    _redis.HashDelete(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
+                }
+
+                _redis.Publish(_storage.SubscriptionChannel, JobId);
             }
             _removedFromQueue = true;
         }
 
         public void Requeue()
         {
+            var fetchedAt = GetFetchedValue();
             if (_storage.UseTransactions)
             {
                 var transaction = _redis.CreateTransaction();
                 transaction.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
-                RemoveFromFetchedList(transaction);
+                if (fetchedAt == FetchedAt)
+                {
+                    transaction.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
+                    transaction.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
+                }
+
+                _redis.PublishAsync(_storage.SubscriptionChannel, JobId);
                 transaction.Execute();
             } else
             {
                 _redis.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
-                RemoveFromFetchedList(_redis);
-            }
+                if (fetchedAt == FetchedAt)
+                {
+                    _redis.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
+                    _redis.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
+                }
+
+                _redis.Publish(_storage.SubscriptionChannel, JobId);            }
             _requeued = true;
         }
 
