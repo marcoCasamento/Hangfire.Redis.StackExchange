@@ -162,6 +162,11 @@ namespace Hangfire.Redis.StackExchange
                 storedParameters.Add("Queue", invocationData.Queue);
             }
 
+            if (invocationData.Queue != null)
+            {
+                storedParameters.Add("Queue", invocationData.Queue);
+            }
+
             if (_storage.UseTransactions)
             {
                 var transaction = Redis.CreateTransaction();
