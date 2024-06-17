@@ -5,8 +5,8 @@
 		<LangVersion>12</LangVersion>
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
-		<Version>1.9.5</Version>
-		<PackageVersion>1.9.5</PackageVersion>
+		<Version>1.10.0</Version>
+		<PackageVersion>1.10.0</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -21,6 +21,11 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
+			1.10.0
+			- Fix #135 -CHANGED BEHAVIOR- Library now requeue jobs from dead server (read comments in the issue) thanks to @Lexy2
+			- Implement #150 (Replace async Redis calls with sync ones) thanks to @Lexy2
+			- Fix #148 (Can't schedule a job without specifying the queue ) thanks to @Lexy2
+			- Fix #142 (Scheduled jobs are returned incorrectly by the monitoring API) thanks to @Lexy2
 			1.9.5
 			- Address #139 support for netstandard2.0
 			- Fix #145 Added Job Queue parameter to the job information
