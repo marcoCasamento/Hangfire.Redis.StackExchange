@@ -156,7 +156,7 @@ namespace Hangfire.Redis.StackExchange
                 { "Arguments", invocationData.Arguments },
                 { "CreatedAt", JobHelper.SerializeDateTime(createdAt) }
             };
-
+            
             if (invocationData.Queue != null)
             {
                 storedParameters.Add("Queue", invocationData.Queue);
@@ -236,16 +236,17 @@ namespace Hangfire.Redis.StackExchange
             // that is being inspected by the FetchedJobsWatcher instance.
             // Job's has the implicit 'Fetched' state.
 
+            var fetchTime = DateTime.UtcNow;
             _ = Redis.HashSet(
                 _storage.GetRedisKey($"job:{jobId}"),
                 "Fetched",
-                JobHelper.SerializeDateTime(DateTime.UtcNow));
+                JobHelper.SerializeDateTime(fetchTime));
 
             // Checkpoint #2. The job is in the implicit 'Fetched' state now.
             // This state stores information about fetched time. The job will
             // be re-queued when the JobTimeout will be expired.
 
-            return new RedisFetchedJob(_storage, Redis, jobId, queueName);
+            return new RedisFetchedJob(_storage, Redis, jobId, queueName, fetchTime);
         }
 
         public override Dictionary<string, string> GetAllEntriesFromHash([NotNull] string key)

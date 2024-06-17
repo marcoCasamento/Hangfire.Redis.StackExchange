@@ -76,7 +76,7 @@ namespace Hangfire.Redis.StackExchange
 
             using (RedisLock.Acquire(connection.Redis, _storage.GetRedisKey($"queue:{queue}:dequeued:lock"), _options.FetchedLockTimeout))
             {
-                Logger.DebugFormat("Looking for timed out jobs in the '{0}' queue...", queue);
+                Logger.DebugFormat("Looking for timed out and aborted jobs in the '{0}' queue...", queue);
 
                 var jobIds = connection.Redis.ListRange(_storage.GetRedisKey($"queue:{queue}:dequeued"));
 
@@ -84,7 +84,7 @@ namespace Hangfire.Redis.StackExchange
 
                 foreach (var jobId in jobIds)
                 {
-                    if (RequeueJobIfTimedOut(connection, jobId, queue))
+                    if (RequeueJobIfTimedOutOrAborted(connection, jobId, queue))
                     {
                         requeued++;
                     }
@@ -92,7 +92,7 @@ namespace Hangfire.Redis.StackExchange
 
                 if (requeued == 0)
                 {
-                    Logger.DebugFormat("No timed out jobs were found in the '{0}' queue", queue);
+                    Logger.DebugFormat("No timed out or aborted jobs were found in the '{0}' queue", queue);
                 }
                 else
                 {
@@ -104,7 +104,7 @@ namespace Hangfire.Redis.StackExchange
             }
         }
 
-        private bool RequeueJobIfTimedOut(RedisConnection connection, string jobId, string queue)
+        private bool RequeueJobIfTimedOutOrAborted(RedisConnection connection, string jobId, string queue)
         {
             var flags = connection.Redis.HashGet(
                 _storage.GetRedisKey($"job:{jobId}"),
@@ -143,9 +143,11 @@ namespace Hangfire.Redis.StackExchange
             }
             else
             {
-                if (TimedOutByFetchedTime(fetched) || TimedOutByCheckedTime(fetched, @checked))
+                if (TimedOutByFetchedTime(fetched) ||
+                    TimedOutByCheckedTime(fetched, @checked) ||
+                    BeingProcessedByADeadServer(connection, jobId))
                 {
-                    var fetchedJob = new RedisFetchedJob(_storage, connection.Redis, jobId, queue);
+                    var fetchedJob = new RedisFetchedJob(_storage, connection.Redis, jobId, queue, JobHelper.DeserializeNullableDateTime(fetched));
                     fetchedJob.Dispose();
 
                     return true;
@@ -173,6 +175,22 @@ namespace Hangfire.Redis.StackExchange
 
             return !string.IsNullOrEmpty(checkedTimestamp) &&
                    (DateTime.UtcNow - JobHelper.DeserializeDateTime(checkedTimestamp) > _options.CheckedTimeout);
+        }
+        
+        private bool BeingProcessedByADeadServer(RedisConnection connection, string jobId)
+        {
+            var serverId = connection.Redis.HashGet(_storage.GetRedisKey($"job:{jobId}:state"), "ServerId");
+            if (serverId == RedisValue.Null)
+            {
+                // job is not fetched by a server
+                return false;
+            }
+            var serverCheckedIn = connection.Redis.HashGet(_storage.GetRedisKey($"server:{serverId}"), "StartedAt");
+
+            // if the server has not been removed by ServerWatchdog due to heartbeat timeout,
+            // there will be a value in this field, so the server is considered alive,
+            // and thus the job shouldn't be requeued just yet.
+            return serverCheckedIn == RedisValue.Null;
         }
     }
 }
