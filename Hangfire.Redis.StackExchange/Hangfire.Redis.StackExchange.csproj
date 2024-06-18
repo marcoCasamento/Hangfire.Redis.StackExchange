@@ -6,7 +6,7 @@
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
 		<Version>1.10.0</Version>
-		<PackageVersion>1.10.1-beta</PackageVersion>
+		<PackageVersion>1.10.1-beta2</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -21,7 +21,7 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
-			1.10.1-Beta1
+			1.10.1-Beta2
 			- Fix #153 Appeared after 1.10.0 release. Only updates to this version for testing purposes and PLEASE report any issues. Stick to 1.9.3 for production.
 			1.10.0
 			- Fix #135 -CHANGED BEHAVIOR- Library now requeue jobs from dead server (read comments in the issue) thanks to @Lexy2
