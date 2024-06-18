@@ -47,7 +47,8 @@ namespace Hangfire.Redis.StackExchange
                 { JobStorageFeatures.Transaction.AcquireDistributedLock, true }, 
                 { JobStorageFeatures.Transaction.CreateJob, true }, // overridden in constructor
                 { JobStorageFeatures.Transaction.SetJobParameter, true}, // overridden in constructor 
-                { JobStorageFeatures.Transaction.RemoveFromQueue(typeof(RedisFetchedJob)), true }, // overridden in constructor                { JobStorageFeatures.Monitoring.DeletedStateGraphs, true }, 
+                { JobStorageFeatures.Transaction.RemoveFromQueue(typeof(RedisFetchedJob)), true }, // overridden in constructor
+                { JobStorageFeatures.Monitoring.DeletedStateGraphs, true }, 
                 { JobStorageFeatures.Monitoring.AwaitingJobs, true }
             };
 
@@ -90,8 +91,8 @@ namespace Hangfire.Redis.StackExchange
 
         private void SetTransactionalFeatures()
         {
-            _features[JobStorageFeatures.Transaction.CreateJob] = _options.UseTransactions; 
-            _features[JobStorageFeatures.Transaction.SetJobParameter] = _options.UseTransactions; 
+            _features[JobStorageFeatures.Transaction.CreateJob] = _options.UseTransactions;
+            _features[JobStorageFeatures.Transaction.SetJobParameter] = _options.UseTransactions;
             _features[JobStorageFeatures.Transaction.RemoveFromQueue(typeof(RedisFetchedJob))] = _options.UseTransactions; 
         }
 

@@ -102,8 +102,8 @@ namespace Hangfire.Redis.StackExchange
                 _redis.ListRightPushAsync(_storage.GetRedisKey($"queue:{Queue}"), JobId);
                 if (fetchedAt == FetchedAt)
                 {
-                    _redis.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
-                    _redis.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
+                    _redis.ListRemove(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
+                    _redis.HashDelete(_storage.GetRedisKey($"job:{JobId}"), new RedisValue[] { "Fetched", "Checked" });
                 }
 
                 _redis.Publish(_storage.SubscriptionChannel, JobId);            }

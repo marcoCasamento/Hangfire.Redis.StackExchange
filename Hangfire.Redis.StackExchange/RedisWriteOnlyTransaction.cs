@@ -274,6 +274,10 @@ namespace Hangfire.Redis.StackExchange
             _transaction.KeyDeleteAsync(_storage.GetRedisKey(key));
         }
 
+        public override void RemoveFromQueue([NotNull] IFetchedJob fetchedJob)
+        {
+            fetchedJob.RemoveFromQueue();
+        }
         public override void Dispose()
         {
             //Don't have to dispose anything
