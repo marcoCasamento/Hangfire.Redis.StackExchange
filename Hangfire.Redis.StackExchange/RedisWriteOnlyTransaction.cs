@@ -222,6 +222,7 @@ namespace Hangfire.Redis.StackExchange
             // Do not modify the original parameters.
             var storedParameters = new Dictionary<string, string>(parameters)
             {
+                { "Queue", invocationData.Queue },
                 { "Type", invocationData.Type },
                 { "Method", invocationData.Method },
                 { "ParameterTypes", invocationData.ParameterTypes },
@@ -273,6 +274,10 @@ namespace Hangfire.Redis.StackExchange
             _transaction.KeyDeleteAsync(_storage.GetRedisKey(key));
         }
 
+        public override void RemoveFromQueue([NotNull] IFetchedJob fetchedJob)
+        {
+            fetchedJob.RemoveFromQueue();
+        }
         public override void Dispose()
         {
             //Don't have to dispose anything

@@ -1,4 +1,5 @@
 ﻿using System;
+using Hangfire.Common;
 using Hangfire.Redis.StackExchange;
 using Hangfire.Redis.Tests.Utils;
 using Moq;
@@ -28,28 +29,28 @@ namespace Hangfire.Redis.Tests
         public void Ctor_ThrowsAnException_WhenStorageIsNull()
         {
            Assert.Throws<ArgumentNullException>("storage",
-                () => new RedisFetchedJob(null, _redis.Object, JobId, Queue));
+               () => new RedisFetchedJob(null, _redis.Object, JobId, Queue, DateTime.UtcNow));
         }
 
         [Fact]
         public void Ctor_ThrowsAnException_WhenRedisIsNull()
         {
             Assert.Throws<ArgumentNullException>("redis",
-                () => new RedisFetchedJob(_storage, null, JobId, Queue));
+                () => new RedisFetchedJob(_storage, null, JobId, Queue, DateTime.UtcNow));
         }
 
         [Fact]
         public void Ctor_ThrowsAnException_WhenJobIdIsNull()
         {
             Assert.Throws<ArgumentNullException>("jobId",
-                () => new RedisFetchedJob(_storage, _redis.Object, null, Queue));
+                () => new RedisFetchedJob(_storage, _redis.Object, null, Queue, DateTime.UtcNow));
         }
 
         [Fact]
         public void Ctor_ThrowsAnException_WhenQueueIsNull()
         {
             Assert.Throws<ArgumentNullException>("queue",
-                () => new RedisFetchedJob(_storage, _redis.Object, JobId, null));
+                () => new RedisFetchedJob(_storage, _redis.Object, JobId, null, DateTime.UtcNow));
         }
 
         [Fact, CleanRedis]
@@ -59,8 +60,10 @@ namespace Hangfire.Redis.Tests
             {
                 // Arrange
                 redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
-
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "job-id", "my-queue");
+                
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:job-id", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "job-id", "my-queue", fetchedAt);
 
                 // Act
                 fetchedJob.RemoveFromQueue();
@@ -79,7 +82,10 @@ namespace Hangfire.Redis.Tests
 				redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
                 redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "another-job-id");
 
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "job-id", "my-queue");
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:job-id", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+                redis.HashSet("{hangfire}:job:another-job-id", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "job-id", "my-queue", fetchedAt);
 
                 // Act
                 fetchedJob.RemoveFromQueue();
@@ -91,21 +97,23 @@ namespace Hangfire.Redis.Tests
         }
 
         [Fact, CleanRedis]
-        public void RemoveFromQueue_RemovesOnlyOneJob()
+        public void RemoveFromQueue_DoesNotRemoveIfFetchedDoesntMatch()
         {
             UseRedis(redis =>
             {
                 // Arrange
 				redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
-                redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "job-id");
 
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "job-id", "my-queue");
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:job-id", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "job-id", "my-queue", fetchedAt + TimeSpan.FromSeconds(1));
 
                 // Act
                 fetchedJob.RemoveFromQueue();
 
                 // Assert
                 Assert.Equal(1, redis.ListLength("{hangfire}:queue:my-queue:dequeued"));
+                Assert.Equal("job-id", (string)redis.ListRightPop("{hangfire}:queue:my-queue:dequeued"));
             });
         }
 
@@ -115,8 +123,9 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("{hangfire}:job:my-job", "Fetched", "value");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:my-job", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", fetchedAt);
 
                 // Act
                 fetchedJob.RemoveFromQueue();
@@ -132,8 +141,8 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("{hangfire}:job:my-job", "Checked", "value");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                redis.HashSet("{hangfire}:job:my-job", "Checked", JobHelper.SerializeDateTime(DateTime.UtcNow));
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", null);
 
                 // Act
                 fetchedJob.RemoveFromQueue();
@@ -150,13 +159,17 @@ namespace Hangfire.Redis.Tests
             {
                 // Arrange
                 redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:my-job", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", fetchedAt);
 
                 // Act
                 fetchedJob.Requeue();
 
                 // Assert
                 Assert.Equal("my-job", (string)redis.ListRightPop("{hangfire}:queue:my-queue"));
+                Assert.Null((string)redis.ListLeftPop("{hangfire}:queue:my-queue:dequeued"));
             });
         }
 
@@ -168,14 +181,18 @@ namespace Hangfire.Redis.Tests
                 // Arrange
 				redis.ListRightPush("{hangfire}:queue:my-queue", "another-job");
                 redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:my-job", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
 
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", fetchedAt);
 
                 // Act
                 fetchedJob.Requeue();
 
                 // Assert - RPOP
-                Assert.Equal("my-job", (string)redis.ListRightPop("{hangfire}:queue:my-queue")); 
+                Assert.Equal("my-job", (string)redis.ListRightPop("{hangfire}:queue:my-queue"));
+                Assert.Null((string)redis.ListRightPop("{hangfire}:queue:my-queue:dequeued"));
             });
         }
 
@@ -186,7 +203,10 @@ namespace Hangfire.Redis.Tests
             {
                 // Arrange
                 redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:my-job", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", fetchedAt);
 
                 // Act
                 fetchedJob.Requeue();
@@ -202,8 +222,9 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("{hangfire}:job:my-job", "Fetched", "value");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                var fetchedAt = DateTime.UtcNow;
+                redis.HashSet("{hangfire}:job:my-job", "Fetched", JobHelper.SerializeDateTime(fetchedAt));
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", fetchedAt);
 
                 // Act
                 fetchedJob.Requeue();
@@ -219,8 +240,8 @@ namespace Hangfire.Redis.Tests
             UseRedis(redis =>
             {
                 // Arrange
-                redis.HashSet("{hangfire}:job:my-job", "Checked", "value");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                redis.HashSet("{hangfire}:job:my-job", "Checked", JobHelper.SerializeDateTime(DateTime.UtcNow));
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", null);
 
                 // Act
                 fetchedJob.Requeue();
@@ -237,7 +258,7 @@ namespace Hangfire.Redis.Tests
             {
                 // Arrange
                 redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", DateTime.UtcNow);
 
                 // Act
                 fetchedJob.Dispose();
@@ -255,7 +276,7 @@ namespace Hangfire.Redis.Tests
                 // Arrange
 				redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
                 redis.ListRightPush("{hangfire}:queue:my-queue:dequeued", "my-job");
-                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue");
+                var fetchedJob = new RedisFetchedJob(_storage, redis, "my-job", "my-queue", DateTime.UtcNow);
 
                 // Act
                 fetchedJob.RemoveFromQueue();

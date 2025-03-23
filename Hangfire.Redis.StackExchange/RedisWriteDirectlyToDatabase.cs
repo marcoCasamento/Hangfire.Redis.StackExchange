@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Hangfire.Annotations;
 using Hangfire.Common;
 using Hangfire.States;
@@ -38,42 +39,42 @@ namespace Hangfire.Redis.StackExchange
 
         public override void AddRangeToSet([NotNull] string key, [NotNull] IList<string> items)
         {
-            _database.SortedSetAddAsync(_storage.GetRedisKey(key), items.Select(x => new SortedSetEntry(x, 0)).ToArray());
+            _database.SortedSetAdd(_storage.GetRedisKey(key), items.Select(x => new SortedSetEntry(x, 0)).ToArray());
         }
 
         public override void ExpireHash([NotNull] string key, TimeSpan expireIn)
         {
-            _database.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
+            _database.KeyExpire(_storage.GetRedisKey(key), expireIn);
         }
 
         public override void ExpireList([NotNull] string key, TimeSpan expireIn)
         {
-            _database.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
+            _database.KeyExpire(_storage.GetRedisKey(key), expireIn);
         }
 
         public override void ExpireSet([NotNull] string key, TimeSpan expireIn)
         {
-            _database.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
+            _database.KeyExpire(_storage.GetRedisKey(key), expireIn);
         }
 
         public override void PersistHash([NotNull] string key)
         {
-            _database.KeyPersistAsync(_storage.GetRedisKey(key));
+            _database.KeyPersist(_storage.GetRedisKey(key));
         }
 
         public override void PersistList([NotNull] string key)
         {
-            _database.KeyPersistAsync(_storage.GetRedisKey(key));
+            _database.KeyPersist(_storage.GetRedisKey(key));
         }
 
         public override void PersistSet([NotNull] string key)
         {
-            _database.KeyPersistAsync(_storage.GetRedisKey(key));
+            _database.KeyPersist(_storage.GetRedisKey(key));
         }
 
         public override void RemoveSet([NotNull] string key)
         {
-            _database.KeyDeleteAsync(_storage.GetRedisKey(key));
+            _database.KeyDelete(_storage.GetRedisKey(key));
         }
 
         public override void Commit()
@@ -85,18 +86,26 @@ namespace Hangfire.Redis.StackExchange
         {
             if (jobId == null) throw new ArgumentNullException(nameof(jobId));
 
-            _database.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
-            _database.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}:history"), expireIn);
-            _database.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}:state"), expireIn);
+            var tasks = new Task[3];
+
+            tasks[0] = _database.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}"), expireIn);
+            tasks[1] = _database.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}:history"), expireIn);
+            tasks[2] = _database.KeyExpireAsync(_storage.GetRedisKey($"job:{jobId}:state"), expireIn);
+
+            Task.WaitAll(tasks);
         }
 
         public override void PersistJob([NotNull] string jobId)
         {
             if (jobId == null) throw new ArgumentNullException(nameof(jobId));
 
-            _database.KeyPersistAsync(_storage.GetRedisKey($"job:{jobId}"));
-            _database.KeyPersistAsync(_storage.GetRedisKey($"job:{jobId}:history"));
-            _database.KeyPersistAsync(_storage.GetRedisKey($"job:{jobId}:state"));
+            var tasks = new Task[3];
+
+            tasks[0] = _database.KeyPersistAsync(_storage.GetRedisKey($"job:{jobId}"));
+            tasks[1] = _database.KeyPersistAsync(_storage.GetRedisKey($"job:{jobId}:history"));
+            tasks[2] = _database.KeyPersistAsync(_storage.GetRedisKey($"job:{jobId}:state"));
+
+            Task.WaitAll(tasks);
         }
 
         public override void SetJobState([NotNull] string jobId, [NotNull] IState state)
@@ -104,8 +113,10 @@ namespace Hangfire.Redis.StackExchange
             if (jobId == null) throw new ArgumentNullException(nameof(jobId));
             if (state == null) throw new ArgumentNullException(nameof(state));
 
-            _database.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), "State", state.Name);
-            _database.KeyDeleteAsync(_storage.GetRedisKey($"job:{jobId}:state"));
+            var tasks = new Task[3];
+
+            tasks[0] = _database.HashSetAsync(_storage.GetRedisKey($"job:{jobId}"), "State", state.Name);
+            tasks[1] = _database.KeyDeleteAsync(_storage.GetRedisKey($"job:{jobId}:state"));
 
             var storedData = new Dictionary<string, string>(state.SerializeData())
             {
@@ -115,9 +126,11 @@ namespace Hangfire.Redis.StackExchange
             if (state.Reason != null)
                 storedData.Add("Reason", state.Reason);
 
-            _database.HashSetAsync(_storage.GetRedisKey($"job:{jobId}:state"), storedData.ToHashEntries());
+            tasks[2] = _database.HashSetAsync(_storage.GetRedisKey($"job:{jobId}:state"), storedData.ToHashEntries());
 
             AddJobState(jobId, state);
+
+            Task.WaitAll(tasks);
         }
 
         public override void AddJobState([NotNull] string jobId, [NotNull] IState state)
@@ -132,7 +145,7 @@ namespace Hangfire.Redis.StackExchange
                 {"CreatedAt", JobHelper.SerializeDateTime(DateTime.UtcNow)}
             };
 
-            _database.ListRightPushAsync(
+            _database.ListRightPush(
                 _storage.GetRedisKey($"job:{jobId}:history"),
                 SerializationHelper.Serialize(storedData));
         }
@@ -142,39 +155,51 @@ namespace Hangfire.Redis.StackExchange
             if (queue == null) throw new ArgumentNullException(nameof(queue));
             if (jobId == null) throw new ArgumentNullException(nameof(jobId));
 
-            _database.SetAddAsync(_storage.GetRedisKey("queues"), queue);
+            var tasks = new Task[3];
+
+            tasks[0] = _database.SetAddAsync(_storage.GetRedisKey("queues"), queue);
             if (_storage.LifoQueues != null && _storage.LifoQueues.Contains(queue, StringComparer.OrdinalIgnoreCase))
             {
-                _database.ListRightPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
+                tasks[1] = _database.ListRightPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
             }
             else
             {
-                _database.ListLeftPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
+                tasks[1] = _database.ListLeftPushAsync(_storage.GetRedisKey($"queue:{queue}"), jobId);
             }
 
-            _database.PublishAsync(_storage.SubscriptionChannel, jobId);
+            tasks[2] = _database.PublishAsync(_storage.SubscriptionChannel, jobId);
+
+            Task.WaitAll(tasks);
         }
 
         public override void IncrementCounter([NotNull] string key)
         {
-            _database.StringIncrementAsync(_storage.GetRedisKey(key));
+            _database.StringIncrement(_storage.GetRedisKey(key));
         }
 
         public override void IncrementCounter([NotNull] string key, TimeSpan expireIn)
         {
-            _database.StringIncrementAsync(_storage.GetRedisKey(key));
-            _database.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
+            var tasks = new Task[2];
+            
+            tasks[0] = _database.StringIncrementAsync(_storage.GetRedisKey(key));
+            tasks[1] = _database.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
+
+            Task.WaitAll(tasks);
         }
 
         public override void DecrementCounter([NotNull] string key)
         {
-            _database.StringDecrementAsync(_storage.GetRedisKey(key));
+            _database.StringDecrement(_storage.GetRedisKey(key));
         }
 
         public override void DecrementCounter([NotNull] string key, TimeSpan expireIn)
         {
-            _database.StringDecrementAsync(_storage.GetRedisKey(key));
-            _database.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
+            var tasks = new Task[2];
+            
+            tasks[0] = _database.StringDecrementAsync(_storage.GetRedisKey(key));
+            tasks[1] = _database.KeyExpireAsync(_storage.GetRedisKey(key), expireIn);
+
+            Task.WaitAll(tasks);
         }
 
         public override void AddToSet([NotNull] string key, [NotNull] string value)
@@ -186,29 +211,29 @@ namespace Hangfire.Redis.StackExchange
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            _database.SortedSetAddAsync(_storage.GetRedisKey(key), value, score);
+            _database.SortedSetAdd(_storage.GetRedisKey(key), value, score);
         }
 
         public override void RemoveFromSet([NotNull] string key, [NotNull] string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            _database.SortedSetRemoveAsync(_storage.GetRedisKey(key), value);
+            _database.SortedSetRemove(_storage.GetRedisKey(key), value);
         }
 
         public override void InsertToList([NotNull] string key, string value)
         {
-            _database.ListLeftPushAsync(_storage.GetRedisKey(key), value);
+            _database.ListLeftPush(_storage.GetRedisKey(key), value);
         }
 
         public override void RemoveFromList([NotNull] string key, string value)
         {
-            _database.ListRemoveAsync(_storage.GetRedisKey(key), value);
+            _database.ListRemove(_storage.GetRedisKey(key), value);
         }
 
         public override void TrimList([NotNull] string key, int keepStartingFrom, int keepEndingAt)
         {
-            _database.ListTrimAsync(_storage.GetRedisKey(key), keepStartingFrom, keepEndingAt);
+            _database.ListTrim(_storage.GetRedisKey(key), keepStartingFrom, keepEndingAt);
         }
 
         public override void SetRangeInHash(
@@ -216,12 +241,12 @@ namespace Hangfire.Redis.StackExchange
         {
             if (keyValuePairs == null) throw new ArgumentNullException(nameof(keyValuePairs));
 
-            _database.HashSetAsync(_storage.GetRedisKey(key), keyValuePairs.ToHashEntries());
+            _database.HashSet(_storage.GetRedisKey(key), keyValuePairs.ToHashEntries());
         }
 
         public override void RemoveHash([NotNull] string key)
         {
-            _database.KeyDeleteAsync(_storage.GetRedisKey(key));
+            _database.KeyDelete(_storage.GetRedisKey(key));
         }
 
         public override void Dispose()

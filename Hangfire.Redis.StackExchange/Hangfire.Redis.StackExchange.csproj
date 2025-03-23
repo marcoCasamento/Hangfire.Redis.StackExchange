@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1</TargetFrameworks>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>12</LangVersion>
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
-		<Version>1.9.4</Version>
-		<PackageVersion>1.9.4-beta.1</PackageVersion>
+		<Version>1.10.0</Version>
+		<PackageVersion>1.10.1-beta2</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -20,6 +21,18 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
+			1.10.1-Beta2
+			- Fix #153 Appeared after 1.10.0 release. Only updates to this version for testing purposes and PLEASE report any issues. Stick to 1.9.3 for production.
+			1.10.0
+			- Fix #135 -CHANGED BEHAVIOR- Library now requeue jobs from dead server (read comments in the issue) thanks to @Lexy2
+			- Implement #150 (Replace async Redis calls with sync ones) thanks to @Lexy2
+			- Fix #148 (Can't schedule a job without specifying the queue ) thanks to @Lexy2
+			- Fix #142 (Scheduled jobs are returned incorrectly by the monitoring API) thanks to @Lexy2
+			1.9.5
+			- Address #139 support for netstandard2.0
+			- Fix #145 Added Job Queue parameter to the job information
+			- Update to Hangfire 1.8.12 and StackExchange.Redis 2.7.33
+			Big thanks to @Lexy2 for all the work on this release
 			1.9.4
 			- Update to Hangfire 1.8.7
 			- Add Support for all features defined for the storage in Hangfire 1.8.7
@@ -80,13 +93,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Hangfire.Core" Version="1.8.7" />
+      <PackageReference Include="Hangfire.Core" Version="1.8.12" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="StackExchange.Redis" Version="2.7.10" />    
+      <PackageReference Include="StackExchange.Redis" Version="2.7.33" />    
     </ItemGroup>
 
 </Project>

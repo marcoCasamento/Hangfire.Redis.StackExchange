@@ -1,4 +1,4 @@
-// Copyright ?2013-2015 Sergey Odinokov, Marco Casamento
+// Copyright © 2013-2015 Sergey Odinokov, Marco Casamento
 // This software is based on https://github.com/HangfireIO/Hangfire.Redis
 
 // Hangfire.Redis.StackExchange is free software: you can redistribute it and/or modify
@@ -45,40 +45,55 @@ namespace Hangfire.Redis.StackExchange
                 { JobStorageFeatures.Connection.GetSetContains, true }, 
                 { JobStorageFeatures.Connection.LimitedGetSetCount, true }, 
                 { JobStorageFeatures.Transaction.AcquireDistributedLock, true }, 
-                { JobStorageFeatures.Transaction.CreateJob, true }, 
-                { JobStorageFeatures.Transaction.SetJobParameter, true}, 
+                { JobStorageFeatures.Transaction.CreateJob, true }, // overridden in constructor
+                { JobStorageFeatures.Transaction.SetJobParameter, true}, // overridden in constructor 
+                { JobStorageFeatures.Transaction.RemoveFromQueue(typeof(RedisFetchedJob)), true }, // overridden in constructor
                 { JobStorageFeatures.Monitoring.DeletedStateGraphs, true }, 
                 { JobStorageFeatures.Monitoring.AwaitingJobs, true }
             };
 
         public RedisStorage()
-            : this("localhost:6379")
+            : this("localhost:6379", null, null)
         {
         }
 
         public RedisStorage(IConnectionMultiplexer connectionMultiplexer, RedisStorageOptions options = null)
+            : this("UseConnectionMultiplexer", connectionMultiplexer, options)
         {
-            _options = options ?? new RedisStorageOptions();
-
-            _connectionMultiplexer = connectionMultiplexer ?? throw new ArgumentNullException(nameof(connectionMultiplexer));
-            _redisOptions = ConfigurationOptions.Parse(_connectionMultiplexer.Configuration);
-            
-            _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
         }
 
         public RedisStorage(string connectionString, RedisStorageOptions options = null)
+            : this(connectionString, null, options)
         {
-            if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
+        }
 
-            _redisOptions = ConfigurationOptions.Parse(connectionString);
+        private RedisStorage(string connectionString, IConnectionMultiplexer connectionMultiplexer, 
+            RedisStorageOptions options = null)
+        {
+            if (connectionString == null)
+                throw new ArgumentNullException(nameof(connectionString));
+            if (connectionString == "UseConnectionMultiplexer" && connectionMultiplexer == null)
+                throw new ArgumentNullException(nameof(connectionMultiplexer));
+
+            _connectionMultiplexer = connectionMultiplexer ?? ConnectionMultiplexer.Connect(connectionString);
+
+            _redisOptions = ConfigurationOptions.Parse(_connectionMultiplexer.Configuration);
 
             _options = options ?? new RedisStorageOptions
             {
                 Db = _redisOptions.DefaultDatabase ?? 0
             };
 
-            _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
+            SetTransactionalFeatures();
+
             _subscription = new RedisSubscription(this, _connectionMultiplexer.GetSubscriber());
+        }
+
+        private void SetTransactionalFeatures()
+        {
+            _features[JobStorageFeatures.Transaction.CreateJob] = _options.UseTransactions;
+            _features[JobStorageFeatures.Transaction.SetJobParameter] = _options.UseTransactions;
+            _features[JobStorageFeatures.Transaction.RemoveFromQueue(typeof(RedisFetchedJob))] = _options.UseTransactions; 
         }
 
         public string ConnectionString => _connectionMultiplexer.Configuration;
