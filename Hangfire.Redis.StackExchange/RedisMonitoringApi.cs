@@ -421,7 +421,7 @@ namespace Hangfire.Redis.StackExchange
             return UseConnection(redis =>
             {
                 var awaitingJobIds = redis
-                    .ListRange(_storage.GetRedisKey("awaiting"), from, from + count - 1)
+                    .SortedSetRangeByRank(_storage.GetRedisKey("awaiting"), from, from + count - 1)
                     .ToStringArray();
                 
                 return GetJobsWithProperties(
