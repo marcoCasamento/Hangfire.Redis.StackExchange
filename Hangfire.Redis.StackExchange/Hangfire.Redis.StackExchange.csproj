@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<LangVersion>12</LangVersion>
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
-		<Version>1.10.0</Version>
-		<PackageVersion>1.10.1-beta2</PackageVersion>
+		<Version>1.11.0</Version>
+		<PackageVersion>1.11.0</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -21,6 +20,9 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
+			1.11.0 Fix #157 AND bring back the code from 1.9.4
+				With this release I'm trying to start back from 1.9.4 (Latest release "approved for production" as 1.9.5 got unlisted) and I'm willing to review and recommit the code from there. One commit after the other.
+				If anyone can help with testing, please drop a line to marco.casamento@gmail.com 
 			1.10.1-Beta2
 			- Fix #153 Appeared after 1.10.0 release. Only updates to this version for testing purposes and PLEASE report any issues. Stick to 1.9.3 for production.
 			1.10.0
@@ -28,7 +30,7 @@
 			- Implement #150 (Replace async Redis calls with sync ones) thanks to @Lexy2
 			- Fix #148 (Can't schedule a job without specifying the queue ) thanks to @Lexy2
 			- Fix #142 (Scheduled jobs are returned incorrectly by the monitoring API) thanks to @Lexy2
-			1.9.5
+			1.9.5 ---UNLISTED----
 			- Address #139 support for netstandard2.0
 			- Fix #145 Added Job Queue parameter to the job information
 			- Update to Hangfire 1.8.12 and StackExchange.Redis 2.7.33
