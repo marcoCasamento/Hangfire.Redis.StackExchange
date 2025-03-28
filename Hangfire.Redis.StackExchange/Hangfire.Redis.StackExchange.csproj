@@ -4,8 +4,8 @@
 		<LangVersion>12</LangVersion>
 		<PackageId>Hangfire.Redis.StackExchange</PackageId>
 		<IsPackable>true</IsPackable>
-		<Version>1.11.0</Version>
-		<PackageVersion>1.11.0</PackageVersion>
+		<Version>1.12.0</Version>
+		<PackageVersion>1.12.0</PackageVersion>
 		<Authors>Marco Casamento and contributors</Authors>
 		<Product>Hangfire Redis Storage</Product>
 		<PackageProjectUrl>https://github.com/marcoCasamento/Hangfire.Redis.StackExchange</PackageProjectUrl>
@@ -20,9 +20,12 @@
 			It also supports Batches (Pro Feature)
 		</Summary>
 		<PackageReleaseNotes>
+			1.12.0 Fix #153 and all the chaneg
+			- Resume all changes between 1after 1.9.3 4 , realigning the codegit
+			- Bump Hangfire to 1.8.12 and StackExchange.Redis to 2.7.33
 			1.11.0 Fix #157 AND bring back the code from 1.9.4
-				With this release I'm trying to start back from 1.9.4 (Latest release "approved for production" as 1.9.5 got unlisted) and I'm willing to review and recommit the code from there. One commit after the other.
-				If anyone can help with testing, please drop a line to marco.casamento@gmail.com 
+			With this release I'm trying to start back from 1.9.4 (Latest release "approved for production" as 1.9.5 got unlisted) and I'm willing to review and recommit the code from there. One commit after the other.
+			If anyone can help with testing, please drop a line to marco.casamento@gmail.com
 			1.10.1-Beta2
 			- Fix #153 Appeared after 1.10.0 release. Only updates to this version for testing purposes and PLEASE report any issues. Stick to 1.9.3 for production.
 			1.10.0
@@ -95,13 +98,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Hangfire.Core" Version="1.8.12" />
+      <PackageReference Include="Hangfire.Core" Version="1.8.18" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="StackExchange.Redis" Version="2.7.33" />    
+      <PackageReference Include="StackExchange.Redis" Version="2.8.31" />    
     </ItemGroup>
 
 </Project>
