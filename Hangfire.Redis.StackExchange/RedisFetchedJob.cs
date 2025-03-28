@@ -64,10 +64,10 @@ namespace Hangfire.Redis.StackExchange
                 {
                     RemoveFromFetchedListAsync(transaction);
                 }
-
-                _redis.PublishAsync(_storage.SubscriptionChannel, JobId);
+                transaction.PublishAsync(_storage.SubscriptionChannel, JobId);
                 transaction.Execute();                
-            } else
+            } 
+            else
             {
                 if (fetchedAt == FetchedAt)
                 {
@@ -91,7 +91,7 @@ namespace Hangfire.Redis.StackExchange
                     RemoveFromFetchedListAsync(transaction);
                 }
 
-                _redis.PublishAsync(_storage.SubscriptionChannel, JobId);
+                transaction.PublishAsync(_storage.SubscriptionChannel, JobId);
                 transaction.Execute();
             } else
             {
@@ -125,8 +125,8 @@ namespace Hangfire.Redis.StackExchange
         }
         private void RemoveFromFetchedList(IDatabase database)
         {
-            database.ListRemoveAsync(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
-            database.HashDeleteAsync(_storage.GetRedisKey($"job:{JobId}"), ["Fetched", "Checked"]);
+            database.ListRemove(_storage.GetRedisKey($"queue:{Queue}:dequeued"), JobId, -1);
+            database.HashDelete(_storage.GetRedisKey($"job:{JobId}"), ["Fetched", "Checked"]);
         }
     }
 }
