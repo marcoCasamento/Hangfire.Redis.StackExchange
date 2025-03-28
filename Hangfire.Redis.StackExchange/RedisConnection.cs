@@ -245,7 +245,9 @@ namespace Hangfire.Redis.StackExchange
             // that is being inspected by the FetchedJobsWatcher instance.
             // Job's has the implicit 'Fetched' state.
 
-            var fetchTime = DateTime.UtcNow;
+            //strip out microseconds from fetchTime as the serialized version will anyway truncate them
+            var fetchTime = new DateTime(DateTime.UtcNow.Ticks / 10000 * 10000);
+            
             _ = Redis.HashSet(
                 _storage.GetRedisKey($"job:{jobId}"),
                 "Fetched",
