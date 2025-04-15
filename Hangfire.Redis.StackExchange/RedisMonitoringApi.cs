@@ -651,7 +651,9 @@ namespace Hangfire.Redis.StackExchange
                         jobs[jobId].Result[properties.Length + 2],
                         jobs[jobId].Result[properties.Length + 3],
                         out Exception loadException),
-                    LastHistoryEntry = !histories.ContainsKey(jobId) ? null : SerializationHelper.Deserialize<Dictionary<string, string>>(histories[jobId].ToString()),
+                    LastHistoryEntry = histories.ContainsKey(jobId)
+                        ? SerializationHelper.Deserialize<Dictionary<string, string>>(histories[jobId].Result.ToString())
+                        : null,
                     LoadException = loadException,
                     State = stateProperties != null ? states[jobId].Result.ToStringArray() : null
                 })
