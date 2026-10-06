@@ -56,6 +56,8 @@ namespace Hangfire.Redis.StackExchange
         private readonly bool _holdsLock;
         private volatile bool _isDisposed = false;
         private readonly Timer _slidingExpirationTimer;
+        private int _renewalRunning;
+        private volatile bool _renewalStopped;
 
         private RedisLock([NotNull] IDatabase redis, RedisKey key, bool holdsLock, TimeSpan holdDuration)
         {
@@ -76,34 +78,53 @@ namespace Hangfire.Redis.StackExchange
 
         private void ExpirationTimerTick(object state)
         {
-            if (!_isDisposed)
+            if (_isDisposed || _renewalStopped || Interlocked.CompareExchange(ref _renewalRunning, 1, 0) != 0)
+                return;
+
+            try
             {
-                var stateBag = state as StateBag;
+                // Disposal or a terminal failure may race with entering the callback.
+                if (_isDisposed || _renewalStopped) return;
+
+                var stateBag = (StateBag)state;
                 Exception redisEx = null;
                 bool lockSuccesfullyExtended = false;
                 int retryCount = 10;
-                while (!lockSuccesfullyExtended && retryCount >= 0)
+                while (!_isDisposed && !lockSuccesfullyExtended && retryCount >= 0)
                 {
                     try
                     {
                         lockSuccesfullyExtended = _redis.LockExtend(_key, OwnerId, stateBag.TimeSpan);
+                        // False means this owner lost the lock; repeating renewal cannot recover it.
+                        break;
                     }
                     catch (Exception ex)
                     {
                         redisEx = ex;
+                        if (_isDisposed) return;
                         Thread.Sleep(3000);
                         retryCount--;
                     }
                 }
-                
-                if (!lockSuccesfullyExtended)
+
+                if (!_isDisposed && !lockSuccesfullyExtended)
                 {
+                    _renewalStopped = true;
+                    _slidingExpirationTimer.Dispose();
+                    // Scheduler/storage locks do not have a performing job context.
+                    if (stateBag.PerformingContext == null) return;
+
                     new BackgroundJobClient(stateBag.PerformingContext.Storage)
                         .ChangeState(
-                            stateBag.PerformingContext.BackgroundJob.Id, 
-                            new FailedState(new Exception($"Unable to extend a distributed lock with Key {_key} and OwnerId {OwnerId}", redisEx))
+                            stateBag.PerformingContext.BackgroundJob.Id,
+                            new FailedState(new Exception($"Unable to extend a distributed lock with Key {_key} and OwnerId {OwnerId}", redisEx)),
+                            ProcessingState.StateName
                         );
                 }
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _renewalRunning, 0);
             }
         }
 
